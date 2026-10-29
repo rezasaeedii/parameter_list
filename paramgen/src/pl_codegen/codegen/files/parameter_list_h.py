@@ -5,7 +5,6 @@ Read ``generate()`` from top to bottom: it is the generated file, in order.
 
 from __future__ import annotations
 
-from ...model.types import VALUE_TYPES
 from .file_builder import FileBuilder
 
 BRIEF = "Generated parameter list and its access functions."
@@ -17,12 +16,6 @@ INIT_CALLBACK = "fParameterList_InitCompletedCallback"
 GET_QUANTITY_FUNCTION = "fParameterList_GetQuantity"
 GET_BY_INDEX_FUNCTION = "fParameterList_GetByIndex"
 GET_BY_NAME_FUNCTION = "fParameterList_GetByName"
-
-#: Read and write one value by its index - one pair for every data type, named
-#: after the smart-data function each one calls: fParameterList_U8_ReadByIndex
-#: calls fSmartData_U8_Read.  (Asked for.)
-READ_BY_INDEX_FUNCTION = "fParameterList_{suffix}_ReadByIndex"
-WRITE_BY_INDEX_FUNCTION = "fParameterList_{suffix}_WriteByIndex"
 
 DESCRIPTOR_TYPE = "const sParameterDescriptor *"
 
@@ -81,20 +74,6 @@ class ParameterListHeader(FileBuilder):
                                                  "uint16_t index")
         text += self.function.generate_prototype(DESCRIPTOR_TYPE, GET_BY_NAME_FUNCTION,
                                                  "const char *pName")
-        text += "\n"
-
-        # ---- read and write by index, one pair for every data type ----------
-        # Every type, whether this project uses it or not: the firmware gets the
-        # same functions from every project, and one nobody calls costs nothing.
-        text += self.comment.generate_line(
-            "Read or write the value at an index, one pair for every data type.")
-        for value_type in VALUE_TYPES.values():
-            text += self.function.generate_prototype(
-                "eSmartDataStatus", READ_BY_INDEX_FUNCTION.format(suffix=value_type.suffix),
-                f"uint16_t index, {value_type.c_name} *pOutValue")
-            text += self.function.generate_prototype(
-                "eSmartDataStatus", WRITE_BY_INDEX_FUNCTION.format(suffix=value_type.suffix),
-                f"uint16_t index, {value_type.c_name} *pValue")
         text += "\n"
 
         # ---- one size getter per tag that is actually used -----------------

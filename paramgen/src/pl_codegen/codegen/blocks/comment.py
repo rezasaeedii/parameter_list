@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from ..literals import safe_comment
 
-from typing import List, Optional, Sequence, Union
+from typing import List, Optional, Sequence
 
 
 class Comment:
@@ -18,8 +18,7 @@ class Comment:
         return f"/* {safe_comment(text)} */\n"
 
     def generate_doc(self, brief: str, params: Sequence[str] = (),
-                     notes: Sequence[str] = (),
-                     returns: Optional[Union[str, Sequence[str]]] = None) -> str:
+                     notes: Sequence[str] = (), returns: Optional[str] = None) -> str:
         """A doxygen block::
 
             /**
@@ -28,11 +27,7 @@ class Comment:
              * @param ...
              * @note  ...
              * @return ...
-             *         ...
              */
-
-        *returns* may be a list of lines: each after the first is continued
-        under the text of the first - one line per status, say.
         """
         lines: List[str] = ["/**"]
         brief = safe_comment(brief)
@@ -48,10 +43,7 @@ class Comment:
                 lines.append(f" * @note  {line}".rstrip() if index == 0
                              else f" *        {line}".rstrip())
         if returns:
-            parts = [returns] if isinstance(returns, str) else list(returns)
-            lines.append(f" * @return {safe_comment(parts[0])}")
-            for part in parts[1:]:
-                lines.append(f" *         {safe_comment(part)}")
+            lines.append(f" * @return {safe_comment(returns)}")
         lines.append(" */")
         return "\n".join(lines) + "\n"
 

@@ -423,6 +423,7 @@ typedef struct {
  */
 eSmartDataStatus fSmartData_B8_Ctor(sSmartDataB8 * const me, bool_t defaultVal);
 eSmartDataStatus fSmartData_B8_Read(sSmartDataB8 * const me, bool_t * pOutValue);
+eSmartDataStatus fSmartData_B8_ReadByIndex(uint16_t index, bool_t * pOutValue);
 eSmartDataStatus fSmartData_B8_ReadAndGetTimestampUs(sSmartDataB8 * const me, bool_t * pOutValue, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_B8_ReadIfChanged(sSmartDataB8 * const me, bool_t * pReferenceValue, bool_t * pOutValue);
 eSmartDataStatus fSmartData_B8_ReadIfChangedAndGetTimestampUs(sSmartDataB8 * const me, bool_t * pReferenceValue, bool_t * pOutValue, uint64_t *pOutTimestampUs);
@@ -433,6 +434,7 @@ eSmartDataStatus fSmartData_B8_ReadIfIsUpdatedWithinUsAndGetTimestampUs(sSmartDa
 eSmartDataStatus fSmartData_B8_ReadIfIsNewForId(sSmartDataB8 * const me, bool_t * pOutValue, eSmartDataUserId userId);
 eSmartDataStatus fSmartData_B8_ReadIfIsNewForIdAndGetTimestamp(sSmartDataB8 * const me, bool_t * pOutValue, eSmartDataUserId userId, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_B8_Write(sSmartDataB8 * const me, bool_t *pValue);
+eSmartDataStatus fSmartData_B8_WriteByIndex(uint16_t index, bool_t *pValue);
 eSmartDataStatus fSmartData_B8_WriteWithTimestampUs(sSmartDataB8 * const me, bool_t *pValue, uint64_t timestampUs);
 bool_t fSmartData_B8_HasBeenWrittenSoFar(sSmartDataB8 * const me);
 eSmartDataStatus fSmartData_B8_SetDefaultValue(sSmartDataB8 * const me, bool_t * pNewValue);
@@ -448,6 +450,7 @@ eSmartDataStatus fSmartData_B8_GetValueSize(sSmartDataB8 * const me, size_t *pOu
  */
 eSmartDataStatus fSmartData_U8_Ctor(sSmartDataU8 * const me, uint8_t minVal, uint8_t maxVal, uint8_t defaultVal, uint8_t resolution, const char *pUnit);
 eSmartDataStatus fSmartData_U8_Read(sSmartDataU8 * const me, uint8_t * pOutValue);
+eSmartDataStatus fSmartData_U8_ReadByIndex(uint16_t index, uint8_t * pOutValue);
 eSmartDataStatus fSmartData_U8_ReadAndGetTimestampUs(sSmartDataU8 * const me, uint8_t * pOutValue, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_U8_ReadIfChanged(sSmartDataU8 * const me, uint8_t * pReferenceValue, uint8_t * pOutValue);
 eSmartDataStatus fSmartData_U8_ReadIfChangedAndGetTimestampUs(sSmartDataU8 * const me, uint8_t * pReferenceValue, uint8_t * pOutValue, uint64_t *pOutTimestampUs);
@@ -458,6 +461,7 @@ eSmartDataStatus fSmartData_U8_ReadIfIsUpdatedWithinUsAndGetTimestampUs(sSmartDa
 eSmartDataStatus fSmartData_U8_ReadIfIsNewForId(sSmartDataU8 * const me, uint8_t * pOutValue, eSmartDataUserId userId);
 eSmartDataStatus fSmartData_U8_ReadIfIsNewForIdAndGetTimestamp(sSmartDataU8 * const me, uint8_t * pOutValue, eSmartDataUserId userId, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_U8_Write(sSmartDataU8 * const me, uint8_t *pValue);
+eSmartDataStatus fSmartData_U8_WriteByIndex(uint16_t index, uint8_t *pValue);
 eSmartDataStatus fSmartData_U8_WriteWithTimestampUs(sSmartDataU8 * const me, uint8_t *pValue, uint64_t timestampUs);
 bool_t fSmartData_U8_HasBeenWrittenSoFar(sSmartDataU8 * const me);
 eSmartDataStatus fSmartData_U8_Verify(sSmartDataU8 * const me);
@@ -480,6 +484,7 @@ eSmartDataStatus fSmartData_U8_GetValueSize(sSmartDataU8 * const me, size_t *pOu
  */
 eSmartDataStatus fSmartData_I8_Ctor(sSmartDataI8 * const me, int8_t minVal, int8_t maxVal, int8_t defaultVal, int8_t resolution, const char *pUnit);
 eSmartDataStatus fSmartData_I8_Read(sSmartDataI8 * const me, int8_t * pOutValue);
+eSmartDataStatus fSmartData_I8_ReadByIndex(uint16_t index, int8_t * pOutValue);
 eSmartDataStatus fSmartData_I8_ReadAndGetTimestampUs(sSmartDataI8 * const me, int8_t * pOutValue, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_I8_ReadIfChanged(sSmartDataI8 * const me, int8_t * pReferenceValue, int8_t * pOutValue);
 eSmartDataStatus fSmartData_I8_ReadIfChangedAndGetTimestampUs(sSmartDataI8 * const me, int8_t * pReferenceValue, int8_t * pOutValue, uint64_t *pOutTimestampUs);
@@ -490,6 +495,7 @@ eSmartDataStatus fSmartData_I8_ReadIfIsUpdatedWithinUsAndGetTimestampUs(sSmartDa
 eSmartDataStatus fSmartData_I8_ReadIfIsNewForId(sSmartDataI8 * const me, int8_t * pOutValue, eSmartDataUserId userId);
 eSmartDataStatus fSmartData_I8_ReadIfIsNewForIdAndGetTimestamp(sSmartDataI8 * const me, int8_t * pOutValue, eSmartDataUserId userId, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_I8_Write(sSmartDataI8 * const me, int8_t *pValue);
+eSmartDataStatus fSmartData_I8_WriteByIndex(uint16_t index, int8_t *pValue);
 eSmartDataStatus fSmartData_I8_WriteWithTimestampUs(sSmartDataI8 * const me, int8_t *pValue, uint64_t timestampUs);
 bool_t fSmartData_I8_HasBeenWrittenSoFar(sSmartDataI8 * const me);
 eSmartDataStatus fSmartData_I8_Verify(sSmartDataI8 * const me);
@@ -512,6 +518,7 @@ eSmartDataStatus fSmartData_I8_GetValueSize(sSmartDataI8 * const me, size_t *pOu
  */
 eSmartDataStatus fSmartData_U16_Ctor(sSmartDataU16 * const me, uint16_t minVal, uint16_t maxVal, uint16_t defaultVal, uint16_t resolution, const char *pUnit);
 eSmartDataStatus fSmartData_U16_Read(sSmartDataU16 * const me, uint16_t * pOutValue);
+eSmartDataStatus fSmartData_U16_ReadByIndex(uint16_t index, uint16_t * pOutValue);
 eSmartDataStatus fSmartData_U16_ReadAndGetTimestampUs(sSmartDataU16 * const me, uint16_t * pOutValue, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_U16_ReadIfChanged(sSmartDataU16 * const me, uint16_t * pReferenceValue, uint16_t * pOutValue);
 eSmartDataStatus fSmartData_U16_ReadIfChangedAndGetTimestampUs(sSmartDataU16 * const me, uint16_t * pReferenceValue, uint16_t * pOutValue, uint64_t *pOutTimestampUs);
@@ -522,6 +529,7 @@ eSmartDataStatus fSmartData_U16_ReadIfIsUpdatedWithinUsAndGetTimestampUs(sSmartD
 eSmartDataStatus fSmartData_U16_ReadIfIsNewForId(sSmartDataU16 * const me, uint16_t * pOutValue, eSmartDataUserId userId);
 eSmartDataStatus fSmartData_U16_ReadIfIsNewForIdAndGetTimestamp(sSmartDataU16 * const me, uint16_t * pOutValue, eSmartDataUserId userId, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_U16_Write(sSmartDataU16 * const me, uint16_t *pValue);
+eSmartDataStatus fSmartData_U16_WriteByIndex(uint16_t index, uint16_t *pValue);
 eSmartDataStatus fSmartData_U16_WriteWithTimestampUs(sSmartDataU16 * const me, uint16_t *pValue, uint64_t timestampUs);
 bool_t fSmartData_U16_HasBeenWrittenSoFar(sSmartDataU16 * const me);
 eSmartDataStatus fSmartData_U16_Verify(sSmartDataU16 * const me);
@@ -544,6 +552,7 @@ eSmartDataStatus fSmartData_U16_GetValueSize(sSmartDataU16 * const me, size_t *p
  */
 eSmartDataStatus fSmartData_I16_Ctor(sSmartDataI16 * const me, int16_t minVal, int16_t maxVal, int16_t defaultVal, int16_t resolution, const char *pUnit);
 eSmartDataStatus fSmartData_I16_Read(sSmartDataI16 * const me, int16_t * pOutValue);
+eSmartDataStatus fSmartData_I16_ReadByIndex(uint16_t index, int16_t * pOutValue);
 eSmartDataStatus fSmartData_I16_ReadAndGetTimestampUs(sSmartDataI16 * const me, int16_t * pOutValue, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_I16_ReadIfChanged(sSmartDataI16 * const me, int16_t * pReferenceValue, int16_t * pOutValue);
 eSmartDataStatus fSmartData_I16_ReadIfChangedAndGetTimestampUs(sSmartDataI16 * const me, int16_t * pReferenceValue, int16_t * pOutValue, uint64_t *pOutTimestampUs);
@@ -554,6 +563,7 @@ eSmartDataStatus fSmartData_I16_ReadIfIsUpdatedWithinUsAndGetTimestampUs(sSmartD
 eSmartDataStatus fSmartData_I16_ReadIfIsNewForId(sSmartDataI16 * const me, int16_t * pOutValue, eSmartDataUserId userId);
 eSmartDataStatus fSmartData_I16_ReadIfIsNewForIdAndGetTimestamp(sSmartDataI16 * const me, int16_t * pOutValue, eSmartDataUserId userId, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_I16_Write(sSmartDataI16 * const me, int16_t *pValue);
+eSmartDataStatus fSmartData_I16_WriteByIndex(uint16_t index, int16_t *pValue);
 eSmartDataStatus fSmartData_I16_WriteWithTimestampUs(sSmartDataI16 * const me, int16_t *pValue, uint64_t timestampUs);
 bool_t fSmartData_I16_HasBeenWrittenSoFar(sSmartDataI16 * const me);
 eSmartDataStatus fSmartData_I16_Verify(sSmartDataI16 * const me);
@@ -577,6 +587,7 @@ eSmartDataStatus fSmartData_I16_GetValueSize(sSmartDataI16 * const me, size_t *p
 
 eSmartDataStatus fSmartData_U32_Ctor(sSmartDataU32 * const me, uint32_t minVal, uint32_t maxVal, uint32_t defaultVal, uint32_t resolution, const char *pUnit);
 eSmartDataStatus fSmartData_U32_Read(sSmartDataU32 * const me, uint32_t * pOutValue);
+eSmartDataStatus fSmartData_U32_ReadByIndex(uint16_t index, uint32_t * pOutValue);
 eSmartDataStatus fSmartData_U32_ReadAndGetTimestampUs(sSmartDataU32 * const me, uint32_t * pOutValue, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_U32_ReadIfChanged(sSmartDataU32 * const me, uint32_t * pReferenceValue, uint32_t * pOutValue);
 eSmartDataStatus fSmartData_U32_ReadIfChangedAndGetTimestampUs(sSmartDataU32 * const me, uint32_t * pReferenceValue, uint32_t * pOutValue, uint64_t *pOutTimestampUs);
@@ -587,6 +598,7 @@ eSmartDataStatus fSmartData_U32_ReadIfIsUpdatedWithinUsAndGetTimestampUs(sSmartD
 eSmartDataStatus fSmartData_U32_ReadIfIsNewForId(sSmartDataU32 * const me, uint32_t * pOutValue, eSmartDataUserId userId);
 eSmartDataStatus fSmartData_U32_ReadIfIsNewForIdAndGetTimestamp(sSmartDataU32 * const me, uint32_t * pOutValue, eSmartDataUserId userId, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_U32_Write(sSmartDataU32 * const me, uint32_t *pValue);
+eSmartDataStatus fSmartData_U32_WriteByIndex(uint16_t index, uint32_t *pValue);
 eSmartDataStatus fSmartData_U32_WriteWithTimestampUs(sSmartDataU32 * const me, uint32_t *pValue, uint64_t timestampUs);
 bool_t fSmartData_U32_HasBeenWrittenSoFar(sSmartDataU32 * const me);
 eSmartDataStatus fSmartData_U32_Verify(sSmartDataU32 * const me);
@@ -609,6 +621,7 @@ eSmartDataStatus fSmartData_U32_GetValueSize(sSmartDataU32 * const me, size_t *p
  */
 eSmartDataStatus fSmartData_I32_Ctor(sSmartDataI32 * const me, int32_t minVal, int32_t maxVal, int32_t defaultVal, int32_t resolution, const char *pUnit);
 eSmartDataStatus fSmartData_I32_Read(sSmartDataI32 * const me, int32_t * pOutValue);
+eSmartDataStatus fSmartData_I32_ReadByIndex(uint16_t index, int32_t * pOutValue);
 eSmartDataStatus fSmartData_I32_ReadAndGetTimestampUs(sSmartDataI32 * const me, int32_t * pOutValue, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_I32_ReadIfChanged(sSmartDataI32 * const me, int32_t * pReferenceValue, int32_t * pOutValue);
 eSmartDataStatus fSmartData_I32_ReadIfChangedAndGetTimestampUs(sSmartDataI32 * const me, int32_t * pReferenceValue, int32_t * pOutValue, uint64_t *pOutTimestampUs);
@@ -619,6 +632,7 @@ eSmartDataStatus fSmartData_I32_ReadIfIsUpdatedWithinUsAndGetTimestampUs(sSmartD
 eSmartDataStatus fSmartData_I32_ReadIfIsNewForId(sSmartDataI32 * const me, int32_t * pOutValue, eSmartDataUserId userId);
 eSmartDataStatus fSmartData_I32_ReadIfIsNewForIdAndGetTimestamp(sSmartDataI32 * const me, int32_t * pOutValue, eSmartDataUserId userId, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_I32_Write(sSmartDataI32 * const me, int32_t *pValue);
+eSmartDataStatus fSmartData_I32_WriteByIndex(uint16_t index, int32_t *pValue);
 eSmartDataStatus fSmartData_I32_WriteWithTimestampUs(sSmartDataI32 * const me, int32_t *pValue, uint64_t timestampUs);
 bool_t fSmartData_I32_HasBeenWrittenSoFar(sSmartDataI32 * const me);
 eSmartDataStatus fSmartData_I32_Verify(sSmartDataI32 * const me);
@@ -641,6 +655,7 @@ eSmartDataStatus fSmartData_I32_GetValueSize(sSmartDataI32 * const me, size_t *p
  */
 eSmartDataStatus fSmartData_U64_Ctor(sSmartDataU64 * const me, uint64_t minVal, uint64_t maxVal, uint64_t defaultVal, uint64_t resolution, const char *pUnit);
 eSmartDataStatus fSmartData_U64_Read(sSmartDataU64 * const me, uint64_t * pOutValue);
+eSmartDataStatus fSmartData_U64_ReadByIndex(uint16_t index, uint64_t * pOutValue);
 eSmartDataStatus fSmartData_U64_ReadAndGetTimestampUs(sSmartDataU64 * const me, uint64_t * pOutValue, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_U64_ReadIfChanged(sSmartDataU64 * const me, uint64_t * pReferenceValue, uint64_t * pOutValue);
 eSmartDataStatus fSmartData_U64_ReadIfChangedAndGetTimestampUs(sSmartDataU64 * const me, uint64_t * pReferenceValue, uint64_t * pOutValue, uint64_t *pOutTimestampUs);
@@ -651,6 +666,7 @@ eSmartDataStatus fSmartData_U64_ReadIfIsUpdatedWithinUsAndGetTimestampUs(sSmartD
 eSmartDataStatus fSmartData_U64_ReadIfIsNewForId(sSmartDataU64 * const me, uint64_t * pOutValue, eSmartDataUserId userId);
 eSmartDataStatus fSmartData_U64_ReadIfIsNewForIdAndGetTimestamp(sSmartDataU64 * const me, uint64_t * pOutValue, eSmartDataUserId userId, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_U64_Write(sSmartDataU64 * const me, uint64_t *pValue);
+eSmartDataStatus fSmartData_U64_WriteByIndex(uint16_t index, uint64_t *pValue);
 eSmartDataStatus fSmartData_U64_WriteWithTimestampUs(sSmartDataU64 * const me, uint64_t *pValue, uint64_t timestampUs);
 bool_t fSmartData_U64_HasBeenWrittenSoFar(sSmartDataU64 * const me);
 eSmartDataStatus fSmartData_U64_Verify(sSmartDataU64 * const me);
@@ -673,6 +689,7 @@ eSmartDataStatus fSmartData_U64_GetValueSize(sSmartDataU64 * const me, size_t *p
  */
 eSmartDataStatus fSmartData_I64_Ctor(sSmartDataI64 * const me, int64_t minVal, int64_t maxVal, int64_t defaultVal, int64_t resolution, const char *pUnit);
 eSmartDataStatus fSmartData_I64_Read(sSmartDataI64 * const me, int64_t * pOutValue);
+eSmartDataStatus fSmartData_I64_ReadByIndex(uint16_t index, int64_t * pOutValue);
 eSmartDataStatus fSmartData_I64_ReadAndGetTimestampUs(sSmartDataI64 * const me, int64_t * pOutValue, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_I64_ReadIfChanged(sSmartDataI64 * const me, int64_t * pReferenceValue, int64_t * pOutValue);
 eSmartDataStatus fSmartData_I64_ReadIfChangedAndGetTimestampUs(sSmartDataI64 * const me, int64_t * pReferenceValue, int64_t * pOutValue, uint64_t *pOutTimestampUs);
@@ -683,6 +700,7 @@ eSmartDataStatus fSmartData_I64_ReadIfIsUpdatedWithinUsAndGetTimestampUs(sSmartD
 eSmartDataStatus fSmartData_I64_ReadIfIsNewForId(sSmartDataI64 * const me, int64_t * pOutValue, eSmartDataUserId userId);
 eSmartDataStatus fSmartData_I64_ReadIfIsNewForIdAndGetTimestamp(sSmartDataI64 * const me, int64_t * pOutValue, eSmartDataUserId userId, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_I64_Write(sSmartDataI64 * const me, int64_t *pValue);
+eSmartDataStatus fSmartData_I64_WriteByIndex(uint16_t index, int64_t *pValue);
 eSmartDataStatus fSmartData_I64_WriteWithTimestampUs(sSmartDataI64 * const me, int64_t *pValue, uint64_t timestampUs);
 bool_t fSmartData_I64_HasBeenWrittenSoFar(sSmartDataI64 * const me);
 eSmartDataStatus fSmartData_I64_Verify(sSmartDataI64 * const me);
@@ -705,6 +723,7 @@ eSmartDataStatus fSmartData_I64_GetValueSize(sSmartDataI64 * const me, size_t *p
  */
 eSmartDataStatus fSmartData_F32_Ctor(sSmartDataF32 * const me, float32_t minVal, float32_t maxVal, float32_t defaultVal, float32_t resolution, const char *pUnit);
 eSmartDataStatus fSmartData_F32_Read(sSmartDataF32 * const me, float32_t * pOutValue);
+eSmartDataStatus fSmartData_F32_ReadByIndex(uint16_t index, float32_t * pOutValue);
 eSmartDataStatus fSmartData_F32_ReadAndGetTimestampUs(sSmartDataF32 * const me, float32_t * pOutValue, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_F32_ReadIfChanged(sSmartDataF32 * const me, float32_t * pReferenceValue, float32_t * pOutValue);
 eSmartDataStatus fSmartData_F32_ReadIfChangedAndGetTimestampUs(sSmartDataF32 * const me, float32_t * pReferenceValue, float32_t * pOutValue, uint64_t *pOutTimestampUs);
@@ -715,6 +734,7 @@ eSmartDataStatus fSmartData_F32_ReadIfIsUpdatedWithinUsAndGetTimestampUs(sSmartD
 eSmartDataStatus fSmartData_F32_ReadIfIsNewForId(sSmartDataF32 * const me, float32_t * pOutValue, eSmartDataUserId userId);
 eSmartDataStatus fSmartData_F32_ReadIfIsNewForIdAndGetTimestamp(sSmartDataF32 * const me, float32_t * pOutValue, eSmartDataUserId userId, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_F32_Write(sSmartDataF32 * const me, float32_t *pValue);
+eSmartDataStatus fSmartData_F32_WriteByIndex(uint16_t index, float32_t *pValue);
 eSmartDataStatus fSmartData_F32_WriteWithTimestampUs(sSmartDataF32 * const me, float32_t *pValue, uint64_t timestampUs);
 bool_t fSmartData_F32_HasBeenWrittenSoFar(sSmartDataF32 * const me);
 eSmartDataStatus fSmartData_F32_Verify(sSmartDataF32 * const me);
@@ -737,6 +757,7 @@ eSmartDataStatus fSmartData_F32_GetValueSize(sSmartDataF32 * const me, size_t *p
  */
 eSmartDataStatus fSmartData_F64_Ctor(sSmartDataF64 * const me, float64_t minVal, float64_t maxVal, float64_t defaultVal, float64_t resolution, const char *pUnit);
 eSmartDataStatus fSmartData_F64_Read(sSmartDataF64 * const me, float64_t * pOutValue);
+eSmartDataStatus fSmartData_F64_ReadByIndex(uint16_t index, float64_t * pOutValue);
 eSmartDataStatus fSmartData_F64_ReadAndGetTimestampUs(sSmartDataF64 * const me, float64_t * pOutValue, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_F64_ReadIfChanged(sSmartDataF64 * const me, float64_t * pReferenceValue, float64_t * pOutValue);
 eSmartDataStatus fSmartData_F64_ReadIfChangedAndGetTimestampUs(sSmartDataF64 * const me, float64_t * pReferenceValue, float64_t * pOutValue, uint64_t *pOutTimestampUs);
@@ -747,6 +768,7 @@ eSmartDataStatus fSmartData_F64_ReadIfIsUpdatedWithinUsAndGetTimestampUs(sSmartD
 eSmartDataStatus fSmartData_F64_ReadIfIsNewForId(sSmartDataF64 * const me, float64_t * pOutValue, eSmartDataUserId userId);
 eSmartDataStatus fSmartData_F64_ReadIfIsNewForIdAndGetTimestamp(sSmartDataF64 * const me, float64_t * pOutValue, eSmartDataUserId userId, uint64_t *pOutTimestampUs);
 eSmartDataStatus fSmartData_F64_Write(sSmartDataF64 * const me, float64_t *pValue);
+eSmartDataStatus fSmartData_F64_WriteByIndex(uint16_t index, float64_t *pValue);
 eSmartDataStatus fSmartData_F64_WriteWithTimestampUs(sSmartDataF64 * const me, float64_t *pValue, uint64_t timestampUs);
 bool_t fSmartData_F64_HasBeenWrittenSoFar(sSmartDataF64 * const me);
 eSmartDataStatus fSmartData_F64_Verify(sSmartDataF64 * const me);

@@ -20,6 +20,7 @@
 
 /* Includes ----------------------------------------------------------------- */
 #include "smart_data.h"
+#include "parameter_descriptor.h"
 
 #include "chrono.h"
 
@@ -466,9 +467,40 @@ do {                                                                            
         *(pOutValue_) = (pSd_)->_resolution;                                                            \
     } while (0)
 
+/**
+ * @brief Finds the smart data object of the parameter at an index of the
+ *        parameter list, and checks that it is of the expected type.
+ *
+ * @param index_ Index of the parameter in the parameter list.
+ * @param type_ Type the smart data object has to be.
+ * @param pSd_ Pointer the smart data object is put in.
+ * @return eSMART_DATA_ERROR_NULL_POINTER if there is no parameter at the index,
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if its smart data object is
+ *         of another type.
+ */
+#define GET_BY_INDEX_(index_, type_, pSd_)                                                              \
+    do {                                                                                                \
+        const sParameterDescriptor *pDescriptor_ = fParameterList_GetByIndex(index_);                   \
+        if (pDescriptor_ == NULL) {                                                                     \
+            return eSMART_DATA_ERROR_NULL_POINTER;                                                      \
+        }                                                                                               \
+        if (((const sSmartDataCore *)pDescriptor_->pSmartData)->TypeInfo.Type != (type_)) {             \
+            return eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED;                                           \
+        }                                                                                               \
+        (pSd_) = pDescriptor_->pSmartData;                                                              \
+    } while (0)
+
 /* Private types ------------------------------------------------------------ */
 /* Private variables -------------------------------------------------------- */
 /* Private function prototypes --------------------------------------------- */
+/**
+ * @brief Returns the descriptor of the parameter at an index of the parameter
+ *        list; NULL when the index is out of range.
+ *
+ * It is defined by the generated parameter list, which is built together with
+ * this library; the ...ByIndex functions use it to find a smart data object.
+ */
+const sParameterDescriptor *fParameterList_GetByIndex(uint16_t index);
 /* Private functions -------------------------------------------------------- */
 /* Exported variables ------------------------------------------------------- */
 
@@ -522,6 +554,25 @@ eSmartDataStatus fSmartData_B8_Read(sSmartDataB8 * const me, bool_t * pOutValue)
     READ_(me, pOutValue);
 
     return eSMART_DATA_OK;
+}
+
+/**
+ * @brief Reads the current value of the smart data of the parameter at an
+ *        index of the parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pOutValue Pointer to the output value.
+ * @return eSmartDataStatus Status of the read operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a bool_t.
+ */
+eSmartDataStatus fSmartData_B8_ReadByIndex(uint16_t index, bool_t * pOutValue) {
+
+    sSmartDataB8 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_B8, pSd);
+
+    return fSmartData_B8_Read(pSd, pOutValue);
 }
 
 /**
@@ -677,6 +728,25 @@ eSmartDataStatus fSmartData_B8_Write(sSmartDataB8 * const me, bool_t *pValue){
     WRITE_(me, pValue);
 
     return eSMART_DATA_OK;
+}
+
+/**
+ * @brief Writes a value to the smart data of the parameter at an index of the
+ *        parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pValue Pointer to the value to be written.
+ * @return eSmartDataStatus Status of the write operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a bool_t.
+ */
+eSmartDataStatus fSmartData_B8_WriteByIndex(uint16_t index, bool_t *pValue) {
+
+    sSmartDataB8 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_B8, pSd);
+
+    return fSmartData_B8_Write(pSd, pValue);
 }
 
 /**
@@ -837,6 +907,25 @@ eSmartDataStatus fSmartData_U8_Read(sSmartDataU8 * const me, uint8_t * pOutValue
 }
 
 /**
+ * @brief Reads the current value of the smart data of the parameter at an
+ *        index of the parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pOutValue Pointer to the output value.
+ * @return eSmartDataStatus Status of the read operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a uint8_t.
+ */
+eSmartDataStatus fSmartData_U8_ReadByIndex(uint16_t index, uint8_t * pOutValue) {
+
+    sSmartDataU8 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_U8, pSd);
+
+    return fSmartData_U8_Read(pSd, pOutValue);
+}
+
+/**
  * @brief Reads the current value and its timestamp from the smart data.
  *
  * @param me Pointer to the smart data object.
@@ -990,6 +1079,25 @@ eSmartDataStatus fSmartData_U8_Write(sSmartDataU8 * const me, uint8_t *pValue){
     WRITE_(me, pValue);
 
     return eSMART_DATA_OK;
+}
+
+/**
+ * @brief Writes a value to the smart data of the parameter at an index of the
+ *        parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pValue Pointer to the value to be written.
+ * @return eSmartDataStatus Status of the write operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a uint8_t.
+ */
+eSmartDataStatus fSmartData_U8_WriteByIndex(uint16_t index, uint8_t *pValue) {
+
+    sSmartDataU8 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_U8, pSd);
+
+    return fSmartData_U8_Write(pSd, pValue);
 }
 
 /**
@@ -1254,6 +1362,25 @@ eSmartDataStatus fSmartData_I8_Read(sSmartDataI8 * const me, int8_t * pOutValue)
 }
 
 /**
+ * @brief Reads the current value of the smart data of the parameter at an
+ *        index of the parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pOutValue Pointer to the output value.
+ * @return eSmartDataStatus Status of the read operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a int8_t.
+ */
+eSmartDataStatus fSmartData_I8_ReadByIndex(uint16_t index, int8_t * pOutValue) {
+
+    sSmartDataI8 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_I8, pSd);
+
+    return fSmartData_I8_Read(pSd, pOutValue);
+}
+
+/**
  * @brief Reads the current value and its timestamp from the smart data.
  *
  * @param me Pointer to the smart data object.
@@ -1407,6 +1534,25 @@ eSmartDataStatus fSmartData_I8_Write(sSmartDataI8 * const me, int8_t *pValue){
     WRITE_(me, pValue);
 
     return eSMART_DATA_OK;
+}
+
+/**
+ * @brief Writes a value to the smart data of the parameter at an index of the
+ *        parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pValue Pointer to the value to be written.
+ * @return eSmartDataStatus Status of the write operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a int8_t.
+ */
+eSmartDataStatus fSmartData_I8_WriteByIndex(uint16_t index, int8_t *pValue) {
+
+    sSmartDataI8 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_I8, pSd);
+
+    return fSmartData_I8_Write(pSd, pValue);
 }
 
 /**
@@ -1670,6 +1816,25 @@ eSmartDataStatus fSmartData_U16_Read(sSmartDataU16 * const me, uint16_t * pOutVa
 }
 
 /**
+ * @brief Reads the current value of the smart data of the parameter at an
+ *        index of the parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pOutValue Pointer to the output value.
+ * @return eSmartDataStatus Status of the read operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a uint16_t.
+ */
+eSmartDataStatus fSmartData_U16_ReadByIndex(uint16_t index, uint16_t * pOutValue) {
+
+    sSmartDataU16 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_U16, pSd);
+
+    return fSmartData_U16_Read(pSd, pOutValue);
+}
+
+/**
  * @brief Reads the current value and its timestamp from the smart data.
  *
  * @param me Pointer to the smart data object.
@@ -1823,6 +1988,25 @@ eSmartDataStatus fSmartData_U16_Write(sSmartDataU16 * const me, uint16_t *pValue
     WRITE_(me, pValue);
 
     return eSMART_DATA_OK;
+}
+
+/**
+ * @brief Writes a value to the smart data of the parameter at an index of the
+ *        parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pValue Pointer to the value to be written.
+ * @return eSmartDataStatus Status of the write operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a uint16_t.
+ */
+eSmartDataStatus fSmartData_U16_WriteByIndex(uint16_t index, uint16_t *pValue) {
+
+    sSmartDataU16 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_U16, pSd);
+
+    return fSmartData_U16_Write(pSd, pValue);
 }
 
 /**
@@ -2086,6 +2270,25 @@ eSmartDataStatus fSmartData_I16_Read(sSmartDataI16 * const me, int16_t * pOutVal
 }
 
 /**
+ * @brief Reads the current value of the smart data of the parameter at an
+ *        index of the parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pOutValue Pointer to the output value.
+ * @return eSmartDataStatus Status of the read operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a int16_t.
+ */
+eSmartDataStatus fSmartData_I16_ReadByIndex(uint16_t index, int16_t * pOutValue) {
+
+    sSmartDataI16 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_I16, pSd);
+
+    return fSmartData_I16_Read(pSd, pOutValue);
+}
+
+/**
  * @brief Reads the current value and its timestamp from the smart data.
  *
  * @param me Pointer to the smart data object.
@@ -2239,6 +2442,25 @@ eSmartDataStatus fSmartData_I16_Write(sSmartDataI16 * const me, int16_t *pValue)
     WRITE_(me, pValue);
 
     return eSMART_DATA_OK;
+}
+
+/**
+ * @brief Writes a value to the smart data of the parameter at an index of the
+ *        parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pValue Pointer to the value to be written.
+ * @return eSmartDataStatus Status of the write operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a int16_t.
+ */
+eSmartDataStatus fSmartData_I16_WriteByIndex(uint16_t index, int16_t *pValue) {
+
+    sSmartDataI16 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_I16, pSd);
+
+    return fSmartData_I16_Write(pSd, pValue);
 }
 
 /**
@@ -2502,6 +2724,25 @@ eSmartDataStatus fSmartData_U32_Read(sSmartDataU32 * const me, uint32_t * pOutVa
 }
 
 /**
+ * @brief Reads the current value of the smart data of the parameter at an
+ *        index of the parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pOutValue Pointer to the output value.
+ * @return eSmartDataStatus Status of the read operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a uint32_t.
+ */
+eSmartDataStatus fSmartData_U32_ReadByIndex(uint16_t index, uint32_t * pOutValue) {
+
+    sSmartDataU32 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_U32, pSd);
+
+    return fSmartData_U32_Read(pSd, pOutValue);
+}
+
+/**
  * @brief Reads the current value and its timestamp from the smart data.
  *
  * @param me Pointer to the smart data object.
@@ -2655,6 +2896,25 @@ eSmartDataStatus fSmartData_U32_Write(sSmartDataU32 * const me, uint32_t *pValue
     WRITE_(me, pValue);
 
     return eSMART_DATA_OK;
+}
+
+/**
+ * @brief Writes a value to the smart data of the parameter at an index of the
+ *        parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pValue Pointer to the value to be written.
+ * @return eSmartDataStatus Status of the write operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a uint32_t.
+ */
+eSmartDataStatus fSmartData_U32_WriteByIndex(uint16_t index, uint32_t *pValue) {
+
+    sSmartDataU32 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_U32, pSd);
+
+    return fSmartData_U32_Write(pSd, pValue);
 }
 
 /**
@@ -2918,6 +3178,25 @@ eSmartDataStatus fSmartData_I32_Read(sSmartDataI32 * const me, int32_t * pOutVal
 }
 
 /**
+ * @brief Reads the current value of the smart data of the parameter at an
+ *        index of the parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pOutValue Pointer to the output value.
+ * @return eSmartDataStatus Status of the read operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a int32_t.
+ */
+eSmartDataStatus fSmartData_I32_ReadByIndex(uint16_t index, int32_t * pOutValue) {
+
+    sSmartDataI32 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_I32, pSd);
+
+    return fSmartData_I32_Read(pSd, pOutValue);
+}
+
+/**
  * @brief Reads the current value and its timestamp from the smart data.
  *
  * @param me Pointer to the smart data object.
@@ -3071,6 +3350,25 @@ eSmartDataStatus fSmartData_I32_Write(sSmartDataI32 * const me, int32_t *pValue)
     WRITE_(me, pValue);
 
     return eSMART_DATA_OK;
+}
+
+/**
+ * @brief Writes a value to the smart data of the parameter at an index of the
+ *        parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pValue Pointer to the value to be written.
+ * @return eSmartDataStatus Status of the write operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a int32_t.
+ */
+eSmartDataStatus fSmartData_I32_WriteByIndex(uint16_t index, int32_t *pValue) {
+
+    sSmartDataI32 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_I32, pSd);
+
+    return fSmartData_I32_Write(pSd, pValue);
 }
 
 /**
@@ -3334,6 +3632,25 @@ eSmartDataStatus fSmartData_U64_Read(sSmartDataU64 * const me, uint64_t * pOutVa
 }
 
 /**
+ * @brief Reads the current value of the smart data of the parameter at an
+ *        index of the parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pOutValue Pointer to the output value.
+ * @return eSmartDataStatus Status of the read operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a uint64_t.
+ */
+eSmartDataStatus fSmartData_U64_ReadByIndex(uint16_t index, uint64_t * pOutValue) {
+
+    sSmartDataU64 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_U64, pSd);
+
+    return fSmartData_U64_Read(pSd, pOutValue);
+}
+
+/**
  * @brief Reads the current value and its timestamp from the smart data.
  *
  * @param me Pointer to the smart data object.
@@ -3487,6 +3804,25 @@ eSmartDataStatus fSmartData_U64_Write(sSmartDataU64 * const me, uint64_t *pValue
     WRITE_(me, pValue);
 
     return eSMART_DATA_OK;
+}
+
+/**
+ * @brief Writes a value to the smart data of the parameter at an index of the
+ *        parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pValue Pointer to the value to be written.
+ * @return eSmartDataStatus Status of the write operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a uint64_t.
+ */
+eSmartDataStatus fSmartData_U64_WriteByIndex(uint16_t index, uint64_t *pValue) {
+
+    sSmartDataU64 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_U64, pSd);
+
+    return fSmartData_U64_Write(pSd, pValue);
 }
 
 /**
@@ -3751,6 +4087,25 @@ eSmartDataStatus fSmartData_I64_Read(sSmartDataI64* const me, int64_t * pOutValu
 }
 
 /**
+ * @brief Reads the current value of the smart data of the parameter at an
+ *        index of the parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pOutValue Pointer to the output value.
+ * @return eSmartDataStatus Status of the read operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a int64_t.
+ */
+eSmartDataStatus fSmartData_I64_ReadByIndex(uint16_t index, int64_t * pOutValue) {
+
+    sSmartDataI64 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_I64, pSd);
+
+    return fSmartData_I64_Read(pSd, pOutValue);
+}
+
+/**
  * @brief Reads the current value and its timestamp from the smart data.
  *
  * @param me Pointer to the smart data object.
@@ -3904,6 +4259,25 @@ eSmartDataStatus fSmartData_I64_Write(sSmartDataI64* const me, int64_t *pValue){
     WRITE_(me, pValue);
 
     return eSMART_DATA_OK;
+}
+
+/**
+ * @brief Writes a value to the smart data of the parameter at an index of the
+ *        parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pValue Pointer to the value to be written.
+ * @return eSmartDataStatus Status of the write operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a int64_t.
+ */
+eSmartDataStatus fSmartData_I64_WriteByIndex(uint16_t index, int64_t *pValue) {
+
+    sSmartDataI64 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_I64, pSd);
+
+    return fSmartData_I64_Write(pSd, pValue);
 }
 
 /**
@@ -4167,6 +4541,25 @@ eSmartDataStatus fSmartData_F32_Read(sSmartDataF32* const me, float32_t * pOutVa
 }
 
 /**
+ * @brief Reads the current value of the smart data of the parameter at an
+ *        index of the parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pOutValue Pointer to the output value.
+ * @return eSmartDataStatus Status of the read operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a float32_t.
+ */
+eSmartDataStatus fSmartData_F32_ReadByIndex(uint16_t index, float32_t * pOutValue) {
+
+    sSmartDataF32 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_F32, pSd);
+
+    return fSmartData_F32_Read(pSd, pOutValue);
+}
+
+/**
  * @brief Reads the current value and its timestamp from the smart data.
  *
  * @param me Pointer to the smart data object.
@@ -4320,6 +4713,25 @@ eSmartDataStatus fSmartData_F32_Write(sSmartDataF32* const me, float32_t *pValue
     WRITE_(me, pValue);
 
     return eSMART_DATA_OK;
+}
+
+/**
+ * @brief Writes a value to the smart data of the parameter at an index of the
+ *        parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pValue Pointer to the value to be written.
+ * @return eSmartDataStatus Status of the write operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a float32_t.
+ */
+eSmartDataStatus fSmartData_F32_WriteByIndex(uint16_t index, float32_t *pValue) {
+
+    sSmartDataF32 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_F32, pSd);
+
+    return fSmartData_F32_Write(pSd, pValue);
 }
 
 /**
@@ -4584,6 +4996,25 @@ eSmartDataStatus fSmartData_F64_Read(sSmartDataF64 * const me, float64_t * pOutV
 }
 
 /**
+ * @brief Reads the current value of the smart data of the parameter at an
+ *        index of the parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pOutValue Pointer to the output value.
+ * @return eSmartDataStatus Status of the read operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a float64_t.
+ */
+eSmartDataStatus fSmartData_F64_ReadByIndex(uint16_t index, float64_t * pOutValue) {
+
+    sSmartDataF64 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_F64, pSd);
+
+    return fSmartData_F64_Read(pSd, pOutValue);
+}
+
+/**
  * @brief Reads the current value and its timestamp from the smart data.
  *
  * @param me Pointer to the smart data object.
@@ -4737,6 +5168,25 @@ eSmartDataStatus fSmartData_F64_Write(sSmartDataF64 * const me, float64_t *pValu
     WRITE_(me, pValue);
 
     return eSMART_DATA_OK;
+}
+
+/**
+ * @brief Writes a value to the smart data of the parameter at an index of the
+ *        parameter list.
+ *
+ * @param index Index of the parameter in the parameter list.
+ * @param pValue Pointer to the value to be written.
+ * @return eSmartDataStatus Status of the write operation;
+ *         eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED if that parameter is not
+ *         a float64_t.
+ */
+eSmartDataStatus fSmartData_F64_WriteByIndex(uint16_t index, float64_t *pValue) {
+
+    sSmartDataF64 *pSd = NULL;
+
+    GET_BY_INDEX_(index, eSMART_DATA_TYPE_F64, pSd);
+
+    return fSmartData_F64_Write(pSd, pValue);
 }
 
 /**

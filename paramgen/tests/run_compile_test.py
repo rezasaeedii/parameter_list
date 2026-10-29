@@ -1187,79 +1187,79 @@ _EXAMPLE_FIXTURE_CHECKS = """
         uint64_t u64 = 0U;
         int64_t i64 = 0;
 
-        if (fParameterList_U8_ReadByIndex(REZA_SAEEDI_COFFEE_CUPS_PER_DAY, &cups) != eSMART_DATA_OK
+        if (fSmartData_U8_ReadByIndex(REZA_SAEEDI_COFFEE_CUPS_PER_DAY, &cups) != eSMART_DATA_OK
             || cups != 3U) {
-            printf("fParameterList_U8_ReadByIndex read %u cups, not the default 3\\n",
+            printf("fSmartData_U8_ReadByIndex read %u cups, not the default 3\\n",
                    (unsigned)cups);
             return 1;
         }
-        if (fParameterList_U8_WriteByIndex(REZA_SAEEDI_COFFEE_CUPS_PER_DAY, &seven) != eSMART_DATA_OK
+        if (fSmartData_U8_WriteByIndex(REZA_SAEEDI_COFFEE_CUPS_PER_DAY, &seven) != eSMART_DATA_OK
             || fSmartData_U8_Read(&Cg_SmartData_RezaSaeedi.CoffeeCupsPerDay, &cups) != eSMART_DATA_OK
             || cups != 7U) {
-            printf("fParameterList_U8_WriteByIndex did not write the object the name reaches\\n");
+            printf("fSmartData_U8_WriteByIndex did not write the object the name reaches\\n");
             return 1;
         }
-        if (fParameterList_U8_WriteByIndex(REZA_SAEEDI_COFFEE_CUPS_PER_DAY, &thirty)
+        if (fSmartData_U8_WriteByIndex(REZA_SAEEDI_COFFEE_CUPS_PER_DAY, &thirty)
                 != eSMART_DATA_ERROR_VALUE_OUT_OF_RANGE
-            || fParameterList_U8_ReadByIndex(REZA_SAEEDI_COFFEE_CUPS_PER_DAY, &cups) != eSMART_DATA_OK
+            || fSmartData_U8_ReadByIndex(REZA_SAEEDI_COFFEE_CUPS_PER_DAY, &cups) != eSMART_DATA_OK
             || cups != 7U) {
-            printf("fParameterList_U8_WriteByIndex took 30 cups (maximum 20)\\n");
+            printf("fSmartData_U8_WriteByIndex took 30 cups (maximum 20)\\n");
             return 1;
         }
-        if (fParameterList_U16_ReadByIndex(REZA_SAEEDI_BIRTH_YEAR, &year) != eSMART_DATA_OK
+        if (fSmartData_U16_ReadByIndex(REZA_SAEEDI_BIRTH_YEAR, &year) != eSMART_DATA_OK
             || year != 2000U) {
-            printf("fParameterList_U16_ReadByIndex read %u, not the default 2000\\n",
+            printf("fSmartData_U16_ReadByIndex read %u, not the default 2000\\n",
                    (unsigned)year);
             return 1;
         }
-        if (fParameterList_U32_WriteByIndex(REZA_SAEEDI_BUGS_FIXED_TODAY, &bugs) != eSMART_DATA_OK) {
-            printf("fParameterList_U32_WriteByIndex refused a value in range\\n");
+        if (fSmartData_U32_WriteByIndex(REZA_SAEEDI_BUGS_FIXED_TODAY, &bugs) != eSMART_DATA_OK) {
+            printf("fSmartData_U32_WriteByIndex refused a value in range\\n");
             return 1;
         }
         bugs = 0U;
-        if (fParameterList_U32_ReadByIndex(REZA_SAEEDI_BUGS_FIXED_TODAY, &bugs) != eSMART_DATA_OK
+        if (fSmartData_U32_ReadByIndex(REZA_SAEEDI_BUGS_FIXED_TODAY, &bugs) != eSMART_DATA_OK
             || bugs != 4000000000U) {
-            printf("fParameterList_U32_ReadByIndex did not read back what was written\\n");
+            printf("fSmartData_U32_ReadByIndex did not read back what was written\\n");
             return 1;
         }
-        if (fParameterList_F64_WriteByIndex(POSITION_HOME_LAT, &lat) != eSMART_DATA_OK
-            || fParameterList_F64_WriteByIndex(POSITION_HOME_LAT, &tooFar)
+        if (fSmartData_F64_WriteByIndex(POSITION_HOME_LAT, &lat) != eSMART_DATA_OK
+            || fSmartData_F64_WriteByIndex(POSITION_HOME_LAT, &tooFar)
                 != eSMART_DATA_ERROR_VALUE_OUT_OF_RANGE
             || fSmartData_F64_Read(&Cg_SmartData_Position.Home.Lat, &f64) != eSMART_DATA_OK
             || f64 != 35.7) {
-            printf("fParameterList_F64_WriteByIndex wrote the wrong value or object\\n");
+            printf("fSmartData_F64_WriteByIndex wrote the wrong value or object\\n");
             return 1;
         }
-        if (fParameterList_I16_WriteByIndex(POSITION_SAMPLES_2, &sample) != eSMART_DATA_OK
+        if (fSmartData_I16_WriteByIndex(POSITION_SAMPLES_2, &sample) != eSMART_DATA_OK
             || fSmartData_I16_Read(&Cg_SmartData_Position.Samples[2], &i16) != eSMART_DATA_OK
             || i16 != -5
             || fSmartData_I16_Read(&Cg_SmartData_Position.Samples[1], &i16) != eSMART_DATA_OK
             || i16 != 0) {
-            printf("fParameterList_I16_WriteByIndex wrote the wrong element of the array\\n");
+            printf("fSmartData_I16_WriteByIndex wrote the wrong element of the array\\n");
             return 1;
         }
         /* Airspeed is a float32_t: every other type is refused, and leaves it alone */
-        if (fParameterList_B8_ReadByIndex(AIRSPEED, &flag) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
-            || fParameterList_B8_WriteByIndex(AIRSPEED, &flag) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
-            || fParameterList_U8_WriteByIndex(AIRSPEED, &seven) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
-            || fParameterList_I8_ReadByIndex(AIRSPEED, &i8) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
-            || fParameterList_U16_WriteByIndex(AIRSPEED, &year) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
-            || fParameterList_I16_ReadByIndex(AIRSPEED, &i16) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
-            || fParameterList_U32_WriteByIndex(AIRSPEED, &bugs) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
-            || fParameterList_I32_WriteByIndex(AIRSPEED, &i32) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
-            || fParameterList_U64_ReadByIndex(AIRSPEED, &u64) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
-            || fParameterList_I64_WriteByIndex(AIRSPEED, &i64) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
-            || fParameterList_F64_WriteByIndex(AIRSPEED, &f64) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
-            || fParameterList_F32_ReadByIndex(AIRSPEED, &airspeed) != eSMART_DATA_OK
+        if (fSmartData_B8_ReadByIndex(AIRSPEED, &flag) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
+            || fSmartData_B8_WriteByIndex(AIRSPEED, &flag) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
+            || fSmartData_U8_WriteByIndex(AIRSPEED, &seven) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
+            || fSmartData_I8_ReadByIndex(AIRSPEED, &i8) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
+            || fSmartData_U16_WriteByIndex(AIRSPEED, &year) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
+            || fSmartData_I16_ReadByIndex(AIRSPEED, &i16) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
+            || fSmartData_U32_WriteByIndex(AIRSPEED, &bugs) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
+            || fSmartData_I32_WriteByIndex(AIRSPEED, &i32) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
+            || fSmartData_U64_ReadByIndex(AIRSPEED, &u64) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
+            || fSmartData_I64_WriteByIndex(AIRSPEED, &i64) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
+            || fSmartData_F64_WriteByIndex(AIRSPEED, &f64) != eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED
+            || fSmartData_F32_ReadByIndex(AIRSPEED, &airspeed) != eSMART_DATA_OK
             || airspeed != 60.0f) {
             printf("a by-index function of the wrong type was not refused\\n");
             return 1;
         }
-        if (fParameterList_F32_ReadByIndex((uint16_t)PARAMETER_LIST_QTY, &airspeed)
+        if (fSmartData_F32_ReadByIndex((uint16_t)PARAMETER_LIST_QTY, &airspeed)
                 != eSMART_DATA_ERROR_NULL_POINTER
-            || fParameterList_F32_WriteByIndex((uint16_t)PARAMETER_LIST_QTY, &airspeed)
+            || fSmartData_F32_WriteByIndex((uint16_t)PARAMETER_LIST_QTY, &airspeed)
                 != eSMART_DATA_ERROR_NULL_POINTER
-            || fParameterList_F32_ReadByIndex(AIRSPEED, NULL) != eSMART_DATA_ERROR_NULL_POINTER) {
+            || fSmartData_F32_ReadByIndex(AIRSPEED, NULL) != eSMART_DATA_ERROR_NULL_POINTER) {
             printf("an index past the end or a NULL pointer was not refused\\n");
             return 1;
         }

@@ -8,7 +8,6 @@ from __future__ import annotations
 from ...model.defines import type_enum_member
 from ...model.parameter import Parameter
 from ...model.tags import TAG_REGISTRY, TagKind
-from ...model.types import VALUE_TYPES, CValueType
 from ..descriptor_layout import (FIELD_DESCRIPTION, FIELD_TYPE,
                                  FIELD_LOG_ID, FIELD_NAME, FIELD_SMART_DATA,
                                  FIELD_USER_NAME)
@@ -16,7 +15,7 @@ from ..literals import escape_string, tag_value_literal
 from .file_builder import FileBuilder
 from .parameter_list_h import (DESCRIPTOR_TYPE, GET_BY_INDEX_FUNCTION, GET_BY_NAME_FUNCTION,
                                GET_QUANTITY_FUNCTION, INIT_CALLBACK, INIT_FUNCTION,
-                               READ_BY_INDEX_FUNCTION, WEAK_MACRO, WRITE_BY_INDEX_FUNCTION)
+                               WEAK_MACRO)
 from .smart_data_h import INIT_FUNCTION as SMART_DATA_INIT
 
 BRIEF = "Generated parameter list and its access functions."
@@ -67,7 +66,6 @@ class ParameterListSource(FileBuilder):
         text += self._generate_get_quantity()
         text += self._generate_get_by_index()
         text += self._generate_get_by_name()
-        text += self._generate_by_index()
         text += self._generate_tag_sizes()
 
         text += self.comment.generate_separator("Private Functions")
@@ -269,73 +267,6 @@ class ParameterListSource(FileBuilder):
             returns="const sParameterDescriptor* NULL when no such parameter exists.")
         text += self.function.generate_begin(DESCRIPTOR_TYPE, GET_BY_NAME_FUNCTION,
                                              "const char *pName")
-        text += self.function.generate_body(body)
-        text += self.function.generate_end()
-        return text + "\n"
-
-    # -- read and write by index ---------------------------------------------
-    def _generate_by_index(self) -> str:
-        """``fParameterList_U8_ReadByIndex`` and ``..._WriteByIndex`` for every data type.  (Asked for.)
-
-        The smart-data functions take the object - fSmartData_U8_Read(&obj,
-        &value) - which a caller holding only an index cannot name.  These take
-        the index, and have the same shape otherwise: the same value pointer,
-        the same eSmartDataStatus.
-
-        Each checks the index, and that the object at it really is of that type
-        before casting it: its core says so, the constructor wrote it.  A wrong
-        index must be refused, not write a uint8_t over a float.  The write is
-        the plain smart-data write: no change event, like fSmartData_U8_Write.
-        """
-        text = ""
-        for value_type in VALUE_TYPES.values():
-            text += self._by_index(value_type, read=True)
-            text += self._by_index(value_type, read=False)
-        return text
-
-    def _by_index(self, value_type: CValueType, read: bool) -> str:
-        """One of the two functions for one data type."""
-        tab = self.tab
-        c_name = value_type.c_name
-        pointer = "pOutValue" if read else "pValue"
-        name = (READ_BY_INDEX_FUNCTION if read else WRITE_BY_INDEX_FUNCTION).format(
-            suffix=value_type.suffix)
-        call = f"fSmartData_{value_type.suffix}_{'Read' if read else 'Write'}"
-
-        body = f"const sParameterDescriptor *pDescriptor = {GET_BY_INDEX_FUNCTION}(index);\n"
-        body += "\n"
-        body += "if (pDescriptor == NULL) {\n"
-        body += f"{tab}return eSMART_DATA_ERROR_NULL_POINTER;\n"
-        body += "}\n"
-        body += "\n"
-        body += (f"if (((const sSmartDataCore *)pDescriptor->{FIELD_SMART_DATA})->TypeInfo.Type"
-                 f" != {value_type.enum_name}) {{\n")
-        body += f"{tab}return eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED;\n"
-        body += "}\n"
-        body += "\n"
-        body += (f"return {call}(({value_type.smart_data_struct} *)"
-                 f"pDescriptor->{FIELD_SMART_DATA}, {pointer});")
-
-        if read:
-            brief = f"Reads the value of the {c_name} parameter at *index*."
-            param = "pOutValue Where the value is written."
-            returns = ["eSmartDataStatus eSMART_DATA_OK when the value came back,"]
-        else:
-            brief = f"Writes the value of the {c_name} parameter at *index*."
-            param = "pValue The value to write."
-            returns = ["eSmartDataStatus eSMART_DATA_OK when the value was stored,"]
-            # a bool_t has no range to be outside of
-            if value_type.kind != "bool":
-                returns.append("eSMART_DATA_ERROR_VALUE_OUT_OF_RANGE when it was refused,")
-        returns += [f"eSMART_DATA_ERROR_NULL_POINTER when the index is out of range or {pointer} is NULL,",
-                    f"eSMART_DATA_ERROR_DATA_TYPE_NOT_SUPPORTED when that parameter is not a {c_name}."]
-
-        text = self.comment.generate_doc(
-            brief,
-            params=[f"index Index of the parameter, see '{self.defines_header}'.", param],
-            returns=returns)
-        text += self.function.generate_begin("eSmartDataStatus", name,
-                                             f"uint16_t index, {c_name} *{pointer}")
         text += self.function.generate_body(body)
         text += self.function.generate_end()
         return text + "\n"

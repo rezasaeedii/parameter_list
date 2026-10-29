@@ -5,7 +5,7 @@
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
   * Generator      : parameter_list_code_generator v01.03.00
-  * Generated at   : 2026-10-29 16:54:52 +0330
+  * Generated at   : 2026-10-29 17:12:39 +0330
   * Input file(s)  : parameter_lists/sys_nav_paramTable.xml
   *                   parameter_lists/sys_ac_power_paramTable.xml
   * Parameters     : 10 value(s)
