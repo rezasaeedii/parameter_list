@@ -9,7 +9,7 @@ the graphical editor (``pl_gui``) writes it; the generator never learns that,
 which is what would let a different front end be put in front of it without
 touching a line here.
 
-Several parameter sub lists can be listed - usually one per sub-module of the
+Several parameter sublists can be listed - usually one per sub-module of the
 firmware - and they are merged into one list before anything else happens.
 """
 
@@ -49,7 +49,7 @@ class PipelineResult:
     #: a value that changed byte offset is a value a board in the field will read
     #: wrongly, so it is reported even though the code is perfectly correct.
     drift: Optional[LayoutDrift] = None
-    #: Every parameter sub list this run read, in build order.  ``model_file``
+    #: Every parameter sublist this run read, in build order.  ``model_file``
     #: is only the first of them.
     model_files: List[Path] = field(default_factory=list)
 
@@ -68,7 +68,7 @@ class Pipeline:
     # -- reading the model -----------------------------------------------
     def load_model(self, diagnostics: DiagnosticCollector,
                    model_file: Optional[Path] = None) -> ParameterList:
-        """The merged parameter list of every configured sub list."""
+        """The merged parameter list of every configured sublist."""
         paths = [model_file] if model_file else list(self._config.inputs.model_files)
 
         parts = []
@@ -76,7 +76,7 @@ class Pipeline:
             self._logger.info("  reading %s", path)
             if not path.is_file():
                 raise CodeGeneratorError(
-                    f"The parameter sub list '{path}' does not exist.\n"
+                    f"The parameter sublist '{path}' does not exist.\n"
                     f"Create it in the editor, or fix "
                     f"'inputs.model_files' "
                     f"in {self._config.path.name}.")
@@ -89,7 +89,7 @@ class Pipeline:
         merged = merge_lists(parts)
 
         if len(paths) > 1:
-            self._logger.info("  merged %d sub list(s) into one parameter list",
+            self._logger.info("  merged %d sublist(s) into one parameter list",
                               len(paths))
         # What the format decides for every parameter - in a smart-data project
         # the access mode - replaces what the lists say, here in memory only.

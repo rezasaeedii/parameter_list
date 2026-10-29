@@ -34,12 +34,12 @@ class Validator:
             # parameter lives in a list, so the list has to come first.
             diagnostics.error(
                 "VAL002",
-                "This project has no parameter sub list, so there is nothing to "
+                "This project has no parameter sublist, so there is nothing to "
                 "generate.",
                 SourceLocation(file=str(self._config.path) if self._config.path
                                else None),
-                hint="A parameter lives in a parameter sub list. In the editor: "
-                     "'Parameter sub lists' (\u2630) > '+ Add parameter sub list'. "
+                hint="A parameter lives in a parameter sublist. In the editor: "
+                     "'Parameter sublists' (\u2630) > '+ Add parameter sublist'. "
                      "Or name one in inputs.model_files in the project file.")
         elif not model.flatten():
             # Even an empty list has a file behind it, and naming it is the

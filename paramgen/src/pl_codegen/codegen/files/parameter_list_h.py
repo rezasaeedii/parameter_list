@@ -94,6 +94,14 @@ class ParameterListHeader(FileBuilder):
 
         # ---- the descriptor table ------------------------------------------
         text += self.marker.generate("Exported variables")
+        # What the free tags mean, from the project file - only the ones that
+        # say something, so a project that describes none gets the same file
+        # as before.  (Asked for.)
+        described = [f"  {tag} : {meaning}"
+                     for tag, meaning in self.config.tag_descriptions.items() if meaning]
+        if described:
+            text += self.comment.generate_block(
+                ["What the free tags mean in this project:", *described])
         text += self.variable.generate_declaration(
             c_type="sParameterDescriptor",
             name=self.descriptor_symbol,

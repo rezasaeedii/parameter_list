@@ -30,7 +30,7 @@ def rewrite_model_files(config_path: Path, names: List[str], *,
     """Replace the ``inputs.model_files`` array of *config_path* with *names*.
 
     Every comment in the file survives, including the ones written inside the
-    array itself - a commented-out sub list is somebody's note to themselves,
+    array itself - a commented-out sublist is somebody's note to themselves,
     not something a button press should throw away.  Those comments are gathered
     and written back *below* the new entries: after a reorder there is no line
     left for a trailing comment to sit on, so keeping the note and admitting it
@@ -187,3 +187,179 @@ def _line_indent(text: str, index: int) -> str:
     line_start = text.rfind("\n", 0, index) + 1
     stripped = text[line_start:index].lstrip()
     return text[line_start:index - len(stripped)] if stripped else text[line_start:index]
+
+
+# -- one setting anywhere in the file ------------------------------------------
+#
+# The Project settings dialog changes any key of the file, not only the list of
+# sublists - and the same promise holds: every comment, every other key and the
+# way the file is laid out stay exactly as they were.  So the text is walked,
+# the one value is replaced (or the key added where it is missing), and nothing
+# else is touched.  (Asked for.)
+
+#: How much deeper each level of a value the file did not have is indented.
+_STEP = "  "
+
+
+def set_json_value(text: str, path: Tuple[str, ...], value: object,
+                   key_name: Optional[str] = None) -> str:
+    """*text* with the value at *path* - ``("output", "base_name")`` - set to *value*.
+
+    A key the file does not have is added at the end of its section, and a
+    section it does not have at the end of the file.  *key_name* renames the
+    last key while its value is replaced: the single ``model_file`` becomes the
+    ``model_files`` list.  *text* has ``\\n`` line endings; a caller with a
+    CRLF file converts it before and after.
+    """
+    start = _space(text, 0)
+    if start >= len(text) or text[start] != "{":
+        raise CodeGeneratorError("The project file does not hold a JSON object.")
+    obj = start
+    for depth, key in enumerate(path):
+        members, close = _members(text, obj)
+        member = next((item for item in members if item[0] == key), None)
+        if member is None:
+            # the rest of the path becomes one new member here
+            nested: object = value
+            for inner in reversed(path[depth + 1:]):
+                nested = {inner: nested}
+            return _insert_member(text, obj, members, close, key, nested)
+        _, key_start, value_start, value_end = member
+        if depth == len(path) - 1:
+            indent = _line_indent(text, key_start)
+            notes = (_comments_in(text[value_start + 1:value_end - 1])
+                     if isinstance(value, list) and text[value_start] == "[" else None)
+            key_text = (json.dumps(key_name) if key_name
+                        else text[key_start:_skip_string(text, key_start)])
+            return (text[:key_start] + key_text
+                    + text[_skip_string(text, key_start):value_start]
+                    + _render(value, indent, notes) + text[value_end:])
+        if text[value_start] != "{":
+            raise CodeGeneratorError(
+                f"'{'.'.join(path[:depth + 1])}' in the project file is not an object.")
+        obj = value_start
+    return text
+
+
+def _insert_member(text: str, obj: int, members: list, close: int,
+                   key: str, value: object) -> str:
+    """*text* with ``"key": value`` added as the last member of the object at *obj*."""
+    if members:
+        indent = _line_indent(text, members[0][1])
+        last_end = members[-1][3]
+        line_end = text.find("\n", last_end)
+        line_end = len(text) if line_end == -1 else line_end
+        rest = text[last_end:line_end].strip()
+        member = f"{json.dumps(key)}: {_render(value, indent)}"
+        # The rest of the last member's line is nothing, its comma or a note:
+        # the new member goes on a line of its own below it.
+        after_comma = rest[1:].strip() if rest.startswith(",") else rest
+        if after_comma == "" or after_comma.startswith("//"):
+            comma = "" if rest.startswith(",") else ","
+            return (text[:last_end] + comma + text[last_end:line_end]
+                    + "\n" + indent + member + text[line_end:])
+        # everything on one line: right after the last value
+        return text[:last_end] + ", " + member + text[last_end:]
+    brace_indent = _line_indent(text, obj)
+    indent = brace_indent + _STEP
+    member = f"{json.dumps(key)}: {_render(value, indent)}"
+    inside = text[obj + 1:close]
+    if inside.strip():
+        # only comments in it: they stay, below the new member
+        return text[:obj + 1] + "\n" + indent + member + inside + text[close:]
+    return text[:obj + 1] + "\n" + indent + member + "\n" + brace_indent + text[close:]
+
+
+def _render(value: object, indent: str, notes: Optional[List[str]] = None) -> str:
+    """*value* as JSON text for a member whose line starts with *indent*.
+
+    Lists and objects one entry per line, the way the app writes its files.
+    *notes* - comments that were inside a list being replaced - are kept below
+    the new entries, exactly as ``rewrite_model_files`` keeps them.
+    """
+    inner = indent + _STEP
+    if isinstance(value, dict):
+        if not value:
+            return "{}"
+        lines = [f"{inner}{json.dumps(key)}: {_render(item, inner)}"
+                 for key, item in value.items()]
+        return "{\n" + ",\n".join(lines) + "\n" + indent + "}"
+    if isinstance(value, list):
+        lines = [f"{inner}{_render(item, inner)}" for item in value]
+        body = ",\n".join(lines)
+        if notes:
+            body += ("\n" if body else "") + "\n".join(f"{inner}{note}" for note in notes)
+        return "[\n" + body + "\n" + indent + "]" if body else "[]"
+    return json.dumps(value, ensure_ascii=False)
+
+
+def _space(text: str, index: int) -> int:
+    """Index of the next character that is not whitespace or a comment."""
+    while index < len(text):
+        if text[index] in " \t\r\n":
+            index += 1
+        elif text.startswith("//", index):
+            index = _skip_line_comment(text, index)
+        elif text.startswith("/*", index):
+            index = _skip_block_comment(text, index)
+        else:
+            break
+    return index
+
+
+def _value_end(text: str, index: int) -> int:
+    """Index just past the JSON value that starts at *index*."""
+    if index >= len(text):
+        raise CodeGeneratorError("The project file ends where a value was expected.")
+    if text[index] == '"':
+        return _skip_string(text, index)
+    if text[index] in "{[":
+        depth = 0
+        while index < len(text):
+            char = text[index]
+            if char == '"':
+                index = _skip_string(text, index)
+                continue
+            if text.startswith("//", index):
+                index = _skip_line_comment(text, index)
+                continue
+            if text.startswith("/*", index):
+                index = _skip_block_comment(text, index)
+                continue
+            if char in "{[":
+                depth += 1
+            elif char in "}]":
+                depth -= 1
+                if depth == 0:
+                    return index + 1
+            index += 1
+        raise CodeGeneratorError("The project file ends inside an object or a list.")
+    end = index
+    while end < len(text) and text[end] not in ",}] \t\r\n/":
+        end += 1
+    return end
+
+
+def _members(text: str, obj: int) -> Tuple[list, int]:
+    """``(key, key start, value start, value end)`` for each member of the
+    object whose ``{`` is at *obj*, and the index of its ``}``."""
+    members = []
+    index = _space(text, obj + 1)
+    while index < len(text) and text[index] != "}":
+        if text[index] == ",":                  # a trailing comma is JSONC
+            index = _space(text, index + 1)
+            continue
+        if text[index] != '"':
+            raise CodeGeneratorError(
+                f"The project file has '{text[index]}' where a key was expected.")
+        key_end = _skip_string(text, index)
+        colon = _space(text, key_end)
+        if colon >= len(text) or text[colon] != ":":
+            raise CodeGeneratorError("The project file has a key without a ':' after it.")
+        value_start = _space(text, colon + 1)
+        value_end = _value_end(text, value_start)
+        members.append((json.loads(text[index:key_end]), index, value_start, value_end))
+        index = _space(text, value_end)
+    if index >= len(text):
+        raise CodeGeneratorError("The project file ends inside an object.")
+    return members, index

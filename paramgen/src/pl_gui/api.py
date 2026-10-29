@@ -27,7 +27,7 @@ from pl_codegen.model.types import VALUE_TYPES
 
 from pl_codegen.xml_model.xml_reader import read_xml
 
-from . import native_dialog
+from . import native_dialog, project_settings
 from .document import Document, listing_target, machine_roots
 from .workspace import Workspace
 
@@ -41,10 +41,10 @@ CHOICES = {
                 (("Project file (JSON)", ("*.json",)),)),
     "project-location": (native_dialog.KIND_FOLDER,
                          "Where the new project's folder is made", ()),
-    "sub-list": (native_dialog.KIND_FILE, "Add an existing parameter sub list",
-                 (("Parameter sub list", ("*.xml",)),)),
+    "sub-list": (native_dialog.KIND_FILE, "Add an existing parameter sublist",
+                 (("Parameter sublist", ("*.xml",)),)),
     "sub-list-location": (native_dialog.KIND_FOLDER,
-                          "Folder for the new parameter sub list", ()),
+                          "Folder for the new parameter sublist", ()),
 }
 
 
@@ -86,6 +86,8 @@ class Api:
             "redo": self.redo,
             "defines": self.set_defines,
             "default_defines": self.default_defines,
+            "project_settings": self.project_settings,
+            "set_project_settings": self.set_project_settings,
             "generate": self.generate,
             "next_log_id": self.next_log_id,
             "lists": self.lists,
@@ -132,7 +134,7 @@ class Api:
         # list of 400 parameters took 18 seconds to draw after every click.
         log_ids = _log_ids_by_declaration(document)
         # One list on its own: in a parameter table its rows are numbered
-        # within that sub list - the number ADD_PARAM writes - and in smart
+        # within that sublist - the number ADD_PARAM writes - and in smart
         # data across the whole build.  The merged view (_all_lists_state)
         # always counts the whole build.
         indices = _indices_by_row(
@@ -176,16 +178,22 @@ class Api:
             # the open list's own structure types, for the Structure types panel
             # and for the "Data type" list of a structure parameter
             "structTypes": document.struct_types(),
+            # A free tag the project describes reads "Tag1 : Saveable" wherever
+            # the editor names it, and its tooltip is that meaning.  (Asked for.)
             "tagSpecs": [
                 {
                     "id": spec.tag_id,
-                    "label": spec.label,
+                    "label": (f"{spec.label} : {meaning}" if meaning else spec.label),
                     "kind": spec.kind.value,
                     "mandatory": spec.mandatory,
                     "definesColumn": spec.defines_column,
-                    "description": spec.description,
+                    "description": meaning or spec.description,
+                    # what the project says it means, alone - the grid heads
+                    # the tag's column with it
+                    "meaning": meaning,
                 }
                 for spec in TAG_REGISTRY
+                for meaning in [document.config.tag_descriptions.get(spec.tag_id, "")]
             ],
             # The tags this project's format writes the same into every
             # parameter - {"ParamMode": "PARAM_MODE_NONE"} in a smart-data
@@ -200,7 +208,7 @@ class Api:
                                          "this value. Only meaningful while Tag Loggable "
                                          "is TRUE."},
             "outputDirectory": str(document.config.output.code_directory),
-            # every parameter sub list of the project; the editor works on one at a time
+            # every parameter sublist of the project; the editor works on one at a time
             "modules": [{"path": str(path), "name": path.stem,
                          "current": document.path is not None and path == document.path,
                          "exists": path.is_file()}
@@ -262,7 +270,7 @@ class Api:
         state["tree"] = tree
         state["allLists"] = True
         state["readOnly"] = True
-        state["file"] = f"{len(document.config.inputs.model_files)} sub list(s), merged"
+        state["file"] = f"{len(document.config.inputs.model_files)} sublist(s), merged"
         state["fileShown"] = state["file"]
         return state
 
@@ -494,6 +502,56 @@ class Api:
         return {"ok": True, **default_choices(),
                 "defineNumbers": _numbers_of(default_defines())}
 
+    # -- the project settings dialog -----------------------------------------
+    def project_settings(self, _request: Dict[str, Any]) -> Dict[str, Any]:
+        """The project file's settings, read from the file now.  (Asked for.)"""
+        document = self.document
+        try:
+            settings = project_settings.read_settings(document.config.path)
+        except (CodeGeneratorError, OSError) as error:
+            return {"ok": False, "message": str(error)}
+        return {"ok": True, **settings, "dirty": document.dirty}
+
+    def set_project_settings(self, request: Dict[str, Any]) -> Dict[str, Any]:
+        """Write the settings the dialog changed into the project file, then reload.
+
+        Refused - with nothing written - while the open sublist has unsaved
+        changes (reloading would throw them away), when the file changed on disk
+        after the dialog read it, or when a value cannot be used.  A refusal
+        sends the file's current settings back, so the dialog shows the truth.
+        """
+        document = self.document
+        path = document.config.path
+        changes = request.get("changes") or {}
+        if not isinstance(changes, dict):
+            return {"ok": False, "message": "The changes have to be a set of settings."}
+        if document.dirty:
+            return {"ok": False, "dirty": True,
+                    "message": "The open sublist has unsaved changes. Save it, or reload "
+                               "it to drop them - applying re-reads the whole project, "
+                               "and that would lose them."}
+        try:
+            if changes:
+                text, _old = project_settings.new_text(
+                    path, str(request.get("fingerprint") or ""), changes)
+                config = project_settings.load_candidate(path, text)
+                try:
+                    document.check_new_build(config.inputs.model_files)
+                except ValueError as error:
+                    raise project_settings.SettingsError(str(error), "inputs.model_files")
+                project_settings.write(path, text)
+            document.reload_project()
+        except project_settings.SettingsError as error:
+            answer: Dict[str, Any] = {"ok": False, "message": str(error), "field": error.field}
+            try:
+                answer["settings"] = project_settings.read_settings(path)
+            except (CodeGeneratorError, OSError):
+                pass
+            return answer
+        except (CodeGeneratorError, OSError, ValueError) as error:
+            return {"ok": False, "message": str(error)}
+        return {"ok": True, "changed": sorted(changes)}
+
     # -- actions --------------------------------------------------------------
     def generate(self, _request: Dict[str, Any]) -> Dict[str, Any]:
         """Generate the code, and turn a tool error into an answer, not a crash.
@@ -648,11 +706,11 @@ def _indices_by_row(document, per_list: bool = False,
     list.
 
     *per_list* counts the open list on its own instead, from zero.  That is the
-    parameter table's index: nsrParamTables.h restarts it in every sub list's
+    parameter table's index: nsrParamTables.h restarts it in every sublist's
     block, so it is the number ADD_PARAM writes.  *merged_view* answers for the
-    rows of every sub list, merged; otherwise for the open list's rows.
+    rows of every sublist, merged; otherwise for the open list's rows.
 
-    One dict PER ROW, not one for the tree: a name is unique in one sub list
+    One dict PER ROW, not one for the tree: a name is unique in one sublist
     only.  Two lists may each hold a 'NewParameter', and when the values were
     looked up by name the second one was shown the first one's index - in the
     merged view, and in its own list in smart data.  Counted row by row, every
@@ -894,7 +952,7 @@ def start_folder(workspace: Workspace, what: str) -> Path:
         project's; else beside the app;
       * New project: beside the app - the folder paramgen/ is in.  Never inside
         it: the app folder is not written to while anybody works;
-      * a parameter sub list, to add or to make: the project's sub list folder.
+      * a parameter sublist, to add or to make: the project's sublist folder.
     """
     config = workspace.config
     if what == "project":

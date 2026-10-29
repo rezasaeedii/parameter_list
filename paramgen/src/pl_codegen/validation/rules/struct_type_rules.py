@@ -64,8 +64,8 @@ class StructTypeRule(ValidationRule):
                         f"this project does not have.",
                         parameter.source,
                         hint=f"Known structure types: {known}. The structures of a "
-                             f"sub list live in the '_types.xml' file beside it; "
-                             f"check that file came along with the sub list.")
+                             f"sublist live in the '_types.xml' file beside it; "
+                             f"check that file came along with the sublist.")
             elif name and library.get(name) is not None:
                 diagnostics.error(
                     "TYP004",
@@ -214,23 +214,23 @@ class StructTypeClashRule(ValidationRule):
     """
 
     rule_id = "STRUCT_TYPE_CLASH"
-    description = ("A structure type belongs to one parameter sub list; two sub lists "
+    description = ("A structure type belongs to one parameter sublist; two sublists "
                    "may not declare one name.")
 
     def check(self, model: ParameterList, diagnostics: DiagnosticCollector) -> None:
         for name in model.type_clashes:
             owners = model.type_owners.get(name) or []
             lists = [_list_name(item) for item in owners]
-            shown = ", ".join(lists) if lists else "more than one sub list"
+            shown = ", ".join(lists) if lists else "more than one sublist"
             # Reported on the later list: the first one is the declaration the
             # build kept, so the later one is where renaming changes least.
             diagnostics.error(
                 "TYP016",
                 f"Structure type '{name}' is declared by more than one parameter "
-                f"sub list: {shown}. A structure type belongs to one sub list only.",
+                f"sublist: {shown}. A structure type belongs to one sublist only.",
                 SourceLocation(file=owners[-1] if owners else None, struct_type=name),
-                hint=f"Rename '{name}' in every sub list but one ('Structure types…' "
-                     f"in each sub list) - or, in a sub list where nothing uses it, "
+                hint=f"Rename '{name}' in every sublist but one ('Structure types…' "
+                     f"in each sublist) - or, in a sublist where nothing uses it, "
                      f"delete it there.")
 
 
@@ -239,7 +239,7 @@ class StructTypeOwnerRule(ValidationRule):
 
     rule_id = "STRUCT_TYPE_OWNER"
     description = ("A structure, and a field of a structure type, may only name a "
-                   "structure type its own parameter sub list declares.")
+                   "structure type its own parameter sublist declares.")
 
     def check(self, model: ParameterList, diagnostics: DiagnosticCollector) -> None:
         problems = _TypeProblems(model, diagnostics)
@@ -254,7 +254,7 @@ class StructTypeOwnerRule(ValidationRule):
                     "TYP017",
                     f"Structure '{use.where}' of {here} is of type '{use.type_name}', "
                     f"which {here} does not declare - it is a type of {owners}. A "
-                    f"parameter sub list uses only its own structure types.",
+                    f"parameter sublist uses only its own structure types.",
                     SourceLocation(file=use.list_file, parameter=use.where),
                     hint=f"Declare a structure type in {here} ('Structure types…') "
                          f"and give it to '{use.where}', or move '{use.where}' to "
@@ -264,7 +264,7 @@ class StructTypeOwnerRule(ValidationRule):
                 use.in_type, "TYP017",
                 f"Field '{use.where}' of {here} is of type '{use.type_name}', which "
                 f"{here} does not declare - it is a type of {owners}. A parameter "
-                f"sub list uses only its own structure types.",
+                f"sublist uses only its own structure types.",
                 hint=f"Give the field a structure type {here} declares itself, or a "
                      f"data type.")
 

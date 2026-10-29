@@ -63,7 +63,7 @@ def builders_for(config: Config) -> List[Type[FileBuilder]]:
 
 #: Tags the ``smart_data`` format writes the same into every parameter, so a
 #: parameter cannot choose them: the access mode is PARAM_MODE_NONE there
-#: (asked for).  The sub list keeps whatever it says - the same list may be
+#: (asked for).  The sublist keeps whatever it says - the same list may be
 #: built by a parameter-table project, where the mode is a real column of
 #: ADD_PARAM - and the value here replaces it only in memory, on the way into
 #: validation and code generation.  The editor shows it read-only.

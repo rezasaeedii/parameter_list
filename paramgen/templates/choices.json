@@ -25,7 +25,8 @@
     "SYS_AND",
     "SYS_VNS",
     "SYS_RHS",
-    "SYS_AUP"
+    "SYS_AUP",
+    "SYS_RFC"
   ],
   "paramModes": [
     "PARAM_MODE_NONE",
@@ -48,5 +49,40 @@
     "int64_t",
     "float32_t",
     "float64_t"
-  ]
+  ],
+  "numbers": {
+    "systemNames": {
+      "SYS_UNKNOWN": 0,
+      "SYS_GS_COMPUTER": 1,
+      "SYS_GS_MANAGER": 2,
+      "SYS_GS_POWER": 3,
+      "SYS_ANTENNA_TRACKER": 4,
+      "SYS_AC_MANAGER": 5,
+      "SYS_AC_POWER": 6,
+      "SYS_AC_AUTOPILOT": 7,
+      "SYS_GIMBAL": 8,
+      "SYS_LOCK_TRACK": 9,
+      "SYS_LINK_GS": 10,
+      "SYS_GS_USB2CAN": 11,
+      "SYS_LINK_AIR": 12,
+      "SYS_BOOTLOADER": 13,
+      "SYS_LINK_BOX": 14,
+      "SYS_GOVERNOR": 15,
+      "SYS_NAV": 16,
+      "SYS_AND": 17,
+      "SYS_VNS": 18,
+      "SYS_RHS": 19,
+      "SYS_AUP": 20,
+      "SYS_RFC": 22
+    },
+    "paramModes": {
+      "PARAM_MODE_NONE": -1,
+      "PARAM_MODE_USER": 0,
+      "PARAM_MODE_READ_ONLY": 1,
+      "PARAM_MODE_PRODUCT_TYPE": 2,
+      "PARAM_MODE_FACTORY": 3,
+      "PARAM_MODE_CALIB": 4,
+      "PARAM_MODE_TEMPORARY": 5
+    }
+  }
 }

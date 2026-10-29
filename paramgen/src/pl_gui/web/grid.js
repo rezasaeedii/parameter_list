@@ -24,15 +24,15 @@ const gridView = {
     /* Enabled comes FIRST.  Whether a parameter is in the build at all is the
        thing you check before reading any other column of its row, and it used
        to sit nineteen columns to the right, between two tag flags. */
-    { key: "enable",   label: "En",        width: "44px",  align: "center" },
-    { key: "index",    label: "Index",     width: "76px",  align: "right", mono: true },
+    { key: "enable",   label: "En",        width: "44px" },
+    { key: "index",    label: "Index",     width: "76px", mono: true },
     /* Capped, not 'fr': a name is normally short, and a flexible track grows
        to fill whatever room the pane happens to have - on a wide window with
        few other columns showing, that stretched one short word across most
        of the screen. Description, the last column, is where a track is still
        let grow: unlike a name, a long description benefits from the room. */
     { key: "name",     label: "Name",      width: "minmax(170px,340px)", mono: true },
-    { key: "owner",    label: "Sub list",  width: "0px" },
+    { key: "owner",    label: "Sublist",  width: "0px" },
     { key: "userName", label: "User Name", width: "minmax(110px,260px)" },
     { key: "paramType", label: "Type",     width: "110px" },
     /* One column for what the variable IS: the data type of a value, and the
@@ -40,13 +40,13 @@ const gridView = {
        said struct or value, and "Value type" was empty for every structure -
        which is two columns to read one answer from. */
     { key: "valueType", label: "Value type", width: "134px", mono: true },
-    { key: "array",    label: "Size",      width: "54px",  align: "right" },
+    { key: "array",    label: "Size",      width: "54px" },
     { key: "unit",     label: "Unit",      width: "68px" },
-    { key: "def",      label: "Default",   width: "82px",  align: "right", mono: true },
-    { key: "min",      label: "Min",       width: "82px",  align: "right", mono: true },
-    { key: "max",      label: "Max",       width: "82px",  align: "right", mono: true },
-    { key: "res",      label: "Res",       width: "88px",  align: "right", mono: true },
-    { key: "logId",    label: "LogID",     width: "80px",  align: "right", mono: true },
+    { key: "def",      label: "Default",   width: "82px", mono: true },
+    { key: "min",      label: "Min",       width: "82px", mono: true },
+    { key: "max",      label: "Max",       width: "82px", mono: true },
+    { key: "res",      label: "Res",       width: "88px", mono: true },
+    { key: "logId",    label: "LogID",     width: "80px", mono: true },
     /* The tag columns say so.  'SystemName' and 'Encrypt' read like properties
        of the parameter; they are tags, and the name is what the generated
        descriptor field is called. */
@@ -55,10 +55,18 @@ const gridView = {
     { key: "reset",    label: "Tag ResetProof", width: "104px" },
     { key: "log",      label: "Tag Loggable",   width: "96px" },
     { key: "crypt",    label: "Tag LogEncryption", width: "126px" },
+    /* The free tags, each headed by what this project says it means
+       (Project settings > Tags) - "TAG1 : Saveable" - so whoever reads the
+       table knows what the column is for.  app.paint() fills in the meaning.
+       (Asked for.) */
+    { key: "tag1", tag: "Tag1", label: "Tag1", width: "minmax(64px,190px)", mono: true },
+    { key: "tag2", tag: "Tag2", label: "Tag2", width: "minmax(64px,190px)", mono: true },
+    { key: "tag3", tag: "Tag3", label: "Tag3", width: "minmax(64px,190px)", mono: true },
+    { key: "tag4", tag: "Tag4", label: "Tag4", width: "minmax(64px,190px)", mono: true },
     /* The parameter table's address column - 0px unless the project is one.
        After the tags, not among them: the address is the parameter's own, and
        sitting between two tag columns it read like a tag itself. */
-    { key: "address",  label: "Address",   width: "0px",   align: "right", mono: true },
+    { key: "address",  label: "Address",   width: "0px", mono: true },
     { key: "desc",     label: "Description", width: "minmax(160px,1.4fr)" },
   ],
 
@@ -143,7 +151,7 @@ const gridView = {
      hundred distinct values is not a menu. */
   CHOICE_COLUMNS: new Set(["enable", "owner", "paramType", "valueType",
                            "unit", "array", "system", "mode", "reset", "log",
-                           "crypt"]),
+                           "crypt", "tag1", "tag2", "tag3", "tag4"]),
 
   /* The distinct values a column holds, for its drop-down. */
   choicesFor(key, rows) {
@@ -196,7 +204,7 @@ const gridView = {
 
   rows(nodes) {
     /* The values of the top level entry being drawn - not of the whole tree.
-       A name is unique in one sub list only: the merged view may hold two
+       A name is unique in one sublist only: the merged view may hold two
        'NewParameter's, and looked up across the whole tree the second one's
        rows found the first one's values and showed its index. */
     let all = [];
@@ -258,6 +266,10 @@ const gridView = {
         reset: fmtBool(tags.ResetProof),
         log: fmtBool(tags.Loggable),
         crypt: fmtBool(tags.LogEncryption),
+        tag1: tags.Tag1 == null ? "" : String(tags.Tag1),
+        tag2: tags.Tag2 == null ? "" : String(tags.Tag2),
+        tag3: tags.Tag3 == null ? "" : String(tags.Tag3),
+        tag4: tags.Tag4 == null ? "" : String(tags.Tag4),
         enable: node.enable ? "yes" : "no",
         /* What this row means, read the same way. */
         desc: texts.description || "",
@@ -373,13 +385,15 @@ const gridView = {
     const all = this.rows(nodes);
     const shown = all.filter((row) => this.matches(row));
 
-    /* A heading is always left-aligned, whatever 'align' says: 'align' is
-       how a COLUMN's data reads - a number to the right, a checkmark
-       centered - and the two used to be the same style, which put "Index",
-       "Default", "Min"... on the right and everything else on the left, a
-       row of headings that read like it had been reordered by accident. */
-    const head = columns.map((column) => `
-      <div class="grid-head">${escapeHtml(column.label)}</div>`).join("");
+    /* Every heading and every cell is left-aligned, numbers included.  The
+       numbers used to sit on the right and everything else on the left, and a
+       table that changes sides from column to column reads untidy.  (Asked for.) */
+    /* A free tag's heading carries what the project says it means, kept as
+       typed (not upper-cased like the name) and readable in full on hover. */
+    const head = columns.map((column) => column.note
+      ? `<div class="grid-head" title="${escapeHtml(`${column.label} : ${column.note}`)}">${
+          escapeHtml(column.label)}<span class="grid-head-note"> : ${escapeHtml(column.note)}</span></div>`
+      : `<div class="grid-head">${escapeHtml(column.label)}</div>`).join("");
 
     const filterRow = columns.map((column) => {
       const chosen = this.filters[column.key] || "";
@@ -463,7 +477,7 @@ const gridView = {
             return `<div class="${cls} name-col"${title} style="padding-left:${6 + indent}px">` +
                    `${twisty}<span class="row-label">${escapeHtml(text)}</span></div>`;
           }
-          return `<div class="${cls}"${title} style="text-align:${column.align || "left"};` +
+          return `<div class="${cls}"${title} style="text-align:left;` +
                  `padding-left:${6 + indent}px">${escapeHtml(text)}</div>`;
         }).join("") + `</div>`;
     }).join("");

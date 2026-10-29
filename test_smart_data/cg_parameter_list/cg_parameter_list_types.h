@@ -4,8 +4,8 @@
   * @brief   Structure types generated from the structure types of the parameter list.
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
-  * Generator      : parameter_list_code_generator v01.03.00
-  * Generated at   : 2026-10-29 17:12:39 +0330
+  * Generator      : parameter_list_code_generator v01.03.01
+  * Generated at   : 2026-10-29 19:44:49 +0330
   * Input file(s)  : parameter_lists/flight_parameters.xml
   * Parameters     : 16 value(s) in 1 structure(s)
   ******************************************************************************

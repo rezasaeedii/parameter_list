@@ -85,7 +85,7 @@ class NameUniquenessRule(ValidationRule):
                     node.source,
                     hint=f"The other one(s) are in {', '.join(others)}. "
                          f"Rename one of them - the name becomes a C identifier, "
-                         f"and the sub lists are merged into a single table.")
+                         f"and the sublists are merged into a single table.")
 
 
 class IndexMacroCollisionRule(ValidationRule):
@@ -341,7 +341,7 @@ def _file_of(node: Parameter) -> str:
     """
     path = node.source.file
     if not path:
-        return "this sub list"
+        return "this sublist"
     return Path(path).name
 
 

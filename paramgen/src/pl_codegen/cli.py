@@ -72,7 +72,7 @@ def build_parser() -> argparse.ArgumentParser:
             "Examples:\n"
             "  python run_generate.py                     # the project opened last\n"
             "  python run_generate.py -c ../projects/demo # a project folder\n"
-            "  python run_generate.py -m other.xml        # generate from another sub list\n"
+            "  python run_generate.py -m other.xml        # generate from another sublist\n"
             "  python run_generate.py --check             # validate only, write nothing\n"
             ))
 
@@ -82,7 +82,7 @@ def build_parser() -> argparse.ArgumentParser:
                              f"the current folder, otherwise the project opened last "
                              f"in the editor")
     parser.add_argument("-m", "--model", type=Path, metavar="FILE",
-                        help="a parameter sub list (XML) to use instead of the "
+                        help="a parameter sublist (XML) to use instead of the "
                              "configured one(s)")
     parser.add_argument("--check", action="store_true",
                         help="validate the input only; write no file at all")
@@ -142,11 +142,11 @@ def _describe_input(config) -> str:
     """One line saying exactly which files the run will read."""
     files = config.inputs.model_files
     if not files:
-        return "no parameter sub list configured"
+        return "no parameter sublist configured"
     if len(files) == 1:
-        return f"parameter sub list {files[0]}"
+        return f"parameter sublist {files[0]}"
     listing = "".join(f"\n         - {path}" for path in files)
-    return f"{len(files)} parameter sub lists, merged:{listing}"
+    return f"{len(files)} parameter sublists, merged:{listing}"
 
 
 def _print_drift(drift) -> None:
@@ -190,10 +190,10 @@ def _print_summary(result, verbose: bool) -> None:
             for path in result.generated_files:
                 print(f"  {path}")
         elif len(result.model_files) == 1:
-            print(f"\nParameter sub list: {result.model_files[0]}  "
+            print(f"\nParameter sublist: {result.model_files[0]}  "
                   f"({result.parameter_count} value(s))")
         elif result.model_files:
-            print(f"\n{len(result.model_files)} parameter sub lists, merged "
+            print(f"\n{len(result.model_files)} parameter sublists, merged "
                   f"({result.parameter_count} value(s)):")
             for path in result.model_files:
                 print(f"  {path}")

@@ -4,8 +4,8 @@
   * @brief   Quantities, parameter indices, tag sizes, system names and parameter modes.
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
-  * Generator      : parameter_list_code_generator v01.03.00
-  * Generated at   : 2026-10-29 17:12:39 +0330
+  * Generator      : parameter_list_code_generator v01.03.01
+  * Generated at   : 2026-10-29 19:44:49 +0330
   * Input file(s)  : parameter_lists/flight_parameters.xml
   * Parameters     : 16 value(s) in 1 structure(s)
   ******************************************************************************
@@ -125,6 +125,9 @@ extern "C" {
 #endif
 #ifndef SYS_AUP
 #define SYS_AUP              (20U)
+#endif
+#ifndef SYS_RFC
+#define SYS_RFC              (22U)
 #endif
 
 /* Values of the 'PARAM MODES' drop-down list (kept where already defined) */

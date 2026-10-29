@@ -120,7 +120,7 @@ def main(argv: list) -> int:
     print(f"  Done: ParamGen is now version {version} (it was {old}).")
     print()
     print("  The run.bat menu and 'run.bat generate --version' show it right away.")
-    print("  Generated files and saved sub lists carry it from the next time they")
+    print("  Generated files and saved sublists carry it from the next time they")
     print("  are generated or saved.")
     return 0
 

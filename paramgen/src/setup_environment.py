@@ -31,7 +31,7 @@ TOOLS_DIR = Path(__file__).resolve().parent
 #: with Python; the check exists to give a clear message on a stripped-down or
 #: embedded Python installation, where some of them can genuinely be absent.
 STANDARD_MODULES: List[Tuple[str, str]] = [
-    ("xml.etree.ElementTree", "reading and writing the parameter sub list XML files"),
+    ("xml.etree.ElementTree", "reading and writing the parameter sublist XML files"),
     ("http.server", "the local web server behind the graphical editor"),
     ("json", "the configuration file and the editor API"),
     ("webbrowser", "opening the editor in the default browser"),
@@ -136,7 +136,7 @@ def _print_footer() -> None:
     commands = (("editor", "the graphical editor"),
                 ("generate", "generate the C files"),
                 ("tests", "run every self test"),
-                ("generate --check", "validate the sub lists, write nothing"))
+                ("generate --check", "validate the sublists, write nothing"))
     width = max(len(f"{LAUNCHER} {command}") for command, _what in commands)
     start = "Double-click" if LAUNCHER.endswith(".bat") else "Start"
 

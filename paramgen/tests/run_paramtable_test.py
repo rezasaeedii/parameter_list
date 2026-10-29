@@ -676,8 +676,8 @@ def indices_shown(api, merged=False):
             for node in state["tree"]}
 
 
-def test_a_sub_list_counts_from_zero(work):
-    """One sub list on its own is numbered the way ADD_PARAM numbers it.
+def test_a_sublist_counts_from_zero(work):
+    """One sublist on its own is numbered the way ADD_PARAM numbers it.
 
     nsrParamTables.h restarts the index in every block, so the second list's
     first parameter is 0 there.  The editor showed its place in the whole
@@ -696,10 +696,10 @@ def test_a_sub_list_counts_from_zero(work):
     document.save()
 
     equal(indices_shown(api), {"PR_C": [0], "PR_D": [1]},
-          "the open sub list counts from zero")
+          "the open sublist counts from zero")
     equal(indices_shown(api, merged=True),
           {"PR_A": [0], "PR_B": [1], "PR_C": [2], "PR_D": [3]},
-          "every sub list, merged, counts the whole build")
+          "every sublist, merged, counts the whole build")
 
     true(document.generate()["success"], "the build")
     written = {cells[2]: int(cells[5]) for cells in
@@ -736,14 +736,14 @@ def every_value_shown(api, merged=False):
     return sorted(found)
 
 
-def test_the_same_name_in_two_sub_lists(work):
-    """A name is unique in one sub list only, and each keeps its own index.
+def test_the_same_name_in_two_sublists(work):
+    """A name is unique in one sublist only, and each keeps its own index.
 
     Two lists whose parameters keep the names the editor gives them - both
     have a 'NewParameter' - and the values were looked up by name.  So the
     second list's 'NewParameter' was shown the first one's index: in the
     merged view, and in smart data in its own list too, which looked exactly
-    like every sub list counting from zero.
+    like every sublist counting from zero.
 
     The first list holds an array and an array of structures as well, whose
     values are not one run, and every number shown has to be the one the
@@ -773,7 +773,7 @@ def test_the_same_name_in_two_sub_lists(work):
     equal([name for _index, name in build].count("NewParameter2"), 2,
           "the fixture: both lists have a NewParameter2")
     equal(every_value_shown(api, merged=True), build,
-          "every sub list, merged: each value its own index, from the whole build")
+          "every sublist, merged: each value its own index, from the whole build")
     first_count = len(build) - 2
     equal(every_value_shown(api), build[first_count:],
           "smart data, the second list alone: the whole build's numbers")
@@ -1001,7 +1001,7 @@ def test_a_sub_system_has_one_list(work):
     document, api, root = new_project(work, lists=("sys_rhs_paramTable",))
     answer = api.new_list({"name": "sys_rhs"})
     equal(answer["ok"], False, "a second list for SYS_RHS is refused")
-    true("already has a parameter sub list" in answer.get("message", ""),
+    true("already has a parameter sublist" in answer.get("message", ""),
          f"naming the one it has: {answer.get('message')}")
     true("sys_rhs_paramTable.xml" in answer["message"], "by its file name")
 
@@ -1330,8 +1330,8 @@ CASES = [
     ("the same list in both formats", test_the_same_list_in_both_formats),
     ("the file it replaces, rebuilt", test_the_file_it_replaces),
     ("reordering the lists moves nothing", test_reordering_the_lists_moves_nothing),
-    ("a sub list counts from zero", test_a_sub_list_counts_from_zero),
-    ("the same name in two sub lists", test_the_same_name_in_two_sub_lists),
+    ("a sublist counts from zero", test_a_sublist_counts_from_zero),
+    ("the same name in two sublists", test_the_same_name_in_two_sublists),
     ("a new row in the middle warns", test_a_new_row_in_the_middle_is_the_one_that_warns),
     ("an abandoned copy is reported", test_an_abandoned_copy_is_reported),
     ("the offsets note", test_the_offsets_note),

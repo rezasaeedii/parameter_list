@@ -352,7 +352,7 @@ def _list_holding_the_example(candidates: List[Path]) -> Optional[Path]:
 
 
 def _project_lists() -> List[Path]:
-    """The parameter sub lists of a real project to build as well: none.
+    """The parameter sublists of a real project to build as well: none.
 
     Kept, and kept empty, so the variants built from a project's own lists
     below have one place to be switched back on from.

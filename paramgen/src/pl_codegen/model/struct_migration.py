@@ -82,7 +82,7 @@ def _adopt(node: Parameter, model: "ParameterList", made: Dict[str, str],
             f"'{node.name}' had no structure type; one called '{struct_type.name}' "
             f"was made from the fields it already has.",
             SourceLocation(file=str(path), parameter=node.name),
-            hint="Saving the sub list writes it into the types file beside it. "
+            hint="Saving the sublist writes it into the types file beside it. "
                  "Rename it in 'Structure types' if you want it called "
                  "something else.")
 

@@ -19,7 +19,7 @@ const app = {
   selected: "",
   allLists: false,
 
-  //: the sub list picker's entries as last written - see paintModules()
+  //: the sublist picker's entries as last written - see paintModules()
   drawnModules: "",
 
   async start() {
@@ -123,6 +123,11 @@ const app = {
     /* ...and the Address column only in a parameter table, which has one. */
     const address = gridView.columns.find((column) => column.key === "address");
     address.width = this.isParamTable() ? "84px" : "0px";
+    /* What each free tag means in this project, for its column's heading. */
+    for (const column of gridView.columns.filter((item) => item.tag)) {
+      const spec = (state.tagSpecs || []).find((item) => item.id === column.tag);
+      column.note = (spec && spec.meaning) || "";
+    }
 
     /* Before the grid is drawn, not after: resolving the selection can hand
        a value back to its declaration - the array shrank under it - and the
@@ -257,10 +262,10 @@ ${this.formatName()}`
      seen from the taskbar too. */
   /* The window's title: the full path of the open project file, then the
      editor's name - "D:\Fc\pl_project.json — Parameter List Editor" - with a
-     '*' in front while the open sub list has unsaved changes.  Taken as the
-     server sends it and nothing else.  It used to name the open sub list too,
-     worked out here from the list of sub lists, and with several of them it
-     sometimes named the wrong one; the sub list is in the bar below the title
+     '*' in front while the open sublist has unsaved changes.  Taken as the
+     server sends it and nothing else.  It used to name the open sublist too,
+     worked out here from the list of sublists, and with several of them it
+     sometimes named the wrong one; the sublist is in the bar below the title
      anyway.  (Asked for.) */
   windowTitle(state) {
     const file = state.project && state.project.file;
@@ -272,7 +277,7 @@ ${this.formatName()}`
      Every path that opens another project or another list asks here first. */
   async mayLeaveTheList(question) {
     if (!this.state || !this.state.dirty) return true;
-    return confirm(`This sub list has unsaved changes.
+    return confirm(`This sublist has unsaved changes.
 
 ${question}`);
   },
@@ -300,9 +305,9 @@ ${question}`);
     } catch (error) { this.failed("Closing the project", error); }
   },
 
-  /* The project can be split over several parameter sub lists. The editor
+  /* The project can be split over several parameter sublists. The editor
      works on one of them; the others are still validated against, so a clash
-     between two sub lists shows up here and not at the end. */
+     between two sublists shows up here and not at the end. */
   paintModules(state) {
     const picker = document.getElementById("module-picker");
     const modules = state.modules || [];
@@ -313,7 +318,7 @@ ${question}`);
        at a time is what you do; seeing all of them together is how you answer
        "what is actually in the generated table?", which no single list can. */
     const all = `<option value="${ALL_LISTS}"${this.allLists ? " selected" : ""}
-                 >— every sub list, merged —</option>`;
+                 >— every sublist, merged —</option>`;
     const html = all + modules.map((module) => {
       /* the open list carries the bar's '*' while it has unsaved changes */
       const mark = module.current && state.dirty ? "*" : "";
@@ -451,7 +456,7 @@ ${question}`);
     const owner = (this.state.modules || []).find((module) => samePath(module.path, file));
     if (owner && !(open && samePath(open.path, file))) {
       if (!(await this.mayLeaveTheList(
-          `Open '${owner.name}', the sub list that declares '${name}', and lose them?`))) return;
+          `Open '${owner.name}', the sublist that declares '${name}', and lose them?`))) return;
       try {
         const answer = await api.open(owner.path);
         if (answer && answer.ok === false) { toast(answer.message, "bad"); return; }
@@ -459,7 +464,7 @@ ${question}`);
         this.selected = "";
         await this.refresh();
         setStatus(`${owner.name} — structure type ${name}`);
-      } catch (error) { this.failed("Opening the sub list", error); return; }
+      } catch (error) { this.failed("Opening the sublist", error); return; }
     }
     this.editTypes(name);
   },
@@ -483,12 +488,12 @@ ${question}`);
     const node = findNode(this.state.tree, path)
               || findNode(this.state.tree, declarationPath(path));
     const owner = node && node.ownerList;
-    if (!owner) { toast("That row does not say which sub list it comes from.", "bad"); return; }
+    if (!owner) { toast("That row does not say which sublist it comes from.", "bad"); return; }
 
     const module = (this.state.modules || []).find((m) => m.name + ".xml" === owner
                                                        || m.path.endsWith(owner));
     if (!module) { toast(`'${owner}' is not part of this build.`, "bad"); return; }
-    if (!(await this.mayLeaveTheList("Open the sub list that owns that row, and lose them?"))) return;
+    if (!(await this.mayLeaveTheList("Open the sublist that owns that row, and lose them?"))) return;
     try {
       const answer = await api.open(module.path);
       if (answer && answer.ok === false) { toast(answer.message, "bad"); return; }
@@ -499,7 +504,7 @@ ${question}`);
       this.paint();
       gridView.reveal(path);
       setStatus(`${owner} — ${path}`);
-    } catch (error) { this.failed("Opening the sub list", error); }
+    } catch (error) { this.failed("Opening the sublist", error); }
   },
 
   updateButtons(node) {
@@ -538,18 +543,18 @@ ${question}`);
     const addButton = document.getElementById("btn-add-menu");
     addButton.disabled = frozen || noList;
     addButton.title = noList
-      ? "This project has no parameter sub list yet. Create one first with the "
-        + "Parameter sub lists button (\u2630)."
+      ? "This project has no parameter sublist yet. Create one first with the "
+        + "Parameter sublists button (\u2630)."
       : "Add a parameter or a structure";
     const saveButton = document.getElementById("btn-save");
     saveButton.disabled = frozen || noList;
     saveButton.title = noList
-      ? "Nothing to save: this project has no parameter sub list yet."
-      : "Save the sub list (Ctrl+S)";
+      ? "Nothing to save: this project has no parameter sublist yet."
+      : "Save the sublist (Ctrl+S)";
     if (noList) {
       const types = document.getElementById("btn-types");
       types.disabled = true;
-      types.title = "Structure types are kept beside a parameter sub list, and this "
+      types.title = "Structure types are kept beside a parameter sublist, and this "
                   + "project has none yet.";
     }
     document.getElementById("btn-undo").disabled = frozen || !this.state.canUndo;
@@ -601,7 +606,7 @@ ${item.file}
       setStatus(answer.deleted
         ? `Removed '${item.name}' and deleted its file`
         : `Removed '${item.name}' from the build; the file is kept`);
-    } catch (error) { this.failed("Removing the sub list", error); }
+    } catch (error) { this.failed("Removing the sublist", error); }
   },
 
   /* Ticking the box in the grid is an ordinary edit: it goes through the same
@@ -706,7 +711,7 @@ ${item.file}
       return;
     }
     if (!(await this.mayLeaveTheList(
-        `Open '${owner.name}', the sub list that problem is in, and lose them?`))) return;
+        `Open '${owner.name}', the sublist that problem is in, and lose them?`))) return;
     try {
       const answer = await api.open(owner.path);
       if (answer && answer.ok === false) { toast(answer.message, "bad"); return; }
@@ -717,7 +722,7 @@ ${item.file}
       this.paint();
       gridView.reveal(path);
       setStatus(`${owner.name} — ${path}`);
-    } catch (error) { this.failed("Opening the sub list", error); }
+    } catch (error) { this.failed("Opening the sublist", error); }
   },
 
   /* Select a node by path and reveal it (used by the Problems panel and by
@@ -944,7 +949,7 @@ ${item.file}
     let answer;
     try {
       answer = await api.lists();
-    } catch (error) { this.failed("Reading the parameter sub lists", error); return; }
+    } catch (error) { this.failed("Reading the parameter sublists", error); return; }
     /* the working copy the dialog edits; nothing is written until OK */
     let rows = answer.lists.map((item) => Object.assign({}, item));
 
@@ -953,7 +958,7 @@ ${item.file}
       const spare = rows.filter((r) => !r.selected);
 
       /* A place in the build is shown the way a person counts it: the first
-         sub list is #1, not #0.  (Reported.)  `index` itself stays 0-based -
+         sublist is #1, not #0.  (Reported.)  `index` itself stays 0-based -
          the arrows below work with it. */
       const line = (item, index, inOrder) => `
         <div class="list-row${item.selected ? " on" : ""}" data-path="${escapeHtml(item.path)}">
@@ -968,7 +973,7 @@ ${item.file}
             <button type="button" class="inline-btn" data-down
                     ${index === chosen.length - 1 ? "disabled" : ""}>↓</button>` : ""}
           <button type="button" class="inline-btn danger" data-remove
-                  title="Remove this sub list from the build, or delete its file">🗑</button>
+                  title="Remove this sublist from the build, or delete its file">🗑</button>
         </div>`;
 
       document.getElementById("list-chosen").innerHTML =
@@ -977,7 +982,7 @@ ${item.file}
                          would generate nothing.</div>`;
       document.getElementById("list-spare").innerHTML =
         spare.length ? spare.map((item) => line(item, 0, false)).join("")
-                     : `<div class="problem-empty">Every sub list in the folder is in the build.</div>`;
+                     : `<div class="problem-empty">Every sublist in the folder is in the build.</div>`;
       wire();
     };
 
@@ -1016,11 +1021,11 @@ ${item.file}
       rows = chosen.concat(spare);
     };
 
-    showModal("Parameter sub lists",
-      `<p class="modal-note">The ticked sub lists are built <b>in the order shown</b>
+    showModal("Parameter sublists",
+      `<p class="modal-note">The ticked sublists are built <b>in the order shown</b>
        &mdash; that order is the order of the indices in the generated code.</p>
-       <button type="button" class="inline-btn" id="btn-new-list">+ Add parameter sub list</button>
-       <button type="button" class="inline-btn" id="btn-open-list">Add an existing parameter sub list…</button>
+       <button type="button" class="inline-btn" id="btn-new-list">+ Add parameter sublist</button>
+       <button type="button" class="inline-btn" id="btn-open-list">Add an existing parameter sublist…</button>
        <label>In the build</label>
        <div class="list-box" id="list-chosen"></div>
        <label>In the folder, not in the build</label>
@@ -1034,7 +1039,7 @@ ${item.file}
             return;
           }
           await this.refresh();
-          toast(`${answer2.paths.length} sub list(s) take part in the build.`, "good");
+          toast(`${answer2.paths.length} sublist(s) take part in the build.`, "good");
         } catch (error) { this.failed("Saving the choice", error); }
       });
 
@@ -1048,7 +1053,7 @@ ${item.file}
      what the editor opens next is a file that really exists.
 
      Where it goes is a Location box, the way an IDE asks: it starts at the
-     project's sub list folder, "Browse…" opens the system's own folder dialog,
+     project's sublist folder, "Browse…" opens the system's own folder dialog,
      and where there is none the folders are listed under the box - live, as
      it is typed into. */
   newList() {
@@ -1057,14 +1062,14 @@ ${item.file}
        and shows the file that will be written.  The backend refuses every other
        name as well - this only spares somebody the round trip. */
     let nameField = `<label>Name</label>
-       <input type="text" id="new-list-name" class="mono" value="parameter_sub_list_">`;
+       <input type="text" id="new-list-name" class="mono" value="parameter_sublist_">`;
     if (this.state.project && this.state.project.format === "param_table") {
       const taken = new Set((this.state.modules || []).map((item) => systemOf(item.name)));
       const free = ((this.state.defines && this.state.defines.systemNames) || [])
         .filter((name) => !taken.has(systemOf(name)));
       if (!free.length) {
-        showModal("Add parameter sub list",
-          `<p class="modal-note">Every sub-system already has a sub list. Add a new one
+        showModal("Add parameter sublist",
+          `<p class="modal-note">Every sub-system already has a sublist. Add a new one
            to <b>System names</b> first (⚙ &rsaquo; <b>Drop-down lists…</b>).</p>`);
         return;
       }
@@ -1078,8 +1083,8 @@ ${item.file}
     const native = this.nativeDialogs();
     let inPage = !native;
     const start = this.startFolder("sub-list-location");
-    showModal("Add parameter sub list",
-      `<p class="modal-note">A new, empty sub list is created and added to the build.</p>
+    showModal("Add parameter sublist",
+      `<p class="modal-note">A new, empty sublist is created and added to the build.</p>
        ${nameField}
        <label>Location</label>
        <div class="with-button">
@@ -1094,22 +1099,22 @@ ${item.file}
         const directory = document.getElementById("new-list-dir").value.trim();
         /* The new list is opened as soon as it is made, so this replaces what
            is open: ask before anything is written. */
-        if (!(await this.mayLeaveTheList("Make the sub list and open it anyway, and lose them?"))) {
+        if (!(await this.mayLeaveTheList("Make the sublist and open it anyway, and lose them?"))) {
           return false;
         }
         try {
           const answer = await api.newList(name, directory);
           if (!answer.ok) {
             /* refused: the dialog stays, with what was typed in it */
-            toast(answer.message || "Could not create the sub list.", "bad");
+            toast(answer.message || "Could not create the sublist.", "bad");
             return false;
           }
           await api.open(answer.path);
           this.selected = "";
           await this.refresh();
           toast(`Created ${answer.path}`, "good");
-          setStatus("Parameter sub list added");
-        } catch (error) { this.failed("Creating the sub list", error); return false; }
+          setStatus("Parameter sublist added");
+        } catch (error) { this.failed("Creating the sublist", error); return false; }
       });
 
     /* the file name shown follows the sub-system picked */
@@ -1129,7 +1134,7 @@ ${item.file}
           ? answer.files.map((item) => escapeHtml(item.name)).join(", ") : "none";
         return (answer.missing
           ? `<p class="modal-note"><b>${escapeHtml(answer.missing)}</b> is not there yet -
-             it is made with the sub list.</p>`
+             it is made with the sublist.</p>`
           : `<p class="modal-note">Already here: <span class="mono">${existing}</span></p>`)
           + (inPage ? folderListHtml(answer, "new-list-drives", "new-list-folders") : "");
       },
@@ -1219,8 +1224,8 @@ ${item.file}
     if (path) await this.openProject(path);
   },
 
-  /* "Add an existing parameter sub list…": the system's Open dialog, starting
-     at the project's sub list folder; the file is checked and copied in by the
+  /* "Add an existing parameter sublist…": the system's Open dialog, starting
+     at the project's sublist folder; the file is checked and copied in by the
      same call the page's own dialog makes. */
   async addExistingSubList() {
     const path = await this.pickNative("sub-list");
@@ -1239,14 +1244,14 @@ ${item.file}
     }
   },
 
-  /* Take an existing sub list into the build and open it.  Answers why not
+  /* Take an existing sublist into the build and open it.  Answers why not
      when it is refused - the dialog that asked shows it beside the file - ""
      when the reader chose to keep the list that is open, and null once done. */
   async addExistingListAt(path) {
     try {
       const added = await api.addExistingList(path);
       if (!added.ok) return added.message || "Could not add that file.";
-      if (!(await this.mayLeaveTheList("Open the sub list you added anyway, and lose them?"))) {
+      if (!(await this.mayLeaveTheList("Open the sublist you added anyway, and lose them?"))) {
         return "";
       }
       await api.open(added.path);
@@ -1257,10 +1262,10 @@ ${item.file}
       toast(added.alreadyInBuild
         ? `'${added.path}' is already in the build - opened.`
         : `'${added.path}' is now part of the build.`, "good");
-      setStatus(added.alreadyInBuild ? "Sub list opened" : "Sub list added");
+      setStatus(added.alreadyInBuild ? "Sublist opened" : "Sublist added");
       return null;
     } catch (error) {
-      this.failed("Adding the sub list", error);
+      this.failed("Adding the sublist", error);
       return "";
     }
   },
@@ -1438,14 +1443,14 @@ ${item.file}
     name.focus();
   },
 
-  /* The page's own dialog for adding an existing sub list, for where the
+  /* The page's own dialog for adding an existing sublist, for where the
      system has none.  A file is checked as soon as it is picked or typed - an
      XML that is not a parameter list has to be refused here, with a reason,
      not discovered halfway through a build after the configuration was
      already rewritten. */
   openList() {
-    showModal("Add an existing parameter sub list",
-      `<p class="modal-note">A sub list from outside this project is <b>copied into
+    showModal("Add an existing parameter sublist",
+      `<p class="modal-note">A sublist from outside this project is <b>copied into
        it</b>, with its structure types. Type or paste its path, or walk to it below.</p>
        <label>Path</label>
        <input type="text" id="open-list-path" class="mono" spellcheck="false">
@@ -1478,14 +1483,14 @@ ${item.file}
         const notes = report.notes || [];
         verdict.innerHTML = report.ok
           ? `<div class="drift ok"><b>${report.inBuild
-               ? "Already in the build - OK opens it." : "This is a parameter sub list."}</b>
+               ? "Already in the build - OK opens it." : "This is a parameter sublist."}</b>
              <p>${report.values} value(s) in ${report.parameters} top level entry(ies),
              ${report.structures} structure(s).${types.length
                ? ` Types: ${escapeHtml(types.join(", "))}.` : ""}</p>
              ${notes.length ? `<p class="hint">${notes
                .map(escapeHtml).join("<br>")}</p>` : ""}</div>`
           : `<div class="drift bad"><b>This file cannot be added.</b>
-             <p>${escapeHtml(report.reason || "It is not a parameter sub list.")}</p></div>`;
+             <p>${escapeHtml(report.reason || "It is not a parameter sublist.")}</p></div>`;
       } catch (error) {
         verdict.innerHTML = `<div class="drift bad"><b>Could not check the file.</b>
           <p>${escapeHtml(error.message)}</p></div>`;
@@ -1496,7 +1501,7 @@ ${item.file}
       load: (where) => api.browse(where),
       draw: (answer) => missingNote(answer)
         + folderListHtml(answer, "open-list-drives", "open-folders")
-        + fileListHtml(answer, "open-files", "Parameter sub lists here",
+        + fileListHtml(answer, "open-files", "Parameter sublists here",
             "No .xml file in this folder.",
             (item) => (item.inBuild ? `<span class="hint">already in the build</span>` : ""),
             (item) => item.inBuild),
@@ -1565,7 +1570,7 @@ ${item.file}
           <b>${escapeHtml(type.name)}</b>
           <span class="count">${type.fields.length} field(s)</span>
           ${used ? `<span class="count">used by ${used} here</span>`
-                 : `<span class="hint">not used in this sub list</span>`}
+                 : `<span class="hint">not used in this sublist</span>`}
           <div class="hint mono">${shape || "no fields yet"}</div>
         </div>
         <span>
@@ -1576,7 +1581,7 @@ ${item.file}
     }).join("");
 
     showModal("Structure types",
-      `<p class="modal-note">The structure types of this sub list. Editing one changes
+      `<p class="modal-note">The structure types of this sublist. Editing one changes
        every parameter of that type.</p>
        <button type="button" class="inline-btn" id="btn-new-type">+ New structure type</button>
        <div class="template-list">${rows
@@ -1657,7 +1662,7 @@ ${item.file}
     const used = (type.usedHere || []).length;
 
     showModal(`Structure type ${name}`,
-      `${used ? `<p class="modal-note"><b>${used} parameter(s) of this sub list are of this
+      `${used ? `<p class="modal-note"><b>${used} parameter(s) of this sublist are of this
          type.</b> Every change here reaches all of them.</p>` : ""}
        <label>Name</label>
        <input type="text" id="type-name" class="mono" value="${escapeHtml(type.name)}">
@@ -1720,7 +1725,7 @@ ${item.file}
       const open = (this.state.modules || []).find((module) => module.current);
       const backToOpen = !!open && path === open.path;
       if (path !== ALL_LISTS && !backToOpen
-          && !(await this.mayLeaveTheList("Switch to the other sub list anyway, and lose them?"))) {
+          && !(await this.mayLeaveTheList("Switch to the other sublist anyway, and lose them?"))) {
         this.paint(true);   // put the picker back on the current module
         return;
       }
@@ -1729,7 +1734,7 @@ ${item.file}
           this.allLists = false;
           this.selected = "";
           await this.refresh();
-          setStatus("Switched sub list");
+          setStatus("Switched sublist");
           return;
         }
         if (path === ALL_LISTS) {
@@ -1738,16 +1743,16 @@ ${item.file}
           this.allLists = true;
           this.selected = "";
           await this.refresh();
-          setStatus("Every sub list, merged — read only");
+          setStatus("Every sublist, merged — read only");
           return;
         }
         this.allLists = false;
         await api.open(path);
         this.selected = "";
         await this.refresh();
-        setStatus("Switched sub list");
+        setStatus("Switched sublist");
       } catch (error) {
-        this.failed("Opening the sub list", error);
+        this.failed("Opening the sublist", error);
         this.paint(true);   // put the picker back on the current module
       }
     });
@@ -1772,6 +1777,7 @@ ${item.file}
       },
     });
     this.bindMenu("btn-settings", "menu-settings", {
+      "project-settings": () => this.projectSettings(),
       "choices": () => this.editLists(),
       "theme": () => this.toggleTheme(),
     });
@@ -1983,13 +1989,13 @@ ${item.file}
     }
     const files = result.files.map((f) => `<div>${escapeHtml(f)}</div>`).join("");
     const modules = (result.modules || []).length > 1
-      ? `<p class="modal-note">Read from ${result.modules.length} parameter sub lists:</p>
+      ? `<p class="modal-note">Read from ${result.modules.length} parameter sublists:</p>
          <div class="file-list">${result.modules
            .map((m) => `<div>${escapeHtml(m)}</div>`).join("")}</div>` : "";
     /* The launcher is named the way THIS machine has it: 'run.bat generate'
        is not a command a Linux user can type. */
     const saved = result.saved
-      ? `<p class="modal-note">The sub list was saved to
+      ? `<p class="modal-note">The sublist was saved to
          <code>${escapeHtml(result.saved)}</code> first, so
          <code>${escapeHtml(this.state.tool.launcher)} generate</code> now produces
          exactly the same code.</p>` : "";
@@ -2086,6 +2092,28 @@ ${item.file}
       <p>${escapeHtml(bits.join(", "))}. Every existing parameter keeps its number.</p></div>`;
   },
 
+
+  /* Project settings: every setting of the project file, read from the file
+     now.  The dialog itself is settingsDialog, below. */
+  async projectSettings() {
+    if (!this.state || !this.state.project) {
+      toast("Open a project first - these are a project's settings.", "bad");
+      return;
+    }
+    let answer;
+    try {
+      answer = await api.projectSettings();
+    } catch (error) { this.failed("Reading the project settings", error); return; }
+    if (!answer.ok) {
+      toast(answer.message || "Could not read the project file.", "bad");
+      return;
+    }
+    settingsDialog.open(answer, async (changed) => {
+      await this.refresh();
+      toast(changed ? `Project settings applied - ${changed} changed, project reloaded.`
+                    : "Project reloaded from its file.", "good");
+    });
+  },
 
   /* The four drop-down lists the editor offers.  The system names and the
      parameter modes are #defines in the smart-data header, each with a number
@@ -2433,6 +2461,453 @@ function toast(message, kind) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => element.classList.add("hidden"), 4200);
 }
+
+/* ------------------------------------------------------ project settings */
+/* Every setting of the project file, one page per section, picked on the left.
+   What is shown is the file as it is when the dialog opens; Apply sends only
+   what was changed, the backend writes those values in place - comments and
+   all - and reloads the project from the file.  So this dialog, the Parameter
+   sublists dialog and a hand edit of the file always meet in the file.  A
+   setting the file does not have shows the value a build uses, marked as such,
+   and stays out of the file until it is changed.  (Asked for.) */
+const SETTINGS_PAGES = [
+  { id: "general", title: "General", hint: "Name and description",
+    intro: "What this project is called. The window title shows the project file itself.",
+    fields: [
+      { key: "project.name", label: "Name", kind: "text" },
+      { key: "project.description", label: "Description", kind: "text",
+        placeholder: "What this project builds" },
+    ] },
+  { id: "output", title: "Output", hint: "Where the code goes",
+    intro: "Where Generate writes, and what the files are called.",
+    fields: [
+      { key: "output.format", label: "Format", kind: "format",
+        help: "Chosen when the project was made." },
+      { key: "output.code_directory", label: "Code folder", kind: "path",
+        placeholder: "the project's own folder",
+        help: "Relative to the project file; empty is the project's own folder." },
+      { key: "output.file_prefix", label: "File prefix", kind: "name" },
+      { key: "output.base_name", label: "Base name", kind: "name",
+        help: "Empty takes the first sublist's name." },
+      { kind: "preview" },
+      { key: "output.full_parameter_list_file", label: "Full parameter list", kind: "path",
+        help: "Every parameter of the build merged into one XML, written by Generate." },
+    ] },
+  { id: "lists", title: "Sublists", hint: "Which lists are built",
+    intro: "The parameter sublists of the build, in build order. Each line goes into the " +
+           "project file exactly as it is typed. The ☰ dialog shows and changes the same list.",
+    fields: [
+      { key: "inputs.model_directory", label: "Sublist folder", kind: "path",
+        help: "A bare file name below is looked up in this folder." },
+      /* the whole width of the page, and every line shown in full: what is
+         typed here is what the project file holds, character for character */
+      { key: "inputs.model_files", label: "Sublists", kind: "lists", wide: true,
+        help: "One sublist per line, exactly as the project file has it. A name " +
+              "with a folder in it is relative to the project file." },
+    ] },
+  { id: "code", title: "Generated code", hint: "What the code looks like",
+    intro: "What goes into the generated files, and the names they use.",
+    fields: [
+      { key: "codegen.emit_description", label: "Descriptions", kind: "bool",
+        help: "Each parameter's description in the code." },
+      { key: "codegen.emit_unit", label: "Units", kind: "bool",
+        help: "Each parameter's unit in the code." },
+      { key: "codegen.emit_generation_info", label: "Generation info", kind: "bool",
+        help: "The generator's name and version in each file's banner." },
+      { key: "codegen.emit_timestamp", label: "Timestamp", kind: "bool",
+        help: "When the files were made. Off makes two builds byte for byte the same." },
+      { key: "style.indent", label: "Indent", kind: "indent" },
+      { key: "style.company", label: "Company", kind: "text",
+        help: "In the copyright line of every banner." },
+      { key: "codegen.extra_includes", label: "Extra includes", kind: "includes",
+        help: "Headers the table needs - a word in a free tag is declared in one." },
+      { group: "Names in the code" },
+      { key: "codegen.descriptor_symbol", label: "Table", kind: "identifier" },
+      { key: "codegen.quantity_define", label: "Count macro", kind: "identifier" },
+      { key: "codegen.index_define_prefix", label: "Index macro prefix", kind: "prefix" },
+      { key: "codegen.offset_define_prefix", label: "Offset macro prefix", kind: "prefix" },
+      { key: "codegen.smart_data_prefix", label: "Smart data prefix", kind: "prefix" },
+      { key: "codegen.struct_type_prefix", label: "Struct type prefix", kind: "prefix" },
+    ] },
+  { id: "validation", title: "Validation", hint: "How strict the checks are",
+    intro: "What stops Generate.",
+    fields: [
+      { key: "validation.treat_warnings_as_errors", label: "Warnings count as errors",
+        kind: "bool", help: "A warning stops the build like an error does." },
+      { key: "validation.require_unit", label: "Every parameter needs a unit", kind: "bool",
+        help: "A parameter without a unit is an error." },
+    ] },
+  { id: "tags", title: "Tags", hint: "What Tag1 - Tag4 mean",
+    intro: "What each free tag means in this project. The parameter form shows it beside " +
+           "the tag - Tag1 : Saveable - and the generated header lists it above the table. " +
+           "A tag left empty is just its name, as before.",
+    fields: ["Tag1", "Tag2", "Tag3", "Tag4"].map((tag) => (
+      { key: `tag_descriptions.${tag}`, label: tag, kind: "text", mono: true,
+        placeholder: "Not described" })) },
+];
+
+const INDENTS = [["  ", "2 spaces"], ["    ", "4 spaces"], ["        ", "8 spaces"],
+                 ["\t", "Tab"]];
+
+const settingsDialog = {
+  data: null,      // what the backend read: values, present, fingerprint, ...
+  values: null,    // the values as edited
+  page: "general",
+  onApplied: null,
+
+  open(data, onApplied) {
+    this.onApplied = onApplied;
+    this.load(data);
+    this.page = "general";
+    this.alert(data.dirty
+      ? "The open sublist has unsaved changes. Save it, or reload it to drop them, " +
+        "before applying - applying re-reads the whole project." : "", "warn");
+    const modal = document.getElementById("settings-modal");
+    document.getElementById("settings-close").onclick = () => this.close();
+    document.getElementById("settings-cancel").onclick = () => this.close();
+    document.getElementById("settings-apply").onclick = () => this.apply();
+    modal.onkeydown = (event) => { if (event.key === "Escape") this.close(); };
+    modal.classList.remove("hidden");
+    this.render();
+  },
+
+  /* (Re)start from what the file says. */
+  load(data) {
+    this.data = data;
+    this.values = JSON.parse(JSON.stringify(data.values));
+    this.marked = "";
+    document.getElementById("settings-file").textContent = data.file;
+  },
+
+  close() {
+    document.getElementById("settings-modal").classList.add("hidden");
+  },
+
+  alert(message, kind) {
+    const box = document.getElementById("settings-alert");
+    box.hidden = !message;
+    box.className = `settings-alert ${kind || "bad"}`;
+    box.textContent = message || "";
+  },
+
+  changed(key) {
+    return JSON.stringify(this.values[key]) !== JSON.stringify(this.data.values[key]);
+  },
+
+  changes() {
+    const out = {};
+    for (const key of Object.keys(this.values)) {
+      if (this.changed(key)) out[key] = this.values[key];
+    }
+    return out;
+  },
+
+  render() {
+    const nav = document.getElementById("settings-nav");
+    nav.innerHTML = SETTINGS_PAGES.map((page) => {
+      const edits = page.fields.filter((field) => field.key && this.changed(field.key)).length;
+      return `<button type="button" class="settings-tab${page.id === this.page ? " active" : ""}"
+          data-page="${page.id}">
+          <span class="settings-tab-title">${escapeHtml(page.title)}${edits
+            ? ` <span class="settings-dot" title="${edits} changed"></span>` : ""}</span>
+          <span class="settings-tab-hint">${escapeHtml(page.hint)}</span></button>`;
+    }).join("");
+    for (const tab of nav.querySelectorAll("[data-page]")) {
+      tab.onclick = () => { this.page = tab.dataset.page; this.render(); };
+    }
+    this.renderPage();
+    this.count();
+  },
+
+  count() {
+    const changed = Object.keys(this.changes()).length;
+    document.getElementById("settings-count").textContent = changed
+      ? `${changed} setting${changed === 1 ? "" : "s"} changed - Apply writes ${
+          changed === 1 ? "it" : "them"} into the project file`
+      : "Nothing changed - Apply reloads the project from its file";
+  },
+
+  renderPage() {
+    const page = SETTINGS_PAGES.find((item) => item.id === this.page);
+    let html = `<h4 class="settings-page-title">${escapeHtml(page.title)}</h4>
+      <p class="settings-intro">${escapeHtml(page.intro)}</p>`;
+    for (const field of page.fields) html += this.row(field);
+    const host = document.getElementById("settings-page");
+    host.innerHTML = html;
+    this.wire(host);
+    if (this.marked) {
+      const marked = host.querySelector(`[data-row="${this.marked}"]`);
+      if (marked) marked.scrollIntoView({ block: "nearest" });
+    }
+  },
+
+  /* One row: the label (with what it is and where it stands) and its control. */
+  row(field) {
+    if (field.group) return `<div class="settings-group">${escapeHtml(field.group)}</div>`;
+    if (field.kind === "preview") return this.preview();
+    const key = field.key;
+    const notInFile = !this.data.present[key] && !this.changed(key);
+    const flags = [
+      this.changed(key) ? `<span class="settings-flag changed">changed</span>` : "",
+      notInFile && field.kind !== "format"
+        ? `<span class="settings-flag" title="The project file does not have this key; a build uses this value, and it stays out of the file until you change it.">not in the file</span>` : "",
+    ].join("");
+    const help = field.help ? `<div class="settings-help">${escapeHtml(field.help)}</div>` : "";
+    return `<div class="settings-row${field.wide ? " wide" : ""}${
+        this.marked === key ? " marked" : ""}" data-row="${key}">
+      <div class="settings-label"><label${field.kind === "bool" ? "" : ` for="set-${key}"`}
+          class="${field.mono ? "mono" : ""}">${escapeHtml(field.label)}</label>${flags}${help}</div>
+      <div class="settings-control">${this.control(field)}</div></div>`;
+  },
+
+  control(field) {
+    const key = field.key;
+    const value = this.values[key];
+    const id = `set-${key}`;
+    const mono = ["path", "name", "prefix", "identifier"].includes(field.kind) || field.mono;
+    switch (field.kind) {
+      case "bool":
+        return `<label class="switch"><input type="checkbox" data-key="${key}"
+          ${value ? "checked" : ""}><span class="switch-track"></span>
+          <span class="switch-text">${value ? "On" : "Off"}</span></label>`;
+      case "format":
+        return `<div class="settings-segment" title="${escapeHtml(field.help)}">${
+          [["smart_data", "Smart data"], ["param_table", "Parameter table"]].map(([code, text]) =>
+            `<span class="${value === code ? "on" : ""}">${text}</span>`).join("")}</div>`;
+      case "indent": {
+        const known = INDENTS.some(([text]) => text === value);
+        const options = INDENTS.map(([text, name]) =>
+          `<option value="${escapeHtml(JSON.stringify(text))}"${text === value ? " selected" : ""}>${name}</option>`);
+        if (!known) {
+          options.push(`<option value="${escapeHtml(JSON.stringify(value))}" selected>As the file has it (${
+            escapeHtml(JSON.stringify(value))})</option>`);
+        }
+        return `<select id="${id}" data-key="${key}" data-json="1">${options.join("")}</select>`;
+      }
+      case "lists":
+        return this.listEditor(field, value || []);
+      case "includes":
+        return this.includeEditor(field, value || []);
+      default: {
+        const placeholder = key === "output.base_name" ? this.data.firstList
+                          : (field.placeholder || "");
+        return `<input type="text" id="${id}" data-key="${key}" class="${mono ? "mono" : ""}"
+          value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}"
+          spellcheck="false" autocomplete="off">`;
+      }
+    }
+  },
+
+  /* The sublists: one line per list, in build order.  Each box grows to show
+     its whole text - a long path is never cut off.  (Asked for.) */
+  listEditor(field, items) {
+    const rows = items.map((item, index) => {
+      const found = this.data.listsFound[item];
+      const badge = found === false
+        ? `<span class="settings-badge bad" title="No such file - the build will report it.">missing</span>` : "";
+      return `<div class="settings-list-row">
+        <span class="settings-list-index">${index + 1}</span>
+        <textarea class="mono settings-entry" rows="1" data-list="${field.key}"
+          data-index="${index}" spellcheck="false" autocomplete="off"
+          >${escapeHtml(item)}</textarea>${badge}
+        <button type="button" class="btn icon" data-move="-1" data-index="${index}"
+          title="Earlier in the build"${index === 0 ? " disabled" : ""}>↑</button>
+        <button type="button" class="btn icon" data-move="1" data-index="${index}"
+          title="Later in the build"${index === items.length - 1 ? " disabled" : ""}>↓</button>
+        <button type="button" class="btn icon danger" data-drop="${index}"
+          title="Out of the build - the file itself stays">✕</button></div>`;
+    }).join("");
+    return `<div class="settings-list" data-editor="${field.key}">${rows ||
+      `<div class="settings-empty">No sublists - nothing would be built.</div>`}
+      <button type="button" class="btn settings-add" data-add="${field.key}">+ Add sublist</button></div>`;
+  },
+
+  /* a line box as tall as its text */
+  fit(box) {
+    box.style.height = "auto";
+    box.style.height = `${box.scrollHeight + 2}px`;
+  },
+
+  /* The extra includes: one chip per header, and a box to add the next. */
+  includeEditor(field, items) {
+    const chips = items.map((item, index) =>
+      `<span class="settings-chip mono">${escapeHtml(item)}<button type="button"
+        data-unchip="${index}" title="Remove">✕</button></span>`).join("");
+    return `<div class="settings-chips" data-editor="${field.key}">${chips}
+      <input type="text" class="mono settings-chip-input" data-chip="${field.key}"
+        placeholder="app.h, then Enter" spellcheck="false" autocomplete="off"></div>`;
+  },
+
+  /* The generated file names, from the prefix and base name as typed. */
+  preview() {
+    const prefix = this.values["output.file_prefix"] || "";
+    const base = this.values["output.base_name"] || this.data.firstList;
+    const names = this.values["output.format"] === "param_table"
+      ? ["nsrParamTables.h", "nsrParamOffsets.h", "nsrSystemNames.h"]
+      : [`${prefix}${base}.h`, `${prefix}${base}.c`, `${prefix}${base}_defines.h`,
+         `${prefix}smart_data.c`];
+    return `<div class="settings-row settings-preview"><div class="settings-label">
+      <label>Files</label><div class="settings-help">What Generate writes.</div></div>
+      <div class="settings-control settings-files" id="settings-preview">${names.map((name) =>
+        `<span class="mono">${escapeHtml(name)}</span>`).join("")}</div></div>`;
+  },
+
+  /* Edits go into this.values as they are typed; the page is redrawn only
+     when its shape changes (a line added or moved), so typing keeps focus. */
+  wire(host) {
+    const refreshMarks = () => { this.count(); this.refreshFlags(); };
+    for (const input of host.querySelectorAll("input[data-key][type=text]")) {
+      input.oninput = () => {
+        this.values[input.dataset.key] = input.value;
+        if (input.dataset.key.startsWith("output.")) {
+          const preview = document.getElementById("settings-preview");
+          if (preview) preview.outerHTML = this.previewNames();
+        }
+        refreshMarks();
+      };
+    }
+    for (const box of host.querySelectorAll("input[data-key][type=checkbox]")) {
+      box.onchange = () => {
+        this.values[box.dataset.key] = box.checked;
+        box.parentElement.querySelector(".switch-text").textContent = box.checked ? "On" : "Off";
+        refreshMarks();
+      };
+    }
+    for (const select of host.querySelectorAll("select[data-key]")) {
+      select.onchange = () => {
+        this.values[select.dataset.key] = JSON.parse(select.value);
+        refreshMarks();
+      };
+    }
+    for (const box of host.querySelectorAll("textarea[data-list]")) {
+      requestAnimationFrame(() => this.fit(box));
+      /* one sublist per box: Enter does not start a second line in it */
+      box.onkeydown = (event) => { if (event.key === "Enter") event.preventDefault(); };
+      box.oninput = () => {
+        if (/[\r\n]/.test(box.value)) box.value = box.value.replace(/[\r\n]+/g, "");
+        const list = this.values[box.dataset.list].slice();
+        list[Number(box.dataset.index)] = box.value;
+        this.values[box.dataset.list] = list;
+        this.fit(box);
+        refreshMarks();
+      };
+    }
+    for (const button of host.querySelectorAll("[data-move]")) {
+      button.onclick = () => {
+        const key = button.closest("[data-editor]").dataset.editor;
+        const list = this.values[key].slice();
+        const from = Number(button.dataset.index);
+        const to = from + Number(button.dataset.move);
+        [list[from], list[to]] = [list[to], list[from]];
+        this.values[key] = list;
+        this.render();
+      };
+    }
+    for (const button of host.querySelectorAll("[data-drop]")) {
+      button.onclick = () => {
+        const key = button.closest("[data-editor]").dataset.editor;
+        this.values[key] = this.values[key].filter((_, index) => index !== Number(button.dataset.drop));
+        this.render();
+      };
+    }
+    for (const button of host.querySelectorAll("[data-add]")) {
+      button.onclick = () => {
+        this.values[button.dataset.add] = [...this.values[button.dataset.add], ""];
+        this.render();
+        const inputs = document.querySelectorAll(`[data-list="${button.dataset.add}"]`);
+        if (inputs.length) inputs[inputs.length - 1].focus();
+      };
+    }
+    for (const button of host.querySelectorAll("[data-unchip]")) {
+      button.onclick = () => {
+        const key = button.closest("[data-editor]").dataset.editor;
+        this.values[key] = this.values[key].filter((_, index) => index !== Number(button.dataset.unchip));
+        this.render();
+      };
+    }
+    for (const input of host.querySelectorAll("input[data-chip]")) {
+      const take = () => {
+        const text = input.value.trim();
+        if (!text) return false;
+        if (!this.values[input.dataset.chip].includes(text)) {
+          this.values[input.dataset.chip] = [...this.values[input.dataset.chip], text];
+        }
+        this.render();
+        const again = document.querySelector(`input[data-chip="${input.dataset.chip}"]`);
+        if (again) again.focus();
+        return true;
+      };
+      input.onkeydown = (event) => {
+        if (event.key === "Enter" || event.key === ",") {
+          event.preventDefault();
+          take();
+        }
+      };
+      /* a header typed and left without Enter is still meant */
+      input.onblur = () => { if (input.value.trim()) take(); };
+    }
+  },
+
+  previewNames() {
+    const holder = document.createElement("div");
+    holder.innerHTML = this.preview();
+    return holder.querySelector("#settings-preview").outerHTML;
+  },
+
+  /* the "changed" flags and the dots, without redrawing the controls */
+  refreshFlags() {
+    for (const row of document.querySelectorAll("#settings-page [data-row]")) {
+      const key = row.dataset.row;
+      const label = row.querySelector(".settings-label");
+      for (const flag of label.querySelectorAll(".settings-flag")) flag.remove();
+      const anchor = label.querySelector("label");
+      if (this.changed(key)) {
+        anchor.insertAdjacentHTML("afterend", `<span class="settings-flag changed">changed</span>`);
+      } else if (!this.data.present[key] && !key.startsWith("output.format")) {
+        anchor.insertAdjacentHTML("afterend", `<span class="settings-flag" title="The project file does not have this key; a build uses this value, and it stays out of the file until you change it.">not in the file</span>`);
+      }
+    }
+    for (const tab of document.querySelectorAll("#settings-nav [data-page]")) {
+      const page = SETTINGS_PAGES.find((item) => item.id === tab.dataset.page);
+      const edits = page.fields.filter((field) => field.key && this.changed(field.key)).length;
+      const title = tab.querySelector(".settings-tab-title");
+      const dot = title.querySelector(".settings-dot");
+      if (edits && !dot) title.insertAdjacentHTML("beforeend", ` <span class="settings-dot"></span>`);
+      if (!edits && dot) dot.remove();
+    }
+  },
+
+  async apply() {
+    /* a header still in the box counts, as if Enter had been pressed */
+    const pending = document.querySelector("input[data-chip]");
+    if (pending && pending.value.trim()) pending.onblur();
+    const changes = this.changes();
+    let answer;
+    try {
+      answer = await api.setProjectSettings(this.data.fingerprint, changes);
+    } catch (error) {
+      this.alert(`Applying failed: ${error.message}`);
+      return;
+    }
+    if (!answer.ok) {
+      this.alert(answer.message || "The settings were not applied.", answer.dirty ? "warn" : "bad");
+      if (answer.settings && !answer.field) {
+        /* the file changed under the dialog: show it as it is now */
+        this.load({ ...answer.settings, dirty: this.data.dirty });
+      }
+      if (answer.field) {
+        this.marked = answer.field;
+        const page = SETTINGS_PAGES.find((item) =>
+          item.fields.some((field) => field.key === answer.field));
+        if (page) this.page = page.id;
+      }
+      this.render();
+      return;
+    }
+    this.close();
+    await this.onApplied(Object.keys(changes).length);
+  },
+};
 
 function showModal(title, bodyHtml, onOk) {
   const modal = document.getElementById("modal");

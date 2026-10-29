@@ -32,7 +32,7 @@ _ELEMENT_PATH = re.compile(r"\d+(?:\.\d+)*")
 def read_xml(path: Path, diagnostics: DiagnosticCollector) -> ParameterList:
     """Parse *path* and rebuild the parameter list model."""
     if not path.is_file():
-        raise CodeGeneratorError(f"The parameter sub list '{path}' does not exist.")
+        raise CodeGeneratorError(f"The parameter sublist '{path}' does not exist.")
     try:
         root = ET.parse(path).getroot()
     except ET.ParseError as exc:
@@ -45,7 +45,7 @@ def read_xml(path: Path, diagnostics: DiagnosticCollector) -> ParameterList:
 
     if root.tag != sch.ROOT:
         raise CodeGeneratorError(
-            f"'{path}' is not a parameter sub list (root element is '{root.tag}', "
+            f"'{path}' is not a parameter sublist (root element is '{root.tag}', "
             f"expected '{sch.ROOT}').")
 
     version = root.get(sch.ATTR_SCHEMA_VERSION, "")
@@ -345,6 +345,12 @@ def convert_tag(kind: TagKind, raw: Optional[str]):
     if kind is TagKind.BOOLEAN:
         return _to_bool(raw, False)
     if kind is TagKind.FREE:
+        # An emptied box is no value.  It used to stay '' - in the model and as
+        # value="" in the file - and the free-tag rule then refused it as
+        # "neither a number nor a C identifier", stopping the build over a tag
+        # nobody had set.  (Asked for.)
+        if not str(raw).strip():
+            return None
         number = _to_optional_int(raw)
         return number if number is not None else raw
     return raw

@@ -114,7 +114,7 @@ class ParamTableSystemRule(ParamTableRule):
     """In this format the file name says which sub-system a list belongs to."""
 
     rule_id = "PARAM_TABLE_SYSTEM"
-    description = "Each sub list's file name must name a known sub-system."
+    description = "Each sublist's file name must name a known sub-system."
 
     def check(self, model: ParameterList, diagnostics: DiagnosticCollector) -> None:
         if not self.wanted:
@@ -136,7 +136,7 @@ class ParamTableSystemRule(ParamTableRule):
                 f"in the 'SYSTEM NAMES' list.",
                 SourceLocation(file=str(path)),
                 hint=f"In this format the file name says which sub-system the "
-                     f"sub list is - name it '<system>_paramTable.xml', in any "
+                     f"sublist is - name it '<system>_paramTable.xml', in any "
                      f"case. Known: {', '.join(sorted(known)) or 'none'}.")
 
 
@@ -151,7 +151,7 @@ class ParamTableSystemTagRule(ParamTableRule):
     """
 
     rule_id = "PARAM_TABLE_SYSTEM_TAG"
-    description = ("Every parameter of a sub list carries its file's sub-system "
+    description = ("Every parameter of a sublist carries its file's sub-system "
                    "in Tag System Name.")
 
     def check(self, model: ParameterList, diagnostics: DiagnosticCollector) -> None:
@@ -181,6 +181,6 @@ class ParamTableSystemTagRule(ParamTableRule):
                 SourceLocation(file=file,
                                parameter=wrong[0].source.parameter or wrong[0].name),
                 hint="In a parameter table the file name decides the sub-system, "
-                     "and the editor writes it into every parameter of a sub list "
-                     "it opens: open this sub list and save it. The tag is what a project "
+                     "and the editor writes it into every parameter of a sublist "
+                     "it opens: open this sublist and save it. The tag is what a project "
                      "generating smart data from the same file uses.")

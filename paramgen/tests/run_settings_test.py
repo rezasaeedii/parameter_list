@@ -197,6 +197,12 @@ case("codegen.emit_generation_info", False,
                         read(root, "out/cg_parameter_list.h").split("*/")[0],
      "no generator banner")
 
+# ---- what the free tags mean ------------------------------------------------
+case("tag_descriptions", {"Tag1": "Saveable", "Tag3": ""},
+     lambda root, text: "Tag1 : Saveable" in read(root, "out/cg_parameter_list.h")
+                        and "Tag3 :" not in read(root, "out/cg_parameter_list.h"),
+     "the described tags listed above the table, the others not")
+
 # ---- validation -----------------------------------------------------------
 case("validation.require_unit", True,
      lambda root, text: "META002" in text,

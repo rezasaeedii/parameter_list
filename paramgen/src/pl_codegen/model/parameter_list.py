@@ -73,11 +73,11 @@ class ParameterList:
         self.parameters.append(parameter)
 
     def extend(self, other: "ParameterList") -> None:
-        """Append another parameter sub list to this one.
+        """Append another parameter sublist to this one.
 
         The result is exactly what one big list would have been: the order of
-        the sub lists decides the order of the indices, and the drop-down lists
-        are merged.  Duplicate names or overlapping log ids across sub lists are
+        the sublists decides the order of the indices, and the drop-down lists
+        are merged.  Duplicate names or overlapping log ids across sublists are
         found by the normal validation afterwards, which names the file each
         parameter came from.
         """

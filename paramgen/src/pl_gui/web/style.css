@@ -277,7 +277,7 @@ html, body {
 
 .inherited { font-size: 10.5px; color: var(--accent); }
 
-/* the sub list picker in the toolbar (hidden when there is only one) */
+/* the sublist picker in the toolbar (hidden when there is only one) */
 .picker { font-family: var(--mono); max-width: 190px; }
 
 /* the read-only "what this field inherits from its structure" panel */
@@ -403,6 +403,130 @@ html, body {
 .modal-card textarea { min-height: 96px; resize: vertical; }
 .modal-card .inline-btn { margin-top: 10px; }
 .modal-note { font-size: 11.5px; color: var(--ink-soft); margin: 4px 0 0; }
+
+/* ------------------------------------------------------ project settings */
+/* One page per section, picked on the left; built from the theme's tokens so
+   it reads the same in the light and the dark theme.  (app.js, settingsDialog) */
+.settings-card {
+  width: min(920px, 94vw); height: min(660px, 88vh); max-height: none;
+  padding: 0; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.settings-head {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding: 14px 18px 12px; border-bottom: 1px solid var(--line-soft);
+}
+.settings-head h3 { margin: 0; font-size: 15px; }
+.settings-file { font-size: 11px; color: var(--ink-faint); margin-top: 3px;
+  word-break: break-all; }
+.settings-alert { margin: 10px 18px 0; padding: 8px 12px; border-radius: var(--radius-sm);
+  font-size: 12px; line-height: 1.45; }
+.settings-alert.bad { background: var(--error-soft); color: var(--error); }
+.settings-alert.warn { background: var(--warn-soft); color: var(--warn); }
+.settings-main { display: grid; grid-template-columns: 196px minmax(0, 1fr);
+  flex: 1; min-height: 0; }
+.settings-nav {
+  padding: 12px 10px; border-right: 1px solid var(--line-soft);
+  background: var(--surface-2); overflow: auto;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.settings-tab {
+  all: unset; box-sizing: border-box; cursor: pointer;
+  display: flex; flex-direction: column; gap: 1px;
+  padding: 8px 10px 8px 12px; border-radius: var(--radius-sm);
+  border-left: 3px solid transparent;
+}
+.settings-tab:hover { background: var(--line-soft); }
+.settings-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.settings-tab.active { background: var(--accent-soft); border-left-color: var(--accent); }
+.settings-tab-title { font-size: 13px; font-weight: 600; color: var(--ink);
+  display: flex; align-items: center; gap: 6px; }
+.settings-tab.active .settings-tab-title { color: var(--accent); }
+.settings-tab-hint { font-size: 11px; color: var(--ink-faint); }
+.settings-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+  display: inline-block; }
+.settings-page { padding: 16px 22px 22px; overflow: auto; }
+.settings-page-title { margin: 0; font-size: 16px; font-weight: 600; }
+.settings-intro { margin: 4px 0 14px; font-size: 12px; color: var(--ink-soft); line-height: 1.5;
+  max-width: 62ch; }
+.settings-group { margin: 18px 0 4px; padding-top: 12px; border-top: 1px solid var(--line-soft);
+  font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--ink-faint); }
+.settings-row {
+  display: grid; grid-template-columns: minmax(130px, 34%) minmax(0, 1fr); gap: 6px 18px;
+  align-items: start; padding: 10px 0; border-bottom: 1px solid var(--line-soft);
+}
+.settings-row:last-child { border-bottom: 0; }
+.settings-row.marked { background: var(--error-soft); margin: 0 -10px; padding: 10px;
+  border-radius: var(--radius-sm); }
+.settings-card .settings-label label { display: inline; margin: 0; font-size: 12.5px;
+  font-weight: 600; color: var(--ink); }
+.settings-help { font-size: 11px; color: var(--ink-faint); margin-top: 3px; line-height: 1.4; }
+.settings-flag { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 9px;
+  font-size: 10px; line-height: 16px; vertical-align: 1px;
+  background: var(--line-soft); color: var(--ink-faint); }
+.settings-flag.changed { background: var(--accent-soft); color: var(--accent); }
+.settings-control { min-width: 0; padding-top: 1px; }
+.settings-card .settings-control input[type=text], .settings-card .settings-control select {
+  font: inherit; font-size: 12.5px; width: 100%; max-width: 440px; padding: 6px 9px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--ink);
+}
+.settings-card .settings-control .mono, .settings-card input.mono { font-family: var(--mono); }
+.settings-card .settings-control input[type=text]:focus,
+.settings-card .settings-control select:focus { outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft); }
+.settings-files { display: flex; flex-wrap: wrap; gap: 5px; }
+.settings-files span { font-size: 11px; color: var(--ink-soft); padding: 2px 7px;
+  border: 1px solid var(--line-soft); border-radius: var(--radius-sm); background: var(--surface-2); }
+.settings-segment { display: inline-flex; border: 1px solid var(--line); border-radius: var(--radius-sm);
+  overflow: hidden; opacity: .9; }
+.settings-segment span { padding: 5px 12px; font-size: 12px; color: var(--ink-faint); }
+.settings-segment span.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.settings-card label.switch { display: inline-flex; align-items: center; gap: 9px;
+  cursor: pointer; margin: 4px 0 0; font-size: 12px; position: relative; }
+.switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.switch-track { position: relative; display: inline-block; width: 34px; height: 19px;
+  border-radius: 10px; background: var(--line-strong); transition: background .15s; flex: none; }
+.switch-track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 15px; height: 15px;
+  border-radius: 50%; background: var(--surface); transition: transform .15s; }
+.switch input:checked + .switch-track { background: var(--accent); }
+.switch input:checked + .switch-track::after { transform: translateX(15px); }
+.switch input:focus-visible + .switch-track { box-shadow: 0 0 0 3px var(--accent-soft); }
+.switch-text { font-size: 12px; color: var(--ink-soft); min-width: 22px; }
+/* a row whose control needs the whole width: the label above it */
+.settings-row.wide { grid-template-columns: minmax(0, 1fr); }
+.settings-list { display: flex; flex-direction: column; gap: 6px; }
+.settings-list-row { display: flex; align-items: flex-start; gap: 6px; }
+.settings-list-row .btn, .settings-list-row .settings-badge { margin-top: 4px; }
+.settings-list-index { padding-top: 8px; }
+.settings-card textarea.settings-entry {
+  flex: 1; min-width: 0; min-height: 0; resize: none; overflow: hidden;
+  font-family: var(--mono); font-size: 12.5px; line-height: 1.45; padding: 6px 9px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--ink);
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.settings-card textarea.settings-entry:focus { outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft); }
+.settings-list-index { width: 18px; text-align: right; font-size: 11px; color: var(--ink-faint);
+  font-family: var(--mono); }
+.settings-badge { font-size: 10px; padding: 1px 6px; border-radius: 9px; white-space: nowrap; }
+.settings-badge.bad { background: var(--error-soft); color: var(--error); }
+.settings-empty { font-size: 12px; color: var(--ink-faint); padding: 4px 0; }
+.settings-add { align-self: flex-start; font-size: 12px; }
+.settings-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; max-width: 560px;
+  padding: 5px; border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface); }
+.settings-chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 4px 2px 8px;
+  border-radius: 12px; background: var(--accent-soft); color: var(--accent); font-size: 11.5px; }
+.settings-chip button { all: unset; cursor: pointer; padding: 0 4px; font-size: 10px; opacity: .7; }
+.settings-chip button:hover { opacity: 1; }
+.settings-card .settings-chips input.settings-chip-input { flex: 1; min-width: 140px;
+  border: 0; box-shadow: none; padding: 3px 4px; max-width: none; background: transparent; }
+.settings-foot { display: flex; align-items: center; gap: 8px; padding: 12px 18px;
+  border-top: 1px solid var(--line-soft); background: var(--surface-2); }
+.settings-count { flex: 1; font-size: 11.5px; color: var(--ink-soft); }
 /* the "(21)" next to a list label, so a truncated list is obvious */
 .count { font-family: var(--mono); color: var(--accent); }
 .file-list { font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft);
@@ -576,6 +700,9 @@ html, body {
 .grid-header { top: 0; border-bottom: 1px solid var(--line); }
 .grid-filters { top: 27px; border-bottom: 1px solid var(--line); }
 
+/* what a free tag means, after its name in the heading: as typed, not shouted */
+.grid-head-note { text-transform: none; letter-spacing: 0; font-weight: 600;
+  color: var(--accent); }
 .grid-head {
   padding: 6px; font-size: 11px; font-weight: 700; color: var(--ink-soft);
   text-transform: uppercase; letter-spacing: .03em; white-space: nowrap;

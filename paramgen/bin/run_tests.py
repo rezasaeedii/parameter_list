@@ -42,6 +42,7 @@ SUITES = [
     ("validation rules", "tests/run_validation_test.py"),
     ("the editor", "tests/run_editor_test.py"),
     ("every project setting", "tests/run_settings_test.py"),
+    ("the project settings dialog", "tests/run_project_settings_test.py"),
     ("the documentation", "tests/run_docs_test.py"),
     ("setting the version", "tests/run_version_test.py"),
     ("structure types", "tests/run_struct_test.py"),

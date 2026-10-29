@@ -48,10 +48,10 @@ UNDO_DEPTH = 60
 
 #: What every action that needs a parameter list says when none is open.  A
 #: parameter lives IN a list; a project without one has nowhere to keep it.
-NO_LIST = ("This project has no parameter sub list yet, and a parameter lives in "
-           "a sub list - there is nowhere to put one. Create a sub list first: "
-           "'Parameter sub lists' (\u2630) in the toolbar, then '+ Add parameter sub "
-           "list' (or 'Add an existing parameter sub list').")
+NO_LIST = ("This project has no parameter sublist yet, and a parameter lives in "
+           "a sublist - there is nowhere to put one. Create a sublist first: "
+           "'Parameter sublists' (\u2630) in the toolbar, then '+ Add parameter "
+           "sublist' (or 'Add an existing parameter sublist').")
 
 #: Every field of :class:`~pl_codegen.model.parameter.Parameter` the
 #: editor form is allowed to write, i.e. every ``data-field`` in ``editor.js``.
@@ -150,6 +150,31 @@ class Document:
             return str(error)
         return None
 
+    def reload_project(self) -> None:
+        """Read the project file again, as the Project settings dialog's Apply does.
+
+        The list that is open stays open while it is still in the build; one
+        the new build left out gives way to the build's first list.  A list
+        that was open from outside the build stays, as it would have.
+        """
+        old_build = list(self.config.inputs.model_files)
+        config = Config.load(self.config.path)
+        current = self.path
+        target = current
+        if current is not None and any(_same_file(current, item) for item in old_build) \
+                and not any(_same_file(current, item) for item in config.inputs.model_files):
+            target = config.inputs.model_file
+        self.config = config
+        self.path = target
+        self.load(target)
+
+    def check_new_build(self, build: List[Path]) -> None:
+        """Refuse a build a parameter-table project could not generate - the same
+        rule the Parameter sublists dialog applies, for lists typed by hand."""
+        adding = [path for path in build
+                  if not any(_same_file(path, old) for old in self.config.inputs.model_files)]
+        self._admit_to_the_build(build, adding)
+
     def load(self, path: Optional[Path] = None) -> List[Dict[str, object]]:
         """Read the XML model, and the project file around it.
 
@@ -187,16 +212,16 @@ class Document:
             system = self._list_system()
             self.load_problems.append({
                 "severity": "warning", "code": "PTB008",
-                "message": (f"{len(stamped)} parameter(s) of this sub list did not "
+                "message": (f"{len(stamped)} parameter(s) of this sublist did not "
                             f"say {system} in Tag System Name (the first: "
                             f"'{stamped[0].name}'). The editor has set it - save the "
-                            f"sub list to write it into the file."),
+                            f"sublist to write it into the file."),
                 "location": {"file": str(self.path), "sheet": None, "row": None,
                              "column": None, "parameter": stamped[0].name,
                              "structType": None},
                 "hint": ("In a parameter table the file name decides the sub-system. "
                          "The tag is what a project generating smart data from the "
-                         "same sub list uses, so the sub list has to carry it."),
+                         "same sublist uses, so the sublist has to carry it."),
             })
         # A text a field shared across the elements of an array goes onto each
         # of its rows; it reads the same, so it is written at the next save.
@@ -795,7 +820,7 @@ class Document:
             # (Reset proof and the logging tags are the form's to set.)
             # A smart-data project does the same with the access mode: it
             # writes PARAM_MODE_NONE for every parameter, the form shows that
-            # read-only, and the sub list keeps its own value - a parameter-
+            # read-only, and the sublist keeps its own value - a parameter-
             # table project building the same list uses it.
             kept = list(fixed_tags(self.config))
             if self.config.output.format == FORMAT_PARAM_TABLE:
@@ -1096,7 +1121,7 @@ class Document:
             if system not in known:
                 raise ValueError(
                     f"'{path.name}' does not name a sub-system: '{system}' is not in "
-                    f"the 'SYSTEM NAMES' list, and in a parameter table a sub list's "
+                    f"the 'SYSTEM NAMES' list, and in a parameter table a sublist's "
                     f"file name is its sub-system. Known: {', '.join(sorted(known)) or 'none'}.")
 
         # One list per sub-system.  The table is built one block per FILE, so two
@@ -1114,12 +1139,12 @@ class Document:
             if path_is_new and first_is_new and not _same_file(first, path):
                 raise ValueError(
                     f"'{first.name}' and '{path.name}' both name {system}. A "
-                    f"sub-system has one sub list: two would be two blocks for it "
+                    f"sub-system has one sublist: two would be two blocks for it "
                     f"in the table, both numbered from 0.")
             kept = first if path_is_new else path
             raise ValueError(
-                f"{system} already has a parameter sub list in this build: "
-                f"'{kept.name}'. A sub-system has one sub list: two would be two "
+                f"{system} already has a parameter sublist in this build: "
+                f"'{kept.name}'. A sub-system has one sublist: two would be two "
                 f"blocks for it in the table, both numbered from 0.")
 
     def create_list(self, name: str, directory: str = "") -> Path:
@@ -1140,7 +1165,7 @@ class Document:
             # A name typed only in other letters (Persian, say) is emptied by
             # _safe_stem, and "needs a name" would contradict what was typed.
             raise ValueError(
-                "A parameter sub list needs a name." if not str(name).strip() else
+                "A parameter sublist needs a name." if not str(name).strip() else
                 "The name becomes the file name, so write it in English letters, "
                 "digits, '_' or '-'.")
 
@@ -1164,7 +1189,7 @@ class Document:
         target = target_directory / f"{stem}.xml"
         if target.exists():
             instead = (" In a parameter table that file already is the sub-system's "
-                       "sub list: add it with 'Add an existing parameter sub list' "
+                       "sublist: add it with 'Add an existing parameter sublist' "
                        "instead."
                        if self.config.output.format == FORMAT_PARAM_TABLE else "")
             raise FileExistsError(
@@ -1204,7 +1229,7 @@ class Document:
             return {"ok": False,
                     "reason": f"'{candidate.name}' holds the structure types of "
                               f"'{_list_of_a_types_file(candidate)}', not a "
-                              f"parameter sub list. Open that file instead."}
+                              f"parameter sublist. Open that file instead."}
         if candidate.suffix.lower() != ".xml":
             return {"ok": False,
                     "reason": f"'{candidate.name}' is not an .xml file."}
@@ -1246,7 +1271,7 @@ class Document:
             if taken:
                 notes.insert(0, f"Its structure type(s) {', '.join(taken)} already "
                                 f"exist in this project. A structure type belongs to "
-                                f"one sub list, so after adding it, rename one of each "
+                                f"one sublist, so after adding it, rename one of each "
                                 f"pair.")
         return {
             "ok": True,
@@ -1276,7 +1301,7 @@ class Document:
         verdict = self.inspect_list(path)
         if not verdict.get("ok"):
             raise ValueError(str(verdict.get("reason")
-                                 or "That file is not a parameter sub list."))
+                                 or "That file is not a parameter sublist."))
 
         source = Path(str(verdict["path"]))
         if verdict.get("inBuild"):
@@ -1312,8 +1337,8 @@ class Document:
             landing = self.list_directory() / source.name
             outside = self.config.path.parent.resolve() not in source.parents
             if outside and landing.exists() and not _same_file(landing, source):
-                return (f"This project already has a '{landing.name}' in its sub "
-                        f"list folder, and a sub-system has one file: add that one to "
+                return (f"This project already has a '{landing.name}' in its "
+                        f"sublist folder, and a sub-system has one file: add that one to "
                         f"the build instead, or delete it first.")
         return None
 
@@ -1380,7 +1405,7 @@ class Document:
         else:
             # An empty build would leave the generator with no input at all;
             # the configuration keeps its list rather than being emptied.
-            raise ValueError("The build needs at least one parameter sub list.")
+            raise ValueError("The build needs at least one parameter sublist.")
 
         deleted = False
         if delete_file and target.is_file():
@@ -1589,8 +1614,8 @@ class Document:
         owner = self._list_defining_type(name)
         if owner:
             raise ValueError(
-                f"The parameter sub list '{owner}' already has a structure type "
-                f"called '{name}'. A structure type belongs to one sub list, so its "
+                f"The parameter sublist '{owner}' already has a structure type "
+                f"called '{name}'. A structure type belongs to one sublist, so its "
                 f"name has to be free in the whole project - choose another one.")
 
     def update_struct_type(self, name: str, changes: Dict[str, object]) -> str:
@@ -1607,7 +1632,7 @@ class Document:
         # its structures not reshaped.
         struct_type = self.model.struct_types.get(name)
         if struct_type is None:
-            raise ValueError(f"This sub list has no structure type called '{name}'.")
+            raise ValueError(f"This sublist has no structure type called '{name}'.")
 
         members = self._fields_from(changes["fields"]) if "fields" in changes else None
         asked = changes.get("name", name)
@@ -1681,7 +1706,7 @@ class Document:
             if self.find_struct_type(wanted) is None:
                 raise ValueError(
                     f"Field '{member.name}' is of type '{wanted}', which is neither "
-                    f"a data type nor a structure type of this sub list.")
+                    f"a data type nor a structure type of this sublist.")
         return members
 
     def _rename_struct_type(self, old: str, new: str) -> None:
@@ -1713,7 +1738,7 @@ class Document:
                            f"{', '.join(holders)}. Remove those fields first.")
 
         if name not in self.model.struct_types:
-            return False, f"This sub list has no structure type called '{name}'."
+            return False, f"This sublist has no structure type called '{name}'."
 
         self.snapshot("delete type")
         self.model.struct_types.remove(name)
@@ -1793,7 +1818,7 @@ class Document:
             struct_type = self.find_struct_type(type_name)
             if struct_type is None:
                 raise ValueError(
-                    f"This sub list has no structure type called '{type_name}'." if type_name
+                    f"This sublist has no structure type called '{type_name}'." if type_name
                     else "A structure needs a structure type: pick one, or declare "
                          "a new one.")
             declared = None
@@ -1896,10 +1921,10 @@ class Document:
     # -- validation and generation -------------------------------------------
     def merged_model(self, diagnostics: Optional[DiagnosticCollector] = None
                      ) -> ParameterList:
-        """This sub list as it is being edited, plus the others as they are on disk.
+        """This sublist as it is being edited, plus the others as they are on disk.
 
         The project is one parameter list even when it is split over several
-        files, so a name or a log id clashing with another sub list has to
+        files, so a name or a log id clashing with another sublist has to
         show up while editing, not at the end.
 
         Built in the order of ``inputs.model_files``, which is the order the
@@ -1922,12 +1947,12 @@ class Document:
 
     def merged_parts(self, diagnostics: Optional[DiagnosticCollector] = None
                      ) -> List[Tuple[Path, ParameterList]]:
-        """The sub lists :meth:`merged_model` merges, still apart, in its order.
+        """The sublists :meth:`merged_model` merges, still apart, in its order.
 
-        ``(file, list)`` per sub list - the open one as it is being edited, the
+        ``(file, list)`` per sublist - the open one as it is being edited, the
         others as they are on disk, each its own copy.  Empty when none of them
         is anywhere to be found.  Kept apart for the editor's index column: a
-        name is unique in one sub list only, so which value is whose can only
+        name is unique in one sublist only, so which value is whose can only
         be told while each list is still on its own.
         """
         # Resolved, because the same file reached by two different paths is one
@@ -2062,7 +2087,7 @@ class Document:
         one id per *value* - ``reserved_log_ids``, not its size in bytes: a
         ``float64_t[10]`` at 410 ends at 419 and the next free id is 420.
 
-        The other sub lists count as well: the log ids of a project have to be
+        The other sublists count as well: the log ids of a project have to be
         unique across all of them, so an id that is free here but taken in
         another file is not free.
         """

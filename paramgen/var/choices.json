@@ -25,7 +25,8 @@
     "SYS_AND",
     "SYS_VNS",
     "SYS_RHS",
-    "SYS_AUP"
+    "SYS_AUP",
+    "SYS_RFC"
   ],
   "paramModes": [
     "PARAM_MODE_NONE",
@@ -71,7 +72,8 @@
       "SYS_AND": 17,
       "SYS_VNS": 18,
       "SYS_RHS": 19,
-      "SYS_AUP": 20
+      "SYS_AUP": 20,
+      "SYS_RFC": 22
     },
     "paramModes": {
       "PARAM_MODE_NONE": -1,

@@ -203,10 +203,14 @@ def seed_from(defines: Optional[Defines]) -> None:
     if not any(defines.get(column) for column in COLUMNS.values()):
         return
 
-    shipped = default_choices()
+    shipped = default_defines()
     merged = Defines()
     for key, column in COLUMNS.items():
-        merged.values[column] = list(defines.get(column)) or shipped[key]
+        own = list(defines.get(column))
+        merged.values[column] = own or list(shipped.get(column))
+        # a list taken from the template keeps the template's numbers too
+        if not own and column in shipped.numbers:
+            merged.numbers[column] = dict(shipped.numbers[column])
     save_choices(merged)
 
 

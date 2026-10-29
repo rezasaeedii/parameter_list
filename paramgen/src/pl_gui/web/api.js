@@ -52,6 +52,11 @@ const api = {
   redo()                     { return this.call("redo"); },
   setDefines(list, values)   { return this.call("defines", { list, values }); },
   defaultDefines()           { return this.call("default_defines"); },
+  /* the Project settings dialog: the file's settings, and the changed ones back */
+  projectSettings()          { return this.call("project_settings"); },
+  setProjectSettings(fingerprint, changes) {
+    return this.call("set_project_settings", { fingerprint, changes });
+  },
   generate()                 { return this.call("generate"); },
   nextLogId()                { return this.call("next_log_id"); },
 

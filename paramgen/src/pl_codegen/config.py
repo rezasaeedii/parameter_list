@@ -25,6 +25,7 @@ from .app_home import (PROJECT_FILE_NAME, PROJECT_FILES, default_snippet_file,
                        project_files_in)
 from .errors import CodeGeneratorError
 from .logging_utils import get_logger
+from .model.tags import optional_tags
 
 #: What a generated file name / include guard may be made of.
 _NAME_SAFE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
@@ -108,7 +109,7 @@ class InputConfig:
     """
 
     #: the XML models, in order.  The first one is the one the editor opens by
-    #: default; every one of them is a parameter sub list of the project.
+    #: default; every one of them is a parameter sublist of the project.
     model_files: List[Path] = field(default_factory=list)
     #: The folder that holds the parameter lists of the project.  A bare file
     #: name in ``model_files`` is looked up here, so a project keeps all of its
@@ -200,6 +201,10 @@ class Config:
     style: StyleConfig = field(default_factory=StyleConfig)
     codegen: CodegenConfig = field(default_factory=CodegenConfig)
     validation: ValidationConfig = field(default_factory=ValidationConfig)
+    #: What each free tag means in this project - ``{"Tag1": "Saveable"}`` -
+    #: shown beside the tag in the editor and above the table in the code.
+    #: A tag with no text is simply "Tag2", as it always was.  (Asked for.)
+    tag_descriptions: Dict[str, str] = field(default_factory=dict)
 
     # -- loading ---------------------------------------------------------
     @classmethod
@@ -345,7 +350,8 @@ class Config:
         codegen.extra_includes = [str(entry) for entry in (codegen.extra_includes or [])]
 
         config = cls(path=config_path, project=project, inputs=inputs, output=output,
-                     style=style, codegen=codegen, validation=validation)
+                     style=style, codegen=codegen, validation=validation,
+                     tag_descriptions=_tag_descriptions(data.get("tag_descriptions")))
         config.validate()
         return config
 
@@ -399,7 +405,21 @@ def _closest(key: str, candidates: Any) -> Optional[str]:
 #: The top-level sections a project file may have.  A file with none of them is
 #: not a project file at all, whatever its name.
 SECTIONS = frozenset({"project", "inputs", "output", "style", "codegen",
-                      "validation"})
+                      "validation", "tag_descriptions"})
+
+#: The tags a project may describe: the free ones, Tag1 .. Tag4.
+DESCRIBED_TAGS = tuple(spec.tag_id for spec in optional_tags())
+
+
+def _tag_descriptions(raw: Any) -> Dict[str, str]:
+    """``tag_descriptions`` as text per free tag; a key that is no free tag is reported."""
+    if raw is None:
+        return {}
+    if not isinstance(raw, dict):
+        get_logger().warning("'tag_descriptions' is not an object of texts - it is ignored.")
+        return {}
+    _warn_unknown_keys("tag_descriptions", raw, set(DESCRIBED_TAGS))
+    return {tag: " ".join(str(raw[tag] or "").split()) for tag in DESCRIBED_TAGS if tag in raw}
 
 
 def _refuse_a_file_that_is_not_a_project(path: Path, data: Dict[str, Any]) -> None:

@@ -119,7 +119,8 @@ def _parameter_to_element(parameter: Parameter,
     tags = ET.SubElement(element, sch.TAGS)
     for spec in TAG_REGISTRY:
         value = parameter.tags.get(spec.tag_id)
-        if value is None:
+        # nothing in it is no tag at all - never value="" in the file
+        if value is None or (isinstance(value, str) and not value.strip()):
             continue
         tag_element = ET.SubElement(tags, sch.TAG)
         tag_element.set(sch.ATTR_ID, spec.tag_id)

@@ -20,8 +20,8 @@ every path in a project file is resolved from the project file itself.
 
 A **structure type** is a `struct` declaration, in `model/struct_type.py`. A
 structure parameter *names* one, so changing the type changes every parameter
-that names it (`model/struct_sync.py`). The types of a parameter sub list live
-next to it in `foo_types.xml`, which is what lets a sub list be handed to another
+that names it (`model/struct_sync.py`). The types of a parameter sublist live
+next to it in `foo_types.xml`, which is what lets a sublist be handed to another
 project with its structures intact.
 
 `choices.py` holds the four drop-down lists. They belong to the machine, not to

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import ast
 import copy
+import json
 import os
 import shutil
 import re
@@ -756,7 +757,7 @@ def test_the_first_click_is_never_lost(_project: Path) -> None:
     """A click right after typing in the form does what it says.  (Reported.)
 
     Pressing the mouse leaves the box, the box sends what it holds, and the
-    answer redraws the grid, the Problems panel and the sub list picker -
+    answer redraws the grid, the Problems panel and the sublist picker -
     usually before the button is let go.  The browser only calls it a click
     when the press and the release land on the same element, so a click on a
     row, a twisty, a link under the table or a problem did nothing; a filter
@@ -806,7 +807,7 @@ def test_the_first_click_is_never_lost(_project: Path) -> None:
 
     modules = app_js.split("  paintModules(state) {", 1)[1].split("\n  },", 1)[0]
     check("this.drawnModules !== html" in modules,
-          "the sub list picker is written again only when its entries change")
+          "the sublist picker is written again only when its entries change")
 
     apply = app_js.split("  async applyChanges(changes) {", 1)[1].split("\n  },", 1)[0]
     check("const target = this.selected;" in apply
@@ -1031,13 +1032,13 @@ def test_every_drive_can_be_reached(work: Path) -> None:
 
 
 def test_the_dialogs_start_where_the_project_is(work: Path) -> None:
-    """Open starts at the project, New beside the app, a sub list at the lists.  (Reported.)
+    """Open starts at the project, New beside the app, a sublist at the lists.  (Reported.)
 
     Every Open began one folder ABOVE the project - for a project at F:\\test,
     the root of the drive - and had to be walked down from there each time.
     Now Open starts in the folder the project file is in, New starts beside the
     app (never inside it: the app folder is not written to while anybody
-    works), and the sub list dialogs at the project's sub list folder.  The
+    works), and the sublist dialogs at the project's sublist folder.  The
     system's dialog and the page's own start at the same places.
     """
     from pl_codegen.app_home import APP_DIR as APP
@@ -1089,7 +1090,7 @@ def test_a_typed_path_is_listed_at_once(work: Path) -> None:
     main = lists / "main.xml"
 
     for name, browse in (("the project dialog", api.browse_projects),
-                         ("the sub list dialog", api.browse)):
+                         ("the sublist dialog", api.browse)):
         answer = browse({"directory": str(lists)})
         check(answer["ok"], f"{name}: a folder is listed: {answer.get('message')}")
         equal((Path(answer["directory"]).resolve(), answer["selected"], answer["missing"]),
@@ -1214,7 +1215,7 @@ def test_the_dialogs_try_the_system_first(_project: Path) -> None:
     """Every Open and Browse tries the system's dialog, and the page's follows its box.
 
     Read from the source, like the other rules here: the menu, the start screen
-    and both sub list buttons go to the system's dialog first and to the page's
+    and both sublist buttons go to the system's dialog first and to the page's
     own only when there is none, and each of the page's dialogs is drawn once,
     with a listing that follows its path box - not re-opened for every step.
     """
@@ -1232,7 +1233,7 @@ def test_the_dialogs_try_the_system_first(_project: Path) -> None:
           "Open project, from the menu and the start screen, tries the system's dialog")
     check(re.search(r'"btn-open-list"\)\.addEventListener\("click",\s*\(\) => '
                     r'this\.addExistingSubList\(\)\)', code) is not None,
-          "and so does 'Add an existing parameter sub list…'")
+          "and so does 'Add an existing parameter sublist…'")
     for flow, what, fallback in (("openProjectFlow", '"project"', "this.openProjectDialog()"),
                                  ("addExistingSubList", '"sub-list"', "this.openList()")):
         check(f"this.pickNative({what}" in bodies.get(flow, "")
@@ -1311,12 +1312,12 @@ def test_no_list_no_parameter(work: Path) -> None:
 
         answer = api.add({"parent": "", "kind": "primitive"})
         check(not answer["ok"], f"{fmt}: a parameter was added with no list")
-        check("no parameter sub list" in (answer.get("message") or ""),
+        check("no parameter sublist" in (answer.get("message") or ""),
               f"{fmt}: the refusal says why: {answer}")
         equal(document.model.parameters, [], f"{fmt}: nothing was kept in memory")
 
         saved = api.save({})
-        check(not saved["ok"] and "no parameter sub list" in saved["message"],
+        check(not saved["ok"] and "no parameter sublist" in saved["message"],
               f"{fmt}: save says there is no list: {saved}")
 
         made = api.new_type({"name": "sThing"})
@@ -2146,15 +2147,15 @@ def test_an_old_python_is_told_in_red(_project: Path) -> None:
         sys.argv = real_argv
 
 
-def test_the_sub_lists_are_numbered_from_one(_project: Path) -> None:
-    """The 'Parameter sub lists' dialog numbers the build from #1.  (Reported.)
+def test_the_sublists_are_numbered_from_one(_project: Path) -> None:
+    """The 'Parameter sublists' dialog numbers the build from #1.  (Reported.)
 
-    It showed #0 for the first sub list - an index, where a person counts.
+    It showed #0 for the first sublist - an index, where a person counts.
     Only the number shown changes: the arrows still work on the 0-based index.
     """
     app_js = (APP_DIR / "src" / "pl_gui" / "web" / "app.js").read_text(encoding="utf-8")
     check('<span class="count">#${index + 1}</span>' in app_js,
-          "the first sub list in the build is shown as #1")
+          "the first sublist in the build is shown as #1")
     check('<span class="count">#${index}</span>' not in app_js, "and none as #0")
     check('data-up ${index === 0 ? "disabled" : ""}' in app_js,
           "while the arrows keep working on the 0-based index")
@@ -2539,7 +2540,7 @@ def test_a_free_tag_takes_a_number(work: Path) -> None:
 def test_the_grid_finds_a_rows_values_in_its_own_entry(_project: Path) -> None:
     """The Index cell reads the values of its own top level entry only.
 
-    A name is unique in one sub list only, so the merged view may hold two
+    A name is unique in one sublist only, so the merged view may hold two
     'NewParameter's.  The grid used to gather the values of the whole tree and
     pick a row's by name - and the second one showed the first one's index.
     The backend's numbers are checked in run_paramtable_test.py; this is the
@@ -2586,7 +2587,7 @@ def test_a_smart_data_project_has_no_param_mode(work: Path) -> None:
     """In a smart-data project the access mode is PARAM_MODE_NONE and cannot be changed.  (Asked for.)
 
     The form shows it read-only and the generated code writes it for every
-    parameter - but the sub list keeps what it says, because a parameter-table
+    parameter - but the sublist keeps what it says, because a parameter-table
     project building the same list writes the mode into ADD_PARAM.
     """
     document, api, _config = open_copy(work)
@@ -2672,7 +2673,8 @@ def test_the_lists_are_numbered_defines(work: Path) -> None:
         check(re.search(r"#ifndef SYS_NAV\n#define SYS_NAV +\(16U\)\n#endif\n", header),
               "SYS_NAV is #defined as 16, only #ifndef")
         check(re.search(r"#define SYS_ALL +\(255U\)", header), "SYS_ALL is 255")
-        check(re.search(r"#ifndef PARAM_MODE_NONE\n#define PARAM_MODE_NONE +\(0U\)", header),
+        # whatever number the shipped template gives it
+        check(re.search(r"#ifndef PARAM_MODE_NONE\n#define PARAM_MODE_NONE +\(-?\d+U?\)", header),
               "the parameter modes are defines too")
 
         api.set_defines({"list": "systemNames", "values": [
@@ -2684,6 +2686,112 @@ def test_the_lists_are_numbered_defines(work: Path) -> None:
         check(not document.generate()["success"], "and nothing is generated")
     finally:
         choices.CHOICES_FILE = real
+
+
+def test_an_emptied_free_tag_is_no_tag(work: Path) -> None:
+    """A free tag typed and then cleared holds nothing - in the model, the file and the build.  (Asked for.)
+
+    It stayed '' - and in the file as value="" - and the free-tag rule refused
+    it as "neither a number nor a C identifier", which stopped Generate over a
+    tag nobody had set.
+    """
+    document, api, _config = open_copy(work, empty=True)
+    api.add({"parent": "", "kind": "primitive"})
+    for cleared in ("", "   "):
+        api.update({"path": "NewParameter", "changes": {"tags": {"Tag1": "5"}}})
+        equal(document.find("NewParameter").tags.get("Tag1"), 5, "Tag1 holds 5")
+        api.update({"path": "NewParameter", "changes": {"tags": {"Tag1": cleared}}})
+        equal(document.find("NewParameter").tags.get("Tag1"), None,
+              f"cleared to {cleared!r} it holds nothing")
+    equal(document.validate_codes("TAG005"), 0, "and nothing is refused")
+    check(not document.find("NewParameter").has_active_tag("Tag1"), "it takes no room")
+
+    document.save()
+    text = document.path.read_text(encoding="utf-8")
+    check('id="Tag1"' not in text, "the file has no empty Tag1")
+
+    # a file that already has value="" reads as no tag
+    document.path.write_text(text.replace(
+        "</Tags>", '<Tag id="Tag2" kind="free" value="" /></Tags>', 1), encoding="utf-8")
+    document.load(document.path)
+    equal(document.find("NewParameter").tags.get("Tag2"), None, 'value="" is read as nothing')
+    equal(document.validate_codes("TAG005"), 0, "and refused by nothing")
+
+
+def test_the_free_tags_have_columns(work: Path) -> None:
+    """The table shows Tag1 .. Tag4, each headed by what the project says it means.  (Asked for.)"""
+    document, api, config = open_copy(work, empty=True)
+    data = json.loads(config.read_text(encoding="utf-8"))
+    data["tag_descriptions"] = {"Tag1": "Saveable", "Tag2": ""}
+    config.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    document.load(document.path)
+    specs = {spec["id"]: spec for spec in api.state({})["tagSpecs"]}
+    equal(specs["Tag1"]["meaning"], "Saveable", "the table is told what Tag1 means")
+    equal(specs["Tag2"]["meaning"], "", "and that Tag2 means nothing yet")
+
+    web = APP_DIR / "src" / "pl_gui" / "web"
+    grid = (web / "grid.js").read_text(encoding="utf-8")
+    for number in (1, 2, 3, 4):
+        check(f'{{ key: "tag{number}", tag: "Tag{number}"' in grid, f"Tag{number} has a column")
+        check(f"tag{number}: tags.Tag{number}" in grid, f"and its cells show the value")
+    check("grid-head-note" in grid, "a heading carries the meaning")
+    app_js = (web / "app.js").read_text(encoding="utf-8")
+    check("column.note = (spec && spec.meaning)" in app_js, "taken from the project's tags")
+
+
+def test_the_template_keeps_its_numbers(work: Path) -> None:
+    """templates/choices.json holds numbers too, and every way in keeps them.  (Asked for.)
+
+    The machine's file had a "numbers" section and the template had none, so
+    there was no way to make every machine start with fixed numbers.  The
+    template now carries one, and the defaults, "Restore the company defaults"
+    and the one-time hand-over from a project's own lists all keep it.
+    """
+    import json
+    import pl_codegen.choices as choices
+    from pl_codegen.model.defines import Defines
+
+    shipped = json.loads(choices.CHOICES_TEMPLATE.read_text(encoding="utf-8"))
+    for key in ("systemNames", "paramModes"):
+        equal(sorted(shipped.get("numbers", {}).get(key, {})), sorted(shipped[key]),
+              f"the shipped template numbers every name of '{key}'")
+
+    real_file, real_template = choices.CHOICES_FILE, choices.CHOICES_TEMPLATE
+    # the machine's own list is never written by a test
+    choices.CHOICES_FILE = work / "choices.json"
+    choices.CHOICES_TEMPLATE = work / "template.json"
+    choices.CHOICES_TEMPLATE.write_text(json.dumps({
+        "systemNames": ["SYS_A", "SYS_B"],
+        "paramModes": ["PARAM_MODE_NONE", "PARAM_MODE_USER"],
+        "numbers": {"systemNames": {"SYS_A": 5, "SYS_B": -3},
+                    "paramModes": {"PARAM_MODE_NONE": -1, "PARAM_MODE_USER": 7}}}),
+        encoding="utf-8")
+    try:
+        equal(choices.default_defines().numbered("SYSTEM NAMES"), [("SYS_A", 5), ("SYS_B", -3)],
+              "the defaults carry the template's numbers")
+        equal(choices.load_choices().numbered("PARAM MODES"),
+              [("PARAM_MODE_NONE", -1), ("PARAM_MODE_USER", 7)],
+              "a machine with no file of its own gets them")
+
+        # the hand-over: a project's own system names, nothing else
+        own = Defines()
+        own.add("SYSTEM NAMES", "SYS_X")
+        choices.seed_from(own)
+        check(choices.CHOICES_FILE.is_file(), "the machine got a file")
+        equal(choices.load_choices().numbered("SYSTEM NAMES"), [("SYS_X", 0)],
+              "the project's own list is taken as it was")
+        equal(choices.load_choices().numbered("PARAM MODES"),
+              [("PARAM_MODE_NONE", -1), ("PARAM_MODE_USER", 7)],
+              "a list taken from the template keeps the template's numbers")
+
+        from pl_gui.api import Api
+        from pl_gui.workspace import Workspace
+        answer = Api(Workspace(work / "settings.json")).default_defines({})
+        equal(answer["defineNumbers"]["paramModes"],
+              [["PARAM_MODE_NONE", -1], ["PARAM_MODE_USER", 7]],
+              "'Restore the company defaults' brings the numbers back")
+    finally:
+        choices.CHOICES_FILE, choices.CHOICES_TEMPLATE = real_file, real_template
 
 
 def test_a_list_number_can_be_negative(work: Path) -> None:
@@ -2745,10 +2853,10 @@ def test_a_list_number_can_be_negative(work: Path) -> None:
 def test_the_title_names_the_project_file(work: Path) -> None:
     """The window title is the project file's full path and the editor's name.  (Asked for.)
 
-    It used to name the open sub list as well, worked out on the page from the
-    list of sub lists, and with several sub lists it sometimes named another
+    It used to name the open sublist as well, worked out on the page from the
+    list of sublists, and with several sublists it sometimes named another
     one.  Now it is what the server says the project file is - with a '*' in
-    front while the open sub list is unsaved (asked for too) - and nothing else.
+    front while the open sublist is unsaved (asked for too) - and nothing else.
     """
     _document, api, config_path = open_copy(work)
     project = api.state({})["project"]
@@ -2854,7 +2962,7 @@ CASES: List[Tuple[str, Callable[[Path], None]]] = [
      test_a_hint_names_a_button_the_editor_has),
     ("every door asks for the same Python", test_every_door_asks_for_the_same_python),
     ("an old Python is told so, in red", test_an_old_python_is_told_in_red),
-    ("the sub lists are numbered from 1", test_the_sub_lists_are_numbered_from_one),
+    ("the sublists are numbered from 1", test_the_sublists_are_numbered_from_one),
     ("the Address column comes before the description",
      test_the_address_column_comes_before_the_description),
     ("a project file with the old name still opens",
@@ -2885,6 +2993,9 @@ CASES: List[Tuple[str, Callable[[Path], None]]] = [
     ("a copy is named like a copy", test_a_copy_is_named_like_a_copy),
     ("a smart-data project has no param mode", test_a_smart_data_project_has_no_param_mode),
     ("the lists are numbered defines", test_the_lists_are_numbered_defines),
+    ("an emptied free tag is no tag", test_an_emptied_free_tag_is_no_tag),
+    ("the free tags have columns", test_the_free_tags_have_columns),
+    ("the template keeps its numbers", test_the_template_keeps_its_numbers),
     ("a list number can be negative", test_a_list_number_can_be_negative),
     ("the title names the project file", test_the_title_names_the_project_file),
     ("a renamed project file opens", test_a_renamed_project_file_opens),

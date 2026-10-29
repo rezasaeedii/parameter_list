@@ -62,15 +62,15 @@
 
     <div class="group needs-project">
       <select id="module-picker" class="btn picker"
-              title="Which parameter sub list of the project is being edited"></select>
+              title="Which parameter sublist of the project is being edited"></select>
       <button id="btn-lists-select" class="btn icon"
-              title="Parameter sub lists: which of them are generated, and in what order">☰</button>
+              title="Parameter sublists: which of them are generated, and in what order">☰</button>
     </div>
 
     <span class="bar-sep needs-project"></span>
 
     <div class="group needs-project">
-      <button id="btn-save"   class="btn primary" title="Save the sub list (Ctrl+S)">Save</button>
+      <button id="btn-save"   class="btn primary" title="Save the sublist (Ctrl+S)">Save</button>
       <button id="btn-reload" class="btn icon"    title="Reload from disk">⟳</button>
     </div>
 
@@ -85,6 +85,7 @@
       <button id="btn-settings" class="btn icon" aria-haspopup="true" aria-expanded="false"
               title="Drop-down lists and the theme">⚙</button>
       <div id="menu-settings" class="menu menu-right" hidden>
+        <button type="button" class="menu-item" data-action="project-settings">Project settings…</button>
         <button type="button" class="menu-item" data-action="choices">Drop-down lists…</button>
         <div class="menu-sep"></div>
         <button type="button" class="menu-item" data-action="theme">
@@ -136,7 +137,7 @@
     <p class="start-lead">
       A <b>project</b> is a folder with a project file in it - <code>pl_project.json</code>,
       or any name you give it. That file
-      says which parameter sub lists the project is made of and where its generated
+      says which parameter sublists the project is made of and where its generated
       code goes; everything in it is written next to it, so the folder can be
       moved or copied and still work.
     </p>
@@ -212,6 +213,31 @@
     <div class="modal-actions">
       <button id="modal-cancel" class="btn">Cancel</button>
       <button id="modal-ok" class="btn primary">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Project settings: every setting of the project file, one page per section
+     (app.js, settingsDialog).  Only what is changed is written back. -->
+<div id="settings-modal" class="modal hidden">
+  <div class="modal-card settings-card" role="dialog" aria-modal="true"
+       aria-labelledby="settings-title">
+    <div class="settings-head">
+      <div class="settings-heading">
+        <h3 id="settings-title">Project settings</h3>
+        <div id="settings-file" class="settings-file mono"></div>
+      </div>
+      <button id="settings-close" class="btn icon" title="Close without applying">✕</button>
+    </div>
+    <div id="settings-alert" class="settings-alert" hidden></div>
+    <div class="settings-main">
+      <nav id="settings-nav" class="settings-nav" aria-label="Settings pages"></nav>
+      <section id="settings-page" class="settings-page"></section>
+    </div>
+    <div class="settings-foot">
+      <span id="settings-count" class="settings-count"></span>
+      <button id="settings-cancel" class="btn">Cancel</button>
+      <button id="settings-apply" class="btn primary">Apply</button>
     </div>
   </div>
 </div>

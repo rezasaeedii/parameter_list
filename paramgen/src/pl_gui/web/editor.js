@@ -42,10 +42,10 @@ const editorView = {
     this.titleElement.textContent = "Nothing selected";
     this.pathElement.textContent = "";
     this.element.innerHTML = noList
-      ? `<p class="empty"><b>This project has no parameter sub list yet.</b><br>
-         A parameter lives in a sub list, so there is nowhere to add one. Create
-         a sub list first: the <b>Parameter sub lists</b> button (&#9776;) in the
-         toolbar, then <b>+ Add parameter sub list</b>.</p>`
+      ? `<p class="empty"><b>This project has no parameter sublist yet.</b><br>
+         A parameter lives in a sublist, so there is nowhere to add one. Create
+         a sublist first: the <b>Parameter sublists</b> button (&#9776;) in the
+         toolbar, then <b>+ Add parameter sublist</b>.</p>`
       : `<p class="empty">Select a parameter on the left, or add one with
          <b>+ Add variable</b>.</p>`;
   },
@@ -509,7 +509,7 @@ const editorView = {
 
       /* A tag the project's format writes the same into every parameter -
          the access mode, PARAM_MODE_NONE, in a smart-data project.  Shown
-         read-only and never sent: the sub list keeps its own value, because a
+         read-only and never sent: the sublist keeps its own value, because a
          parameter-table project building the same list uses it. */
       if (Object.prototype.hasOwnProperty.call(fixed, spec.id)) {
         html += `<div class="field">
@@ -532,7 +532,7 @@ const editorView = {
           ? "—" : String(value);
         const fromFile = state.systemFromFile || "";
         const hint = stored === fromFile
-          ? "From the name of this sub list's file, and written into the sub list."
+          ? "From the name of this sublist's file, and written into the sublist."
           : `This file's name says '${escapeHtml(fromFile || "—")}', which is not
              a sub-system - see Problems.`;
         html += `<div class="field">
@@ -550,7 +550,7 @@ const editorView = {
            where they decide real things.  (They used to be read-only here.) */
         const noColumn = table && IGNORED_TAGS.includes(spec.id)
           ? `<span class="hint">No column in ADD_PARAM - a project generating smart
-               data from this sub list uses it.</span>`
+               data from this sublist uses it.</span>`
           : "";
         html += `<div class="field">
           <label title="${escapeHtml(spec.description)}">${label}</label>

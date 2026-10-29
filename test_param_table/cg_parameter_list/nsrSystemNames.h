@@ -4,8 +4,8 @@
   * @brief   The sub-systems of the Drop-down lists, as #defines.
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
-  * Generator      : parameter_list_code_generator v01.03.00
-  * Generated at   : 2026-10-29 17:12:39 +0330
+  * Generator      : parameter_list_code_generator v01.03.01
+  * Generated at   : 2026-10-29 19:44:45 +0330
   * Input file(s)  : parameter_lists/sys_nav_paramTable.xml
   *                   parameter_lists/sys_ac_power_paramTable.xml
   * Parameters     : 10 value(s)
@@ -89,6 +89,9 @@
 #endif
 #ifndef SYS_AUP
 #define SYS_AUP              (20)
+#endif
+#ifndef SYS_RFC
+#define SYS_RFC              (22)
 #endif
 
 #endif /* NSRSYSTEMNAMES_H */
