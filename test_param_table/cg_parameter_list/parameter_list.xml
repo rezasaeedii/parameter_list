@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ParameterListModel schemaVersion="1.0" generator="parameter_list_code_generator" generatorVersion="01.01.01" generatedAt="2026-10-29T16:47:02+03:30">
+  <SourceFiles>
+    <SourceFile path="parameter_lists/sys_nav_paramTable.xml" />
+    <SourceFile path="parameter_lists/sys_ac_power_paramTable.xml" />
+  </SourceFiles>
+  <Parameters>
+    <Parameter name="PR_NAV_AIRSPEED" kind="primitive" enable="true" userName="Nav Airspeed" type="SETTING" valueType="float32_t" size="1" unit="m/s" address="0">
+      <Source file="parameter_lists/sys_nav_paramTable.xml" />
+      <Limits default="0.0" minimum="0.0" maximum="120.0" resolution="0.1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_NAV" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_READ_ONLY" />
+      </Tags>
+      <Description>Indicated airspeed.</Description>
+    </Parameter>
+    <Parameter name="PR_NAV_HOME_LAT" kind="primitive" enable="true" userName="Nav Home Lat" type="SETTING" valueType="float64_t" size="1" unit="deg" address="0">
+      <Source file="parameter_lists/sys_nav_paramTable.xml" />
+      <Limits default="35.6892" minimum="-90.0" maximum="90.0" resolution="1e-07" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_NAV" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_USER" />
+      </Tags>
+      <Description>Latitude of the home point.</Description>
+    </Parameter>
+    <Parameter name="PR_NAV_ALTITUDE_CM" kind="primitive" enable="true" userName="Nav Altitude Cm" type="SETTING" valueType="int32_t" size="1" unit="cm" address="0">
+      <Source file="parameter_lists/sys_nav_paramTable.xml" />
+      <Limits default="0" minimum="-50000" maximum="1000000" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_NAV" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_READ_ONLY" />
+      </Tags>
+      <Description>Altitude above sea level.</Description>
+    </Parameter>
+    <Parameter name="PR_NAV_GPS_SATELLITES" kind="primitive" enable="true" userName="Nav Gps Satellites" type="SETTING" valueType="uint8_t" size="1" unit="" address="0">
+      <Source file="parameter_lists/sys_nav_paramTable.xml" />
+      <Limits default="0" minimum="0" maximum="64" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_NAV" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_READ_ONLY" />
+      </Tags>
+      <Description>Satellites the GPS receiver tracks.</Description>
+    </Parameter>
+    <Parameter name="PR_NAV_HEADING_OFFSET" kind="primitive" enable="true" userName="Nav Heading Offset" type="SETTING" valueType="int16_t" size="1" unit="deg" address="0">
+      <Source file="parameter_lists/sys_nav_paramTable.xml" />
+      <Limits default="0" minimum="-180" maximum="180" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_NAV" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_CALIB" />
+      </Tags>
+      <Description>Compass mounting offset.</Description>
+    </Parameter>
+    <Parameter name="PR_NAV_UPTIME_MS" kind="primitive" enable="true" userName="Nav Uptime Ms" type="SETTING" valueType="uint64_t" size="1" unit="ms" address="0">
+      <Source file="parameter_lists/sys_nav_paramTable.xml" />
+      <Limits default="0" minimum="0" maximum="1000000000000" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_NAV" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_READ_ONLY" />
+      </Tags>
+      <Description>Time since the navigation unit started.</Description>
+    </Parameter>
+    <Parameter name="PR_PWR_BATTERY_MV" kind="primitive" enable="true" userName="Pwr Battery Mv" type="SETTING" valueType="uint16_t" size="1" unit="mV" address="0">
+      <Source file="parameter_lists/sys_ac_power_paramTable.xml" />
+      <Limits default="24000" minimum="0" maximum="60000" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_AC_POWER" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_READ_ONLY" />
+      </Tags>
+      <Description>Battery voltage.</Description>
+    </Parameter>
+    <Parameter name="PR_PWR_CURRENT_OFFSET" kind="primitive" enable="true" userName="Pwr Current Offset" type="SETTING" valueType="int8_t" size="1" unit="" address="0">
+      <Source file="parameter_lists/sys_ac_power_paramTable.xml" />
+      <Limits default="0" minimum="-50" maximum="50" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_AC_POWER" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_FACTORY" />
+      </Tags>
+      <Description>Current sensor zero offset.</Description>
+    </Parameter>
+    <Parameter name="PR_PWR_ENERGY_USED" kind="primitive" enable="true" userName="Pwr Energy Used" type="SETTING" valueType="uint32_t" size="1" unit="mWh" address="0">
+      <Source file="parameter_lists/sys_ac_power_paramTable.xml" />
+      <Limits default="0" minimum="0" maximum="4000000000" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_AC_POWER" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_READ_ONLY" />
+      </Tags>
+      <Description>Energy drawn since power-up.</Description>
+    </Parameter>
+    <Parameter name="PR_PWR_CHARGE_BALANCE" kind="primitive" enable="true" userName="Pwr Charge Balance" type="SETTING" valueType="int64_t" size="1" unit="mAs" address="0">
+      <Source file="parameter_lists/sys_ac_power_paramTable.xml" />
+      <Limits default="0" minimum="-1000000000" maximum="1000000000" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_AC_POWER" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_TEMPORARY" />
+      </Tags>
+      <Description>Charge in minus charge out.</Description>
+    </Parameter>
+  </Parameters>
+</ParameterListModel>

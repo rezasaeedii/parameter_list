@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ParameterListModel schemaVersion="1.0" generator="parameter_list_code_generator" generatorVersion="01.01.01" generatedAt="2026-10-29T16:47:37+03:30">
+  <SourceFiles />
+  <Parameters>
+    <Parameter name="EngineOn" kind="primitive" enable="true" userName="EngineOn" type="MONITORING" valueType="bool_t" size="1" unit="" logId="100" address="0">
+      <Source />
+      <Limits default="false" minimum="0" maximum="1" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_AC_MANAGER" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="true" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_NONE" />
+      </Tags>
+      <Description>TRUE while the engine runs.</Description>
+    </Parameter>
+    <Parameter name="FlightMode" kind="primitive" enable="true" userName="FlightMode" type="SETTING" valueType="uint8_t" size="1" unit="" logId="101" address="0">
+      <Source />
+      <Limits default="0" minimum="0" maximum="5" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_AC_AUTOPILOT" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="true" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_NONE" />
+      </Tags>
+      <Description>0 manual, 1 stabilise, 2 hold, 3 mission, 4 return, 5 land.</Description>
+    </Parameter>
+    <Parameter name="ElevatorTrim" kind="primitive" enable="true" userName="ElevatorTrim" type="SETTING" valueType="int8_t" size="1" unit="deg" address="0">
+      <Source />
+      <Limits default="0" minimum="-20" maximum="20" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_AC_AUTOPILOT" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_NONE" />
+      </Tags>
+      <Description>Elevator trim.</Description>
+    </Parameter>
+    <Parameter name="MotorRpm" kind="primitive" enable="true" userName="MotorRpm" type="MONITORING" valueType="uint16_t" size="1" unit="rpm" logId="102" address="0">
+      <Source />
+      <Limits default="0" minimum="0" maximum="12000" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_GOVERNOR" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="true" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_NONE" />
+      </Tags>
+      <Description>Engine speed.</Description>
+    </Parameter>
+    <Parameter name="CellTemperature" kind="primitive" enable="true" userName="CellTemperature" type="MONITORING" valueType="int16_t" size="4" unit="degC" logId="103" address="0">
+      <Source />
+      <Limits default="25" minimum="-40" maximum="125" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_AC_POWER" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="true" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_NONE" />
+      </Tags>
+      <Description>Temperature of one battery cell - one per cell.</Description>
+    </Parameter>
+    <Parameter name="FlightTime" kind="primitive" enable="true" userName="FlightTime" type="MONITORING" valueType="uint32_t" size="1" unit="s" logId="107" address="0">
+      <Source />
+      <Limits default="0" minimum="0" maximum="4000000000" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_AC_MANAGER" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="true" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_NONE" />
+      </Tags>
+      <Description>Time in the air since take-off.</Description>
+    </Parameter>
+    <Parameter name="AltitudeCm" kind="primitive" enable="true" userName="AltitudeCm" type="MONITORING" valueType="int32_t" size="1" unit="cm" logId="108" address="0">
+      <Source />
+      <Limits default="0" minimum="-50000" maximum="1000000" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_NAV" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="true" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_NONE" />
+      </Tags>
+      <Description>Altitude above sea level.</Description>
+    </Parameter>
+    <Parameter name="Airspeed" kind="primitive" enable="true" userName="Airspeed" type="MONITORING" valueType="float32_t" size="1" unit="m/s" logId="109" address="0">
+      <Source />
+      <Limits default="0.0" minimum="0.0" maximum="120.0" resolution="0.1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_NAV" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="true" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_NONE" />
+      </Tags>
+      <Description>Indicated airspeed.</Description>
+    </Parameter>
+    <Parameter name="HomeLatitude" kind="primitive" enable="true" userName="HomeLatitude" type="SETTING" valueType="float64_t" size="1" unit="deg" address="0">
+      <Source />
+      <Limits default="35.6892" minimum="-90.0" maximum="90.0" resolution="1e-07" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_NAV" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_NONE" />
+      </Tags>
+      <Description>Latitude of the home point.</Description>
+    </Parameter>
+    <Parameter name="RezaSaeedi" kind="struct" enable="true" type="MONITORING" valueType="sRezaSaeedi" size="1" address="0">
+      <Source />
+      <Limits />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_UNKNOWN" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_NONE" />
+      </Tags>
+      <Description>The one behind the tool, as a structure.</Description>
+      <Fields>
+        <Parameter name="BirthYear" kind="primitive" enable="true" valueType="uint16_t" size="1" unit="">
+          <Source />
+          <Limits default="2000" minimum="1900" maximum="2100" resolution="1" />
+          <Tags />
+          <Description>Year of birth - the default is a placeholder.</Description>
+        </Parameter>
+        <Parameter name="CoffeeCupsPerDay" kind="primitive" enable="true" valueType="uint8_t" size="1" unit="cup">
+          <Source />
+          <Limits default="3" minimum="0" maximum="20" resolution="1" />
+          <Tags />
+          <Description>Cups of coffee a day. Even this stops at 20.</Description>
+        </Parameter>
+        <Parameter name="BugsFixedToday" kind="primitive" enable="true" valueType="uint32_t" size="1" unit="">
+          <Source />
+          <Limits default="0" minimum="0" maximum="4294967295" resolution="1" />
+          <Tags />
+          <Description>Bugs fixed today. It only counts up.</Description>
+        </Parameter>
+        <Parameter name="SleepHours" kind="primitive" enable="true" valueType="float32_t" size="1" unit="h">
+          <Source />
+          <Limits default="4.5" minimum="0.0" maximum="24.0" resolution="0.5" />
+          <Tags />
+          <Description>Hours of sleep last night.</Description>
+        </Parameter>
+      </Fields>
+    </Parameter>
+  </Parameters>
+</ParameterListModel>

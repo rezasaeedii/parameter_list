@@ -1,0 +1,40 @@
+{
+  "project": {
+    "name": "test_smart_data",
+    "description": ""
+  },
+  "inputs": {
+    "model_files": [
+      "flight_parameters.xml"
+    ],
+    "model_directory": "parameter_lists"
+  },
+  "output": {
+    "format": "smart_data",
+    "code_directory": "cg_parameter_list",
+    "full_parameter_list_file": "cg_parameter_list/parameter_list.xml",
+    "file_prefix": "cg_",
+    "base_name": "parameter_list"
+  },
+  "style": {
+    "company": "FAS",
+    "indent": "    "
+  },
+  "codegen": {
+    "emit_description": true,
+    "emit_unit": true,
+    "emit_generation_info": true,
+    "emit_timestamp": true,
+    "index_define_prefix": "",
+    "offset_define_prefix": "PARAMETER_LIST_",
+    "smart_data_prefix": "Cg_SmartData_",
+    "struct_type_prefix": "sCgStruct_",
+    "descriptor_symbol": "ParameterList",
+    "quantity_define": "PARAMETER_LIST_QTY",
+    "extra_includes": []
+  },
+  "validation": {
+    "treat_warnings_as_errors": false,
+    "require_unit": false
+  }
+}

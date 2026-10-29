@@ -1,0 +1,862 @@
+/* ==========================================================================
+   Parameter List Editor - all the styling of the GUI lives in this one file.
+   Change a colour here and the whole application follows.
+   ========================================================================== */
+
+:root {
+  --bg:           #eef1f5;
+  --surface:      #ffffff;
+  --surface-2:    #f7f9fb;
+  --ink:          #1a1d21;
+  --ink-soft:     #5c6570;
+  --ink-faint:    #98a2ad;
+  --line:         #d7dde3;
+  --line-soft:    #e6eaee;
+
+  --accent:       #0b4f8a;
+  --accent-hover: #0d5fa6;
+  --accent-soft:  #e8f0f7;
+  --accent-2:     #0f7b57;
+  --accent-2-hover:#12946a;
+
+  --error:        #b3261e;
+  --error-soft:   #fdecea;
+  --warn:         #8a5a00;
+  --warn-soft:    #fdf5e4;
+  --info:         #4a5568;
+  --info-soft:    #eef1f5;
+
+  --radius:       7px;
+  --radius-sm:    5px;
+  --shadow:       0 1px 2px rgba(16,24,40,.06), 0 4px 12px rgba(16,24,40,.06);
+  --shadow-lg:    0 10px 40px rgba(16,24,40,.18);
+
+  --line-strong:  #c3ccd6;
+  --on-accent:    #ffffff;
+  --ok-soft:      #e4f2e9;
+  /* the quiet band behind a structure row, and its name */
+  --struct-band:  #eef1f5;
+  --struct-ink:   #3a4a5e;
+  --statusbar:    #0b4f8a;
+  --statusbar-ink:#dbe8f3;
+  --scrim:        rgba(16,24,40,.45);
+  --toast:        #1a1d21;
+  --toast-ink:    #ffffff;
+  --tree-stripe:  rgba(0,0,0,.018);
+
+  --topbar-h:     92px;
+  --problems-bar: 34px;   /* the panel when it is collapsed */
+  --status-h:     26px;
+  --mono: "Cascadia Mono", "Consolas", "SF Mono", "DejaVu Sans Mono", monospace;
+  --sans: "Segoe UI", "Inter", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+/* The `hidden` attribute only sets `display:none` from the browser's own
+   stylesheet, so ANY rule of ours that sets display - .layout{display:flex},
+   .view-box{display:flex} - silently beats it.  That is what made switching
+   between the tree and the grid do nothing: both were "hidden" and both were
+   on screen.  One line, and `hidden` means hidden everywhere. */
+[hidden] { display: none !important; }
+
+html, body {
+  height: 100%; margin: 0;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------------- top bar */
+/* The toolbar wraps on a narrow window - and it has enough buttons to wrap on a
+   wide one too - so the bar grows instead of spilling over the panes below it.
+   Its real height is measured and published as --topbar-h (see app.js), which is
+   what everything under it is positioned from. */
+.topbar {
+  min-height: 56px;
+  display: flex; align-items: center; align-content: center; gap: 18px;
+  padding: 6px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  position: relative; z-index: 5;
+}
+.brand { display: flex; align-items: center; gap: 10px; min-width: 210px; }
+/* The company logo, as it is - on its own transparent background, the height
+   of the buttons beside it and as wide as that makes it. */
+.brand-mark {
+  height: 30px; width: auto; flex: none;
+  display: block; user-select: none; -webkit-user-drag: none;
+}
+.brand-text { display: flex; flex-direction: column; line-height: 1.25; }
+.brand-text strong { font-size: 13px; }
+.brand-text small { color: var(--ink-faint); font-size: 11px;
+  max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.toolbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; row-gap: 5px; }
+.sep { width: 1px; height: 22px; background: var(--line); margin: 0 4px; }
+
+/* ---------------------------------------------------------------- buttons */
+.btn {
+  font: inherit; font-size: 12px;
+  padding: 6px 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s;
+  white-space: nowrap;
+}
+.btn:hover:not(:disabled) { background: var(--surface-2); border-color: var(--line-strong); }
+.btn:active:not(:disabled) { background: var(--line-soft); }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn.icon { padding: 6px 9px; font-size: 13px; line-height: 1; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn.accent { background: var(--accent-2); border-color: var(--accent-2); color: var(--on-accent); }
+.btn.accent:hover:not(:disabled) { background: var(--accent-2-hover); border-color: var(--accent-2-hover); }
+.btn.danger:hover:not(:disabled) { background: var(--error-soft); border-color: var(--error); color: var(--error); }
+
+/* ---------------------------------------------------------------- layout */
+.layout {
+  position: absolute; left: 0; right: 0;
+  /* --problems-now is whatever the panel is at this moment: its full height,
+     or the collapsed bar.  The body grows into the space the panel gives back,
+     which is most of the time - an empty Problems panel used to hold a third
+     of the window open to say "No problems". */
+  top: var(--topbar-h);
+  bottom: calc(var(--status-h) + var(--problems-now, var(--problems-h, 190px)));
+  display: flex; min-height: 0;
+}
+.pane { display: flex; flex-direction: column; min-height: 0; background: var(--surface); }
+.tree-pane { width: 46%; min-width: 320px; }
+.editor-pane { flex: 1; min-width: 340px; border-left: 1px solid var(--line); }
+.splitter { width: 0; }
+
+.pane-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+  min-height: 40px;
+}
+.pane-head h2 { margin: 0; font-size: 12px; text-transform: uppercase;
+  letter-spacing: .6px; color: var(--ink-soft); }
+.pane-head .path { margin-left: auto; font-family: var(--mono); font-size: 11px;
+  color: var(--ink-faint); }
+.pane-foot { padding: 5px 12px; border-top: 1px solid var(--line-soft);
+  color: var(--ink-faint); font-size: 11px; background: var(--surface-2); }
+
+#filter {
+  margin-left: auto; width: 170px;
+  font: inherit; font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+#filter:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+
+/* ---------------------------------------------------------------- tree */
+.tree-head, .tree-row {
+  display: grid;
+  /* En first, then the name, then what it holds and what it is. */
+  grid-template-columns: 34px 1fr 106px 104px;
+  gap: 8px;
+  align-items: center;
+}
+.tree-head {
+  padding: 6px 12px;
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--ink-faint);
+  border-bottom: 1px solid var(--line-soft);
+}
+.tree { flex: 1; overflow: auto; padding: 4px 0; outline: none; }
+
+.tree-row {
+  padding: 4px 12px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  font-size: 12.5px;
+}
+.tree-row:hover { background: var(--surface-2); }
+.tree-row.selected { background: var(--accent-soft); border-left-color: var(--accent); }
+.tree-row.disabled .name-cell { opacity: .45; text-decoration: line-through; }
+.tree-row.disabled .col-vtype,
+.tree-row.disabled .col-ptype { opacity: .45; }
+
+/* the enable column, in the tree and in the grid */
+.col-en { display: flex; align-items: center; justify-content: center; }
+.en-box { width: 13px; height: 13px; cursor: pointer; accent-color: var(--accent); margin: 0; }
+/* the grid's Enabled marks are styled after the row colours, further down */
+.en-box.blocked, .en-box:disabled { opacity: .45; cursor: not-allowed; }
+
+/* the grid is a tree: the twisty opens one level, in the name column */
+.grid-cell.name-col { display: flex; align-items: center; gap: 2px; overflow: hidden; }
+.row-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.twisty-btn {
+  flex: none; width: 14px; border: 0; background: none; color: var(--ink-soft);
+  cursor: pointer; font-size: 10px; line-height: 1; padding: 0; border-radius: 3px;
+}
+.twisty-btn:hover { background: var(--accent-soft); color: var(--accent); }
+.twisty-btn.leaf { color: var(--ink-faint); cursor: default; }
+
+/* every row of a value reads the same - a single one, an array's declaration,
+   one of its elements; only a structure row looks different */
+.grid-row.value-row .grid-cell { color: var(--ink-soft); }
+
+/* the merged view is read only: the form is visible but cannot be typed into */
+.editor.read-only { position: relative; }
+.editor.read-only input, .editor.read-only select,
+.editor.read-only textarea, .editor.read-only .inline-btn {
+  pointer-events: none; opacity: .7;
+}
+.tree-row.has-error { border-left-color: var(--error); }
+.tree-row.hidden { display: none; }
+
+.name-cell { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.twisty {
+  width: 14px; text-align: center; color: var(--ink-faint);
+  font-size: 10px; user-select: none; flex: none;
+}
+.twisty.leaf { visibility: hidden; }
+.node-icon { font-size: 11px; flex: none; }
+.node-icon.struct { color: var(--accent); }
+.node-icon.prim { color: var(--ink-faint); }
+.node-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* the same two levels the grid uses, so both views read the same way */
+.node-name.struct { color: var(--struct-ink); font-weight: 600; }
+.node-badge {
+  font-size: 9.5px; padding: 1px 5px; border-radius: 8px;
+  background: var(--info-soft); color: var(--ink-soft); flex: none;
+}
+.col-type, .col-group { font-family: var(--mono); font-size: 11px; color: var(--ink-soft);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------------------------------------------------------------- editor */
+.editor { flex: 1; overflow: auto; padding: 14px 16px 26px; }
+.editor .empty { color: var(--ink-faint); font-size: 12.5px; margin-top: 20px; text-align: center; }
+
+.field-group { margin-bottom: 18px; }
+.field-group > h3 {
+  margin: 0 0 9px; font-size: 11px; text-transform: uppercase; letter-spacing: .6px;
+  color: var(--ink-soft);
+  padding-bottom: 5px; border-bottom: 1px solid var(--line-soft);
+}
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 14px; }
+.grid.wide { grid-template-columns: 1fr; }
+
+.field { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.field > label { font-size: 11px; color: var(--ink-soft); }
+.field > label .req { color: var(--error); }
+.field input[type=text], .field input[type=number], .field select, .field textarea {
+  font: inherit; font-size: 12.5px;
+  padding: 5px 8px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--ink);
+  width: 100%;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: 2px solid var(--accent-soft); border-color: var(--accent);
+}
+.field input.mono, .field textarea { font-family: var(--mono); font-size: 12px; }
+.field textarea { resize: vertical; min-height: 54px; }
+.field .hint { font-size: 10.5px; color: var(--ink-faint); }
+.field.check { flex-direction: row; align-items: center; gap: 7px; }
+.field.check input { width: auto; }
+.field.check label { font-size: 12px; color: var(--ink); }
+
+.inline-btn {
+  font: inherit; font-size: 11px; padding: 4px 8px; margin-top: 3px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface-2); cursor: pointer; align-self: flex-start;
+}
+.inline-btn:hover { background: var(--line-soft); }
+
+.inherited { font-size: 10.5px; color: var(--accent); }
+
+/* the sub list picker in the toolbar (hidden when there is only one) */
+.picker { font-family: var(--mono); max-width: 190px; }
+
+/* the read-only "what this field inherits from its structure" panel */
+.inherited-table {
+  border: 1px solid var(--line-soft); border-radius: var(--radius-sm);
+  background: var(--surface-2); overflow: hidden; margin-top: 8px;
+}
+.inherited-row {
+  display: grid; grid-template-columns: 190px 150px 1fr;
+  gap: 10px; align-items: baseline;
+  padding: 5px 10px; font-size: 12px;
+  border-top: 1px solid var(--line-soft);
+}
+.inherited-row:first-child { border-top: 0; }
+.inherited-row .k { color: var(--ink-soft); }
+.inherited-row .v { font-family: var(--mono); color: var(--accent); }
+.inherited-row .note { font-size: 11px; color: var(--ink-soft); }
+
+/* ---------------------------------------------------------------- problems */
+.problems {
+  position: absolute; left: 0; right: 0; bottom: var(--status-h);
+  height: var(--problems-h, 190px);
+  display: flex; flex-direction: column;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+}
+.problems.collapsed { height: var(--problems-bar); }
+.problems.collapsed .problem-list { display: none; }
+.problems.collapsed .problems-head { border-bottom: 0; }
+/* the twisty points the way it will move */
+.problems.collapsed #btn-toggle-problems { transform: rotate(180deg); }
+.problems-head { cursor: pointer; }
+.problems-head .grow { flex: 1; }
+
+/* ---- one counter per severity, and each one is a filter ----
+   The count says how bad it is; clicking says "only show me those".  A
+   severity with nothing in it fades rather than disappearing, so the row of
+   counters keeps the same shape and the eye keeps its landmarks. */
+.sev-counts { display: flex; align-items: center; gap: 6px; margin-left: 10px; }
+.sev-count {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 9px 2px 6px; border-radius: 11px;
+  border: 1px solid transparent; background: var(--surface-2);
+  color: var(--ink-soft); font: inherit; font-size: 11px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+}
+.sev-count:hover { border-color: var(--line-strong); }
+.sev-mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 14px; height: 14px; border-radius: 50%;
+  font-size: 9px; font-weight: 700; color: var(--on-accent);
+}
+.sev-count.error   .sev-mark { background: var(--error); }
+.sev-count.warning .sev-mark { background: var(--warn); }
+.sev-count.info    .sev-mark { background: var(--info); }
+
+/* a severity that has something to say wears its own colour */
+.sev-count.error:not(.empty)   { background: var(--error-soft); color: var(--error); }
+.sev-count.warning:not(.empty) { background: var(--warn-soft); color: var(--warn); }
+.sev-count.info:not(.empty)    { background: var(--info-soft); color: var(--info); }
+
+/* nothing of this severity: still there, just quiet */
+.sev-count.empty { opacity: .5; }
+.sev-count.empty .sev-mark { background: var(--ink-faint); }
+
+/* switched off by the reader: struck through, so "0 of them" and "hidden" can
+   never be mistaken for each other */
+.sev-count.off { opacity: .55; text-decoration: line-through; }
+.sev-count.off .sev-mark { background: var(--ink-faint); }
+
+.problem-list { flex: 1; overflow: auto; }
+.problem {
+  display: grid; grid-template-columns: 68px 88px 1fr;
+  gap: 10px; align-items: baseline;
+  padding: 5px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 12px;
+}
+/* only a row that names a parameter can be jumped to */
+.problem.goes { cursor: pointer; }
+.problem.goes:hover { background: var(--surface-2); }
+.problem .sev { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.problem.error .sev { color: var(--error); }
+.problem.warning .sev { color: var(--warn); }
+.problem.info .sev { color: var(--info); }
+.problem .code { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); }
+.problem .msg { min-width: 0; }
+.problem .where { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+.problem .hint { display: block; color: var(--ink-faint); font-size: 11px; margin-top: 1px; }
+.problem-empty { padding: 16px; text-align: center; color: var(--ink-faint); font-size: 12px; }
+
+/* ---------------------------------------------------------------- status */
+.statusbar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: var(--status-h);
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 12px;
+  background: var(--statusbar); color: var(--statusbar-ink);
+  font-size: 11px;
+}
+.statusbar .grow { flex: 1; }
+
+/* ---------------------------------------------------------------- modal */
+.modal {
+  position: fixed; inset: 0; z-index: 50;
+  background: var(--scrim);
+  display: grid; place-items: center;
+}
+.modal.hidden { display: none; }
+.modal-card {
+  width: min(560px, 92vw); max-height: 84vh; overflow: auto;
+  background: var(--surface); border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 18px 20px;
+}
+.modal-card h3 { margin: 0 0 12px; font-size: 15px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.modal-card label { display: block; font-size: 11px; color: var(--ink-soft); margin: 10px 0 3px; }
+.modal-card input[type=text], .modal-card textarea {
+  font: inherit; font-family: var(--mono); font-size: 12px;
+  width: 100%; padding: 6px 8px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+}
+.modal-card textarea { min-height: 96px; resize: vertical; }
+.modal-card .inline-btn { margin-top: 10px; }
+.modal-note { font-size: 11.5px; color: var(--ink-soft); margin: 4px 0 0; }
+/* the "(21)" next to a list label, so a truncated list is obvious */
+.count { font-family: var(--mono); color: var(--accent); }
+.file-list { font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft);
+  background: var(--surface-2); border: 1px solid var(--line-soft);
+  border-radius: var(--radius-sm); padding: 8px 10px; margin-top: 10px; }
+.file-list div { padding: 1px 0; }
+
+/* ---------------------------------------------------------------- toast */
+.toast {
+  position: fixed; left: 50%; bottom: 46px; transform: translateX(-50%);
+  z-index: 60;
+  padding: 9px 16px; border-radius: var(--radius);
+  background: var(--toast); color: var(--toast-ink); font-size: 12.5px;
+  box-shadow: var(--shadow-lg);
+  max-width: 70vw;
+}
+.toast.hidden { display: none; }
+.toast.bad { background: var(--error); }
+.toast.good { background: var(--accent-2); }
+/* Not an error, but not "done" either: something happened that the reader has
+   to know about before they walk away from it. */
+.toast.warn { background: var(--warn); color: var(--on-accent); }
+
+/* ------------------------------------------- the structure type library */
+/* One row per reusable type in the "Types..." dialog. */
+.template-list {
+  border: 1px solid var(--line-soft); border-radius: var(--radius-sm);
+  background: var(--surface-2); overflow: hidden; margin-top: 10px;
+}
+.template-row {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding: 9px 11px; border-bottom: 1px solid var(--line-soft);
+}
+.template-row:last-child { border-bottom: none; }
+.template-row .count { margin-left: 6px; font-size: 11px; }
+.template-row .hint { font-size: 10.5px; color: var(--ink-faint); margin-top: 3px; }
+.template-row .hint.mono { font-family: var(--mono); }
+.inline-btn.danger { color: var(--error); border-color: var(--error); }
+.inline-btn.danger:hover { background: var(--error); color: var(--on-accent); }
+
+/* --------------------------------------- the parameter lists of the project */
+/* The "Lists" dialog: which lists are built, and in what order. */
+.list-box {
+  border: 1px solid var(--line-soft); border-radius: var(--radius-sm);
+  background: var(--surface-2); overflow: hidden; margin-top: 4px;
+  max-height: 190px; overflow-y: auto;
+}
+/* The drives of the machine, above a folder list.  Walking up ends at the root
+   of one drive, so these are the only way onto another one. */
+.drive-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.drive-row .drive {
+  width: auto; min-width: 42px; padding: 0 10px;
+  font-family: var(--mono); font-size: 12px;
+}
+.drive-row .drive.on {
+  background: var(--accent-soft); border-color: var(--accent); color: var(--accent);
+}
+.list-row {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 10px; border-bottom: 1px solid var(--line-soft);
+}
+.list-row:last-child { border-bottom: none; }
+.list-row.on { background: var(--surface); }
+.list-row input[type=checkbox] { width: auto; margin: 0; }
+.list-name { flex: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.list-name .hint { font-size: 10.5px; color: var(--ink-faint); }
+.list-name .hint.mono { font-family: var(--mono); }
+.list-row .inline-btn { margin-top: 0; padding: 2px 7px; }
+.list-row .inline-btn[disabled] { opacity: .35; cursor: default; }
+/* the file a path box names, or the one just clicked, in a dialog's listing */
+.list-row.picked { box-shadow: inset 3px 0 0 var(--accent); background: var(--accent-soft); }
+.list-row[data-folder], .list-row[data-file] { cursor: pointer; }
+/* A Location box with its "Browse…" beside it, the way an IDE asks for a folder. */
+.modal-card .with-button { margin-top: 0; }
+.modal-card .with-button .inline-btn { margin-top: 0; }
+
+/* While the system's own file dialog is open (a window of its own), the page is
+   veiled: a second click here would only queue another dialog behind it. */
+.veil {
+  position: fixed; inset: 0; z-index: 70;
+  background: var(--scrim);
+  display: grid; place-items: center;
+}
+.veil[hidden] { display: none; }
+.veil-card {
+  background: var(--surface); color: var(--ink); border-radius: var(--radius);
+  box-shadow: var(--shadow-lg); padding: 14px 18px; font-size: 12.5px;
+  max-width: min(460px, 90vw);
+}
+
+/* ------------------------------------------- the memory layout warning */
+/* Shown at the top of the "Code generated" dialog when this build moved a value
+   that firmware may already have in flash.  It is deliberately the loudest
+   thing on the page: the generated code is correct either way, so nothing else
+   would make anyone look. */
+.drift {
+  border-radius: var(--radius-sm); padding: 10px 12px; margin: 0 0 12px;
+  border: 1px solid var(--line);
+}
+.drift > b { display: block; margin-bottom: 5px; font-size: 12.5px; }
+.drift p { margin: 0 0 6px; font-size: 11.5px; line-height: 1.55; }
+.drift.bad { background: var(--error-soft); border-color: var(--error); }
+.drift.bad > b { color: var(--error); }
+/* The one thing in the dialog that is an INSTRUCTION rather than a fact -
+   what to actually do before flashing - set apart from the sentence around
+   it, which only explains why. */
+.drift-action { color: var(--error); font-weight: 700; font-size: 13.5px; }
+.drift.ok { background: var(--surface-2); }
+.drift .hint { font-size: 10.5px; color: var(--ink-faint); }
+.drift-table { max-height: 210px; overflow-y: auto; margin-top: 6px;
+  border: 1px solid var(--line-soft); border-radius: var(--radius-sm);
+  background: var(--surface); }
+.drift-table table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.drift-table th, .drift-table td { padding: 3px 8px; text-align: left;
+  border-bottom: 1px solid var(--line-soft); }
+.drift-table th { background: var(--surface-2); font-weight: 600;
+  position: sticky; top: 0; }
+/* A heading is always left-aligned (the rule above); centering is only ever
+   for a short data value, never for a column name - see .grid-head for the
+   same rule in the other table. */
+.drift-table td.c { text-align: center; }
+.drift-table tr:last-child td { border-bottom: none; }
+
+
+/* ==========================================================================
+   14. The spreadsheet view
+   A CSS grid rather than a <table>: the column widths are one string, shared
+   by the header, the filter row and every data row, so nothing can drift out
+   of alignment. The header and the filter row stick while the body scrolls,
+   which is the whole point of looking at it this way.
+   ========================================================================== */
+/* NOT '.grid': that class is the editor form's own two-column layout, and
+   naming the sheet the same thing flattened every form into one column. */
+.sheet { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+.grid-scroll { flex: 1; min-height: 0; overflow: auto; }
+.grid-table { display: block; min-width: max-content; }
+
+/* ---- reading the grid ----
+   Zebra striping is gone on purpose.  It was a stripe that meant nothing, and
+   it fought with the one distinction that does mean something: a STRUCTURE is
+   scaffolding - it has no index, no value and no row in the generated table -
+   while a LEAF is an actual parameter.  Two levels of contrast, no more:
+   structures read as quiet group headings, leaves read as the content. */
+.grid-row { display: grid; align-items: center; border-bottom: 1px solid var(--line-soft); }
+.grid-row[data-path] { cursor: pointer; }
+
+/* structures: a faint band, and the name carries the weight */
+.grid-row.struct-row { background: var(--struct-band); }
+.grid-row.struct-row .grid-cell { color: var(--ink-soft); }
+.grid-row.struct-row .row-name { color: var(--struct-ink); font-weight: 600; }
+
+.grid-row[data-path]:hover { background: var(--surface-2); }
+.grid-row.selected, .grid-row.struct-row.selected { background: var(--accent-soft); }
+.grid-row.disabled { opacity: .45; }
+.grid-row.has-error { box-shadow: inset 3px 0 0 var(--error); }
+
+/* The grid's Enabled column: one meaning per mark, the same on every row.
+     ✓  generated - drawn in its row's own colour; nothing to look at
+     ◌  its own flag is on, but a structure above it is off: not generated
+     ✗  switched off
+   As specific as the row rules and written after them, so neither a value
+   row's nor a structure row's colour can hide a ◌ or a ✗.  (A bold green ✓
+   used to show on an array's declaration row only - it meant nothing.) */
+.grid-row .grid-cell.blocked { color: var(--warn); }
+.grid-row .grid-cell.off     { color: var(--ink-faint); }
+
+.grid-header, .grid-filters {
+  position: sticky; z-index: 2; background: var(--surface);
+}
+.grid-header { top: 0; border-bottom: 1px solid var(--line); }
+.grid-filters { top: 27px; border-bottom: 1px solid var(--line); }
+
+.grid-head {
+  padding: 6px; font-size: 11px; font-weight: 700; color: var(--ink-soft);
+  text-transform: uppercase; letter-spacing: .03em; white-space: nowrap;
+  /* Every heading, whatever its column's own data alignment is - see
+     gridView.render() in grid.js. */
+  text-align: left;
+  /* A grid item never shrinks below its own content unless it is told to, so a
+     0px column still took its padding: two hidden columns ate 24px of the row
+     and drew a gap where nothing is. */
+  min-width: 0;
+  /* A column this project has no use for is 0px wide - List outside the merged
+     view, Address outside a parameter table.  The CELLS were already clipped;
+     the HEADINGS were not, so "Address" was painted on top of "Description" and
+     the hidden "List" heading made the whole header look reordered. */
+  overflow: hidden;
+}
+.grid-filter { padding: 3px 4px; overflow: hidden; min-width: 0; }
+.grid-filter input {
+  width: 100%; min-width: 0; padding: 2px 5px; font-size: 11px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface-2); color: var(--ink);
+}
+.grid-filter input:focus { outline: none; border-color: var(--accent); }
+/* a filter that is doing something says so, so an empty result is never a mystery */
+.grid-filter input:not(:placeholder-shown),
+.grid-filter input[value]:not([value=""]) {
+  border-color: var(--accent); background: var(--accent-soft);
+}
+
+.grid-cell {
+  padding: 4px 6px; font-size: 12px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+.grid-cell.mono { font-family: var(--mono); font-size: 11.5px; }
+
+.grid-foot {
+  padding: 5px 10px; font-size: 11px; color: var(--ink-soft);
+  border-top: 1px solid var(--line); background: var(--surface-2);
+}
+.grid-foot a { color: var(--accent); }
+
+/* the Tree / Grid switch in the toolbar */
+.viewswitch { display: inline-flex; }
+.viewswitch .btn.view { border-radius: 0; }
+.viewswitch .btn.view:first-child {
+  border-top-left-radius: var(--radius); border-bottom-left-radius: var(--radius);
+}
+.viewswitch .btn.view:last-child {
+  border-top-right-radius: var(--radius); border-bottom-right-radius: var(--radius);
+  margin-left: -1px;
+}
+.viewswitch .btn.view.on {
+  background: var(--accent); border-color: var(--accent); color: var(--on-accent);
+}
+
+/* the log id cell that sits inside the tags grid */
+.field.dimmed { opacity: .55; }
+.with-button { display: flex; gap: 6px; align-items: stretch; }
+.with-button input { flex: 1; min-width: 0; }
+.with-button .inline-btn { white-space: nowrap; }
+
+/* ==========================================================================
+   15. The two-row top bar
+   Row one is the DOCUMENT: which list, and what happens to the file.
+   Row two is the WORK: what you are doing to the parameters in it.
+   Anything that is a setting rather than an action is behind the gear, so the
+   bar stays the width of the work instead of the width of every dialog.
+   ========================================================================== */
+.topbar { display: block; padding: 0; height: auto; }
+
+.bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 12px; min-height: 44px;
+}
+.bar-document { border-bottom: 1px solid var(--line); }
+.bar-edit { padding-top: 5px; padding-bottom: 5px; min-height: 40px; }
+
+.bar .grow { flex: 1; }
+
+/* a run of controls that belong together */
+.group {
+  display: flex; align-items: center; gap: 6px;
+  padding-left: 10px; margin-left: 2px;
+  border-left: 1px solid var(--line);
+}
+.field-inline {
+  font-size: 11px; color: var(--ink-soft); text-transform: uppercase;
+  letter-spacing: .04em; font-weight: 700;
+}
+
+/* ---- drop-down menus ---- */
+.menu-host { position: relative; display: inline-flex; }
+.menu {
+  /* Anchored to the LEFT edge of its button by default.  It used to be pinned
+     to the right for every menu, which put the '+ Add' menu - a button at the
+     far left of the bar - off the left edge of the window, where it was
+     invisible.  A menu near the right edge asks for .menu-right instead. */
+  position: absolute; top: calc(100% + 5px); left: 0; z-index: 40;
+  min-width: 210px; padding: 5px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow-lg);
+}
+.menu-right { left: auto; right: 0; }
+.menu-item {
+  display: block; width: 100%; text-align: left;
+  padding: 7px 10px; border: 0; border-radius: var(--radius-sm);
+  background: none; color: var(--ink); font: inherit; font-size: 12.5px;
+  cursor: pointer; white-space: nowrap;
+}
+.menu-item:hover:not(:disabled):not(.off) { background: var(--accent-soft); }
+.menu-item:disabled, .menu-item.off { opacity: .4; cursor: default; }
+.menu-sep { height: 1px; margin: 4px 6px; background: var(--line); }
+
+/* ---- the project menu ------------------------------------------------- */
+.menu-label {
+  padding: 6px 12px 2px; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px; color: var(--ink-faint);
+}
+.menu-empty { padding: 4px 12px 8px; font-size: 11px; color: var(--ink-faint); }
+.menu-item.on { color: var(--accent); font-weight: 600; }
+#btn-project { max-width: 260px; }
+#project-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Which output format the open project wants.  Only shown for the one that is
+   not the default, because the two look identical on screen otherwise and the
+   difference decides what is even legal to build. */
+.format-badge {
+  padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .4px;
+  background: var(--accent-soft); color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+/* ---- the start screen -------------------------------------------------- */
+/* Shown instead of the editor when no project is open. It is a first screen,
+   not an error page, so it reads like one: what a project is, and the two
+   ways to get one. */
+.start {
+  /* the same box the editor uses, so the two swap without the page moving */
+  position: absolute; left: 0; right: 0;
+  top: var(--topbar-h); bottom: var(--status-h);
+  overflow: auto; display: flex; justify-content: center; padding: 40px 20px;
+  background: var(--surface);
+}
+.start-card { width: 100%; max-width: 640px; }
+.start-card h1 { margin: 0 0 10px; font-size: 22px; }
+.start-lead { margin: 0 0 20px; color: var(--ink-soft); line-height: 1.7; font-size: 13px; }
+.start-actions { display: flex; gap: 10px; margin-bottom: 28px; }
+.start-heading {
+  margin: 0 0 8px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .5px; color: var(--ink-faint);
+}
+.start .list-box { max-height: none; }
+.list-row.gone { opacity: .55; }
+
+/* ---- the fields of one structure type ---------------------------------- */
+.type-fields-box { max-height: 320px; overflow: auto; border: 1px solid var(--line);
+                   border-radius: 6px; }
+.type-fields { width: 100%; border-collapse: collapse; font-size: 12px; }
+.type-fields th { position: sticky; top: 0; background: var(--surface-2);
+                  text-align: left; padding: 6px 8px; font-size: 10px;
+                  text-transform: uppercase; letter-spacing: .4px;
+                  color: var(--ink-faint); border-bottom: 1px solid var(--line); }
+.type-fields td { padding: 3px 4px; border-bottom: 1px solid var(--line); }
+.type-fields input, .type-fields select { width: 100%; margin: 0; }
+.type-fields td:last-child { white-space: nowrap; }
+
+/* A value the form shows but does not offer, because it belongs elsewhere. */
+.read-only-value {
+  padding: 5px 8px; border: 1px dashed var(--line); border-radius: 4px;
+  background: var(--surface-2); color: var(--ink-soft); font-size: 12px;
+  min-height: 30px; box-sizing: border-box;
+}
+
+/* ---- the top bar, laid out in groups ----------------------------------- */
+/* Each row reads as three or four GROUPS with a hairline between them, not as
+   a run of fifteen buttons. That is the whole difference between a toolbar you
+   scan and one you search. */
+.bar-sep { width: 1px; height: 20px; background: var(--line); margin: 0 4px; flex: none; }
+.group { display: inline-flex; align-items: center; gap: 4px; }
+.btn.ghost { background: transparent; border-color: transparent; }
+.btn.ghost:hover:not(:disabled) { background: var(--accent-soft); border-color: var(--line); }
+.btn-label { color: var(--ink-faint); font-size: 10px; text-transform: uppercase;
+             letter-spacing: .5px; margin-right: 6px; }
+.btn-value { font-weight: 600; }
+.file-name { color: var(--ink-faint); font-size: 11px; max-width: 300px;
+             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* unsaved changes: a '*' in front of the name - at the start, because this box
+   cuts long text at its end and a mark after the name went with it */
+.file-name.dirty::before { content: "*"; color: var(--accent-2); font-weight: 700; }
+.bar-edit #filter { width: 220px; margin: 0; }
+.row-inline { display: flex; gap: 6px; align-items: center; }
+
+/* ---- the grid is the only view now ------------------------------------- */
+/* The grid takes the width it needs and the editor keeps a usable third:
+   the two are side by side, so a row clicked on the left opens on the right
+   without either becoming a sliver. */
+.list-pane { flex: 1 1 auto; min-width: 0; }
+.layout .editor-pane { flex: 0 0 34%; min-width: 320px; max-width: 520px; }
+
+/* ---- a filter that is a drop-down -------------------------------------- */
+.grid-filter select {
+  width: 100%; margin: 0; padding: 1px 2px; font-size: 11px;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 3px;
+  color: var(--ink);
+}
+.grid-filter select.on, .grid-filter input.on {
+  border-color: var(--accent); background: var(--accent-soft);
+}
+
+/* An absolute Windows path is longer than any dialog, and a modal that scrolls
+   sideways hides its own buttons. Paths wrap instead. */
+.modal-note code, .hint.mono { overflow-wrap: anywhere; }
+
+/* ---- the pane that swaps between the tree and the grid ---- */
+.view-box { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+/* ==========================================================================
+   Dark mode.
+   Only the tokens are redefined - never a rule - so a panel added later is
+   dark automatically.  Themes drift when a rule has a light twin somewhere:
+   somebody edits one and not the other, and a single panel stays white.
+
+   The theme is chosen in the toolbar and remembered per browser; a machine
+   that has never chosen one starts dark, which is what the team asked for.
+   ========================================================================== */
+:root[data-theme="dark"] {
+  --bg:           #14171c;
+  --surface:      #1b1f26;
+  --surface-2:    #22272f;
+  --ink:          #e4e8ee;
+  --ink-soft:     #a2acba;
+  --ink-faint:    #6d7986;
+  --line:         #2f3742;
+  --line-soft:    #262d36;
+  --line-strong:  #3d4753;
+
+  /* Lifted well off the background: the same navy as the light theme is
+     unreadable on a dark panel, and a "brand colour" nobody can read is not
+     a brand colour. */
+  --accent:       #4a9eff;
+  --accent-hover: #6bb0ff;
+  --accent-soft:  #17293d;
+  --accent-2:     #35c48b;
+  --accent-2-hover:#4fd6a0;
+  --on-accent:    #0d1117;
+
+  --error:        #ff6b61;
+  --error-soft:   #3a1f1e;
+  --warn:         #e0a44a;
+  --warn-soft:    #35291a;
+  --info:         #9aa5b4;
+  --info-soft:    #232830;
+  --ok-soft:      #17301f;
+  --struct-band:  #15181e;
+  --struct-ink:   #9fb4cc;
+
+  --statusbar:    #0f1620;
+  --statusbar-ink:#8fb4d9;
+  --scrim:        rgba(0,0,0,.62);
+  --toast:        #e4e8ee;
+  --toast-ink:    #14171c;
+  --tree-stripe:  rgba(255,255,255,.022);
+
+  /* A shadow is a darker patch of the page; on a dark page there is nothing
+     left to darken, so the depth comes from a lit edge instead. */
+  --shadow:       0 1px 2px rgba(0,0,0,.5), 0 4px 12px rgba(0,0,0,.4);
+  --shadow-lg:    0 10px 40px rgba(0,0,0,.65);
+
+  color-scheme: dark;
+}
+
+/* The form controls are drawn by the browser, so they need telling as well;
+   without this a <select> stays white with white text on it. */
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea {
+  background: var(--surface-2);
+  color: var(--ink);
+  border-color: var(--line);
+}
+:root[data-theme="dark"] input::placeholder,
+:root[data-theme="dark"] textarea::placeholder { color: var(--ink-faint); }
+:root[data-theme="dark"] option { background: var(--surface-2); color: var(--ink); }

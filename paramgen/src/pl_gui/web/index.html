@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parameter List Editor</title>
+<!-- The company logo is the window's icon - in the title bar and on the
+     taskbar, which is where an app window takes it from.  Named here, because
+     without a <link rel="icon"> every browser asks the server for /favicon.ico
+     by itself, which is a 404 in the console on every single page load.  Two
+     sizes, so the small one is drawn for the small places rather than scaled
+     down by the browser. -->
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="icon" type="image/png" sizes="256x256" href="icon-256.png">
+<link rel="stylesheet" href="style.css">
+<script>
+/* The theme is applied BEFORE the stylesheet paints anything, inline and
+   before <body>: doing it from app.js would show one white frame first, and a
+   white flash on every reload is exactly what a dark theme is meant to avoid.
+   A machine that has never chosen starts dark. */
+(function () {
+  try {
+    document.documentElement.dataset.theme =
+      localStorage.getItem("pl-theme") || "dark";
+  } catch (error) {
+    document.documentElement.dataset.theme = "dark";  /* storage can be blocked */
+  }
+})();
+</script>
+</head>
+<body>
+
+<!-- ============================ top bar ============================ -->
+<!-- Laid out the way an editor's is: the first row is the DOCUMENT - which
+     project, which list, and what happens to the file - and the second row is
+     what you are doing to the parameters in it.  Each row reads left to right
+     in groups, with the one green "go" action alone on the right, so the eye
+     has three places to land rather than fifteen. -->
+<header class="topbar">
+
+  <div class="bar bar-document">
+    <img class="brand-mark" src="logo.png" alt="" title="Parameter List Editor">
+
+    <div class="menu-host">
+      <button id="btn-project" class="btn ghost" aria-haspopup="true" aria-expanded="false"
+              title="Open, create or close a project">
+        <span class="btn-label">Project</span>
+        <span id="project-name" class="btn-value">No project</span> &#9662;</button>
+      <div id="menu-project" class="menu" hidden>
+        <button type="button" class="menu-item" data-action="open-project">Open project…</button>
+        <button type="button" class="menu-item" data-action="new-project">New project…</button>
+        <button type="button" class="menu-item" data-action="close-project">Close project</button>
+        <div class="menu-sep"></div>
+        <div class="menu-label">Recent</div>
+        <div id="menu-recent"></div>
+      </div>
+    </div>
+
+    <span id="format-badge" class="format-badge" hidden></span>
+
+    <span class="bar-sep needs-project"></span>
+
+    <div class="group needs-project">
+      <select id="module-picker" class="btn picker"
+              title="Which parameter sub list of the project is being edited"></select>
+      <button id="btn-lists-select" class="btn icon"
+              title="Parameter sub lists: which of them are generated, and in what order">☰</button>
+    </div>
+
+    <span class="bar-sep needs-project"></span>
+
+    <div class="group needs-project">
+      <button id="btn-save"   class="btn primary" title="Save the sub list (Ctrl+S)">Save</button>
+      <button id="btn-reload" class="btn icon"    title="Reload from disk">⟳</button>
+    </div>
+
+    <small id="file-name" class="file-name needs-project">&mdash;</small>
+
+    <span class="grow"></span>
+
+    <button id="btn-generate" class="btn accent needs-project"
+            title="Generate the C code (Ctrl+G)">Generate code</button>
+
+    <div class="menu-host">
+      <button id="btn-settings" class="btn icon" aria-haspopup="true" aria-expanded="false"
+              title="Drop-down lists and the theme">⚙</button>
+      <div id="menu-settings" class="menu menu-right" hidden>
+        <button type="button" class="menu-item" data-action="choices">Drop-down lists…</button>
+        <div class="menu-sep"></div>
+        <button type="button" class="menu-item" data-action="theme">
+          <span id="theme-label">Switch to the light theme</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bar bar-edit">
+    <div class="menu-host">
+      <button id="btn-add-menu" class="btn" aria-haspopup="true" aria-expanded="false"
+              title="Add a variable: one value, or one you define yourself"
+              >+ Add variable ▾</button>
+      <div id="menu-add" class="menu" hidden>
+        <button type="button" class="menu-item" data-action="add"
+                title="One value of its own. Ctrl+N">Primitive</button>
+        <button type="button" class="menu-item" data-action="add-struct">User defined…</button>
+      </div>
+    </div>
+
+    <button id="btn-types" class="btn" title="Declare, edit and delete structure types">
+      Structure types…</button>
+
+    <span class="bar-sep"></span>
+    <button id="btn-duplicate" class="btn icon" title="Duplicate (Ctrl+D)">⧉</button>
+    <button id="btn-up"        class="btn icon" title="Move up">↑</button>
+    <button id="btn-down"      class="btn icon" title="Move down">↓</button>
+    <button id="btn-delete"    class="btn icon danger" title="Delete (Del)">🗑</button>
+
+    <span class="bar-sep"></span>
+    <button id="btn-undo" class="btn icon" title="Undo (Ctrl+Z)">↶</button>
+    <button id="btn-redo" class="btn icon" title="Redo (Ctrl+Y or Ctrl+Shift+Z)">↷</button>
+
+    <span class="grow"></span>
+
+    <input id="filter" type="search" placeholder="Search every column…" autocomplete="off">
+    <button id="btn-clear-filters" class="btn icon" title="Clear every column filter">⌫</button>
+  </div>
+</header>
+
+<!-- ======================== the start screen ======================== -->
+<!-- Shown when no project is open, which is what a machine that has just had
+     the app copied onto it sees.  It is not an error state: the editor is
+     installed once and edits projects, so "no project yet" is simply where it
+     starts. -->
+<section id="start-screen" class="start" hidden>
+  <div class="start-card">
+    <h1>Parameter List Editor</h1>
+    <p class="start-lead">
+      A <b>project</b> is a folder with a project file in it - <code>pl_project.json</code>,
+      or any name you give it. That file
+      says which parameter sub lists the project is made of and where its generated
+      code goes; everything in it is written next to it, so the folder can be
+      moved or copied and still work.
+    </p>
+    <div class="start-actions">
+      <button id="btn-start-open" class="btn primary">Open project…</button>
+      <button id="btn-start-new"  class="btn">New project…</button>
+    </div>
+    <h2 class="start-heading">Recent projects</h2>
+    <div id="start-recent" class="list-box"></div>
+  </div>
+</section>
+
+<!-- ============================ body ============================ -->
+<!-- ONE layout.  The left pane shows the tree or the grid; the editor is
+     always beside it, so a row clicked in either view opens here. -->
+<main class="layout" id="layout">
+
+  <section class="pane list-pane">
+    <div id="grid-view" class="view-box">
+      <div id="grid" class="sheet"></div>
+    </div>
+    <div class="pane-foot"><span id="tree-count">0 values</span></div>
+  </section>
+
+  <div class="splitter"></div>
+
+  <section class="pane editor-pane">
+    <div class="pane-head">
+      <h2 id="editor-title">Nothing selected</h2>
+      <span id="editor-path" class="path"></span>
+    </div>
+    <div id="editor" class="editor">
+      <p class="empty">Select a parameter on the left, or add one with
+        <b>+ Add variable</b>.</p>
+    </div>
+  </section>
+</main>
+
+<!-- ============================ problems ============================ -->
+<section class="problems" id="problems-pane">
+  <div class="pane-head problems-head">
+    <h2>Problems</h2>
+    <!-- One counter per severity, and each one is a filter: the count answers
+         "how bad is it?" and the click answers "show me only those". -->
+    <span class="sev-counts" role="group" aria-label="Filter by severity">
+      <button type="button" class="sev-count error" data-severity="error"
+              title="Errors - nothing is generated while one of these stands">
+        <span class="sev-mark">✕</span><span id="count-error">0</span><span id="label-error"> errors</span></button>
+      <button type="button" class="sev-count warning" data-severity="warning"
+              title="Warnings - the code is generated, but read these">
+        <span class="sev-mark">▲</span><span id="count-warning">0</span><span id="label-warning"> warnings</span></button>
+      <button type="button" class="sev-count info" data-severity="info"
+              title="Information - nothing is wrong">
+        <span class="sev-mark">i</span><span id="count-info">0</span> info</button>
+    </span>
+    <span class="grow"></span>
+    <button id="btn-toggle-problems" class="btn icon" title="Show / hide">▾</button>
+  </div>
+  <div id="problems" class="problem-list"></div>
+</section>
+
+<footer class="statusbar">
+  <span id="status">Ready</span>
+  <span class="grow"></span>
+  <span id="status-counts"></span>
+</footer>
+
+<!-- ============================ dialogs ============================ -->
+<div id="modal" class="modal hidden">
+  <div class="modal-card">
+    <h3 id="modal-title">Title</h3>
+    <div id="modal-body"></div>
+    <div class="modal-actions">
+      <button id="modal-cancel" class="btn">Cancel</button>
+      <button id="modal-ok" class="btn primary">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Shown while the system's own Open / Browse dialog is up (pl_gui/native_dialog.py).
+     That dialog is a window of its own, possibly beside this one rather than in
+     front of it, so the page says where the reader's attention has gone. -->
+<div id="dialog-veil" class="veil" hidden>
+  <div class="veil-card">A file dialog is open in its own window - choose there, or
+    cancel it to come back.</div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="api.js"></script>
+<script src="grid.js"></script>
+<script src="editor.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ParameterListTypes schemaVersion="1.0" generator="parameter_list_code_generator" generatorVersion="01.01.01">
+  <StructType name="sRezaSaeedi">
+    <Field name="BirthYear" valueType="uint16_t" />
+    <Field name="CoffeeCupsPerDay" valueType="uint8_t" />
+    <Field name="BugsFixedToday" valueType="uint32_t" />
+    <Field name="SleepHours" valueType="float32_t" />
+  </StructType>
+</ParameterListTypes>

@@ -1,0 +1,16 @@
+# run.sh is a POSIX shell script: it must keep LF line endings on every
+# checkout, including a Windows clone with core.autocrlf=true - a CRLF in it
+# is a "bad interpreter" error on Linux before the script runs a single line.
+*.sh text eol=lf
+
+# The Windows launcher stays CRLF the same way, for symmetry and so a diff
+# never shows a whole-file rewrite because someone's editor normalised it.
+*.bat text eol=crlf
+
+# The app writes these two with a forced LF (write_settings() / choices.py),
+# on every platform including Windows - see paramgen/src/pl_codegen/app_home.py
+# and choices.py.  Without this, opening or closing a project on a Windows
+# clone with core.autocrlf=true left the file showing "modified" in git
+# forever after, even right after a fresh checkout with nothing edited.
+paramgen/var/settings.json text eol=lf
+paramgen/var/choices.json text eol=lf

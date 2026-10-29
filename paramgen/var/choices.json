@@ -1,0 +1,90 @@
+{
+  "paramTypes": [
+    "MONITORING",
+    "COMMAND",
+    "SETTING"
+  ],
+  "systemNames": [
+    "SYS_UNKNOWN",
+    "SYS_GS_COMPUTER",
+    "SYS_GS_MANAGER",
+    "SYS_GS_PO",
+    "SYS_ANTENNA_TRACKER",
+    "SYS_AC_MANAGER",
+    "SYS_AC_POWER",
+    "SYS_AC_AUTOPILOT",
+    "SYS_GIMBAL",
+    "SYS_LOCK_TRACK",
+    "SYS_LINK_GS",
+    "SYS_GS_USB2CAN",
+    "SYS_LINK_AIR",
+    "SYS_BOOTLOADER",
+    "SYS_LINK_BOX",
+    "SYS_GOVERNOR",
+    "SYS_NAV",
+    "SYS_AND",
+    "SYS_VNS",
+    "SYS_RHS",
+    "SYS_AUP",
+    "Suuu",
+    "dsax"
+  ],
+  "paramModes": [
+    "PARAM_MODE_NONE",
+    "PARAM_MODE_USER",
+    "PARAM_MODE_READ_ONLY",
+    "PARAM_MODE_PRODUCT_TYPE",
+    "PARAM_MODE_FACTORY",
+    "PARAM_MODE_CALIB",
+    "PARAM_MODE_TEMPORARY"
+  ],
+  "valueTypes": [
+    "bool_t",
+    "uint8_t",
+    "int8_t",
+    "uint16_t",
+    "int16_t",
+    "uint32_t",
+    "int32_t",
+    "uint64_t",
+    "int64_t",
+    "float32_t",
+    "float64_t"
+  ],
+  "numbers": {
+    "systemNames": {
+      "SYS_UNKNOWN": 0,
+      "SYS_GS_COMPUTER": 1,
+      "SYS_GS_MANAGER": 2,
+      "SYS_GS_PO": 3,
+      "SYS_ANTENNA_TRACKER": 4,
+      "SYS_AC_MANAGER": 5,
+      "SYS_AC_POWER": 6,
+      "SYS_AC_AUTOPILOT": 7,
+      "SYS_GIMBAL": 8,
+      "SYS_LOCK_TRACK": 9,
+      "SYS_LINK_GS": 10,
+      "SYS_GS_USB2CAN": 11,
+      "SYS_LINK_AIR": 12,
+      "SYS_BOOTLOADER": 13,
+      "SYS_LINK_BOX": 14,
+      "SYS_GOVERNOR": 15,
+      "SYS_NAV": 16,
+      "SYS_AND": 17,
+      "SYS_VNS": 18,
+      "SYS_RHS": 19,
+      "SYS_AUP": 20,
+      "Suuu": 56652,
+      "dsax": 56653
+    },
+    "paramModes": {
+      "PARAM_MODE_NONE": 0,
+      "PARAM_MODE_USER": 1,
+      "PARAM_MODE_READ_ONLY": 2,
+      "PARAM_MODE_PRODUCT_TYPE": 3,
+      "PARAM_MODE_FACTORY": 4,
+      "PARAM_MODE_CALIB": 5,
+      "PARAM_MODE_TEMPORARY": 6
+    }
+  }
+}

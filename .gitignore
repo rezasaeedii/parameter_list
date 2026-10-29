@@ -1,0 +1,5 @@
+# Python's byte-code caches: every run rebuilds them, for the Python version
+# of the machine it runs on, so they are never worth sharing.
+__pycache__/
+*.py[cod]
+/paramgen/var/settings.json

@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ParameterListModel schemaVersion="1.0" generator="parameter_list_code_generator" generatorVersion="01.01.01" generatedAt="2026-10-29T16:47:02+03:30">
+  <SourceFiles />
+  <Parameters>
+    <Parameter name="PR_PWR_BATTERY_MV" kind="primitive" enable="true" userName="Pwr Battery Mv" type="SETTING" valueType="uint16_t" size="1" unit="mV" address="0">
+      <Source />
+      <Limits default="24000" minimum="0" maximum="60000" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_AC_POWER" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_READ_ONLY" />
+      </Tags>
+      <Description>Battery voltage.</Description>
+    </Parameter>
+    <Parameter name="PR_PWR_CURRENT_OFFSET" kind="primitive" enable="true" userName="Pwr Current Offset" type="SETTING" valueType="int8_t" size="1" unit="" address="0">
+      <Source />
+      <Limits default="0" minimum="-50" maximum="50" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_AC_POWER" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_FACTORY" />
+      </Tags>
+      <Description>Current sensor zero offset.</Description>
+    </Parameter>
+    <Parameter name="PR_PWR_ENERGY_USED" kind="primitive" enable="true" userName="Pwr Energy Used" type="SETTING" valueType="uint32_t" size="1" unit="mWh" address="0">
+      <Source />
+      <Limits default="0" minimum="0" maximum="4000000000" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_AC_POWER" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_READ_ONLY" />
+      </Tags>
+      <Description>Energy drawn since power-up.</Description>
+    </Parameter>
+    <Parameter name="PR_PWR_CHARGE_BALANCE" kind="primitive" enable="true" userName="Pwr Charge Balance" type="SETTING" valueType="int64_t" size="1" unit="mAs" address="0">
+      <Source />
+      <Limits default="0" minimum="-1000000000" maximum="1000000000" resolution="1" />
+      <Tags>
+        <Tag id="SystemName" kind="enum" value="SYS_AC_POWER" />
+        <Tag id="ResetProof" kind="boolean" value="false" />
+        <Tag id="Loggable" kind="boolean" value="false" />
+        <Tag id="LogEncryption" kind="boolean" value="false" />
+        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_TEMPORARY" />
+      </Tags>
+      <Description>Charge in minus charge out.</Description>
+    </Parameter>
+  </Parameters>
+</ParameterListModel>

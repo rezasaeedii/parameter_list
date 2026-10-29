@@ -1,0 +1,52 @@
+{
+  "paramTypes": [
+    "MONITORING",
+    "COMMAND",
+    "SETTING"
+  ],
+  "systemNames": [
+    "SYS_UNKNOWN",
+    "SYS_GS_COMPUTER",
+    "SYS_GS_MANAGER",
+    "SYS_GS_POWER",
+    "SYS_ANTENNA_TRACKER",
+    "SYS_AC_MANAGER",
+    "SYS_AC_POWER",
+    "SYS_AC_AUTOPILOT",
+    "SYS_GIMBAL",
+    "SYS_LOCK_TRACK",
+    "SYS_LINK_GS",
+    "SYS_GS_USB2CAN",
+    "SYS_LINK_AIR",
+    "SYS_BOOTLOADER",
+    "SYS_LINK_BOX",
+    "SYS_GOVERNOR",
+    "SYS_NAV",
+    "SYS_AND",
+    "SYS_VNS",
+    "SYS_RHS",
+    "SYS_AUP"
+  ],
+  "paramModes": [
+    "PARAM_MODE_NONE",
+    "PARAM_MODE_USER",
+    "PARAM_MODE_READ_ONLY",
+    "PARAM_MODE_PRODUCT_TYPE",
+    "PARAM_MODE_FACTORY",
+    "PARAM_MODE_CALIB",
+    "PARAM_MODE_TEMPORARY"
+  ],
+  "valueTypes": [
+    "bool_t",
+    "uint8_t",
+    "int8_t",
+    "uint16_t",
+    "int16_t",
+    "uint32_t",
+    "int32_t",
+    "uint64_t",
+    "int64_t",
+    "float32_t",
+    "float64_t"
+  ]
+}
