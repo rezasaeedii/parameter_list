@@ -5,7 +5,7 @@
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
   * Generator      : parameter_list_code_generator v01.03.00
-  * Generated at   : 2026-10-29 16:54:52 +0330
+  * Generated at   : 2026-10-29 17:01:39 +0330
   * Input file(s)  : parameter_lists/flight_parameters.xml
   * Parameters     : 16 value(s) in 1 structure(s)
   ******************************************************************************
@@ -126,34 +126,28 @@ extern "C" {
 #ifndef SYS_AUP
 #define SYS_AUP              (20U)
 #endif
-#ifndef Suuu
-#define Suuu                 (56652U)
-#endif
-#ifndef dsax
-#define dsax                 (56653U)
-#endif
 
 /* Values of the 'PARAM MODES' drop-down list (kept where already defined) */
 #ifndef PARAM_MODE_NONE
-#define PARAM_MODE_NONE          (0U)
+#define PARAM_MODE_NONE          (-1)
 #endif
 #ifndef PARAM_MODE_USER
-#define PARAM_MODE_USER          (1U)
+#define PARAM_MODE_USER          (0U)
 #endif
 #ifndef PARAM_MODE_READ_ONLY
-#define PARAM_MODE_READ_ONLY     (2U)
+#define PARAM_MODE_READ_ONLY     (1U)
 #endif
 #ifndef PARAM_MODE_PRODUCT_TYPE
-#define PARAM_MODE_PRODUCT_TYPE  (3U)
+#define PARAM_MODE_PRODUCT_TYPE  (2U)
 #endif
 #ifndef PARAM_MODE_FACTORY
-#define PARAM_MODE_FACTORY       (4U)
+#define PARAM_MODE_FACTORY       (3U)
 #endif
 #ifndef PARAM_MODE_CALIB
-#define PARAM_MODE_CALIB         (5U)
+#define PARAM_MODE_CALIB         (4U)
 #endif
 #ifndef PARAM_MODE_TEMPORARY
-#define PARAM_MODE_TEMPORARY     (6U)
+#define PARAM_MODE_TEMPORARY     (5U)
 #endif
 
 /* Exported macros ---------------------------------------------------------- */

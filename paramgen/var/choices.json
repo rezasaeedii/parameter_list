@@ -25,9 +25,7 @@
     "SYS_AND",
     "SYS_VNS",
     "SYS_RHS",
-    "SYS_AUP",
-    "Suuu",
-    "dsax"
+    "SYS_AUP"
   ],
   "paramModes": [
     "PARAM_MODE_NONE",
@@ -73,18 +71,16 @@
       "SYS_AND": 17,
       "SYS_VNS": 18,
       "SYS_RHS": 19,
-      "SYS_AUP": 20,
-      "Suuu": 56652,
-      "dsax": 56653
+      "SYS_AUP": 20
     },
     "paramModes": {
-      "PARAM_MODE_NONE": 0,
-      "PARAM_MODE_USER": 1,
-      "PARAM_MODE_READ_ONLY": 2,
-      "PARAM_MODE_PRODUCT_TYPE": 3,
-      "PARAM_MODE_FACTORY": 4,
-      "PARAM_MODE_CALIB": 5,
-      "PARAM_MODE_TEMPORARY": 6
+      "PARAM_MODE_NONE": -1,
+      "PARAM_MODE_USER": 0,
+      "PARAM_MODE_READ_ONLY": 1,
+      "PARAM_MODE_PRODUCT_TYPE": 2,
+      "PARAM_MODE_FACTORY": 3,
+      "PARAM_MODE_CALIB": 4,
+      "PARAM_MODE_TEMPORARY": 5
     }
   }
 }
