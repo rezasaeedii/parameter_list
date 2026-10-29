@@ -4,8 +4,8 @@
   * @brief   Where each parameter sits in memory - a note, not code.
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
-  * Generator      : parameter_list_code_generator v01.01.01
-  * Generated at   : 2026-10-29 16:47:02 +0330
+  * Generator      : parameter_list_code_generator v01.03.00
+  * Generated at   : 2026-10-29 16:54:52 +0330
   * Input file(s)  : parameter_lists/sys_nav_paramTable.xml
   *                   parameter_lists/sys_ac_power_paramTable.xml
   * Parameters     : 10 value(s)

@@ -24,7 +24,7 @@ Anything that knows about the editor - a dialog, an undo stack, an HTTP route -
 belongs *outside* this package, in ``pl_gui``.
 """
 
-__version__ = "01.01.01"
+__version__ = "01.03.00"
 __tool_name__ = "parameter_list_code_generator"
 
 __all__ = ["__version__", "__tool_name__"]
