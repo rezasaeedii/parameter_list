@@ -1557,10 +1557,6 @@ ${item.file}
     box.focus();
   },
 
-  /* ------------------------------------------- reusable structure types */
-  /* A type is a shape, and a parameter made from one owns its copy: nothing
-     links back, so editing the parameter never edits the type and editing the
-     type never rewrites a parameter that was made earlier. */
   /* --------------------------------------------------- structure types */
   /* A structure type is a C++ struct declaration: a name and the fields inside
      it.  A parameter NAMES one, so editing the type here reaches every

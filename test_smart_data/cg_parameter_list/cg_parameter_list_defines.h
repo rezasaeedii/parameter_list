@@ -4,10 +4,10 @@
   * @brief   Quantities, parameter indices, tag sizes, system names and parameter modes.
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
-  * Generator      : parameter_list_code_generator v01.03.01
-  * Generated at   : 2026-10-30 08:55:22 +0330
+  * Generator      : parameter_list_code_generator v01.04.01
+  * Generated at   : 2026-10-30 18:37:47 +0330
   * Input file(s)  : parameter_lists/flight_parameters.xml
-  * Parameters     : 23 value(s) in 1 structure(s)
+  * Parameters     : 22 value(s) in 1 structure(s)
   ******************************************************************************
   * @attention
   *
@@ -34,7 +34,7 @@ extern "C" {
 
 /* Exported defines --------------------------------------------------------- */
 /* Number of parameters in the parameter list */
-#define PARAMETER_LIST_QTY  (23U)  /*!< Number of enabled parameters */
+#define PARAMETER_LIST_QTY  (22U)  /*!< Number of enabled parameters */
 
 /* Index of every parameter inside the parameter list */
 #define ENGINE_ON                        (0U)   /*!< bool_t */
@@ -53,22 +53,21 @@ extern "C" {
 #define REZA_SAEEDI_COFFEE_CUPS_PER_DAY  (13U)  /*!< uint8_t [cup] */
 #define REZA_SAEEDI_BUGS_FIXED_TODAY     (14U)  /*!< uint32_t */
 #define REZA_SAEEDI_SLEEP_HOURS          (15U)  /*!< float32_t [h] */
-#define NOUROOZ_0                        (16U)  /*!< uint8_t (element 0 of 5) */
-#define NOUROOZ_1                        (17U)  /*!< uint8_t (element 1 of 5) */
-#define NOUROOZ_2                        (18U)  /*!< uint8_t (element 2 of 5) */
-#define NOUROOZ_3                        (19U)  /*!< uint8_t (element 3 of 5) */
-#define NOUROOZ_4                        (20U)  /*!< uint8_t (element 4 of 5) */
-#define NOUROZ2222                       (21U)  /*!< uint8_t */
-#define SALAM                            (22U)  /*!< uint8_t */
+#define WORK_DAYS_0                      (16U)  /*!< uint8_t (element 0 of 5) */
+#define WORK_DAYS_1                      (17U)  /*!< uint8_t (element 1 of 5) */
+#define WORK_DAYS_2                      (18U)  /*!< uint8_t (element 2 of 5) */
+#define WORK_DAYS_3                      (19U)  /*!< uint8_t (element 3 of 5) */
+#define WORK_DAYS_4                      (20U)  /*!< uint8_t (element 4 of 5) */
+#define DAY_OFF                          (21U)  /*!< uint8_t */
 
 /* Array size of every array parameter */
 #define CELL_TEMPERATURE_ARRAY_SIZE  (4U)  /*!< Number of elements of 'CellTemperature' */
-#define NOUROOZ_ARRAY_SIZE           (5U)  /*!< Number of elements of 'nourooz' */
+#define WORK_DAYS_ARRAY_SIZE         (5U)  /*!< Number of elements of 'WorkDays' */
 
 /* Total size used by every tag */
-#define PARAMETER_LIST_TAG_SYSTEM_NAME_SIZE  (51U)  /*!< Bytes used by tag 'SystemName' (23 parameter(s)) */
+#define PARAMETER_LIST_TAG_SYSTEM_NAME_SIZE  (50U)  /*!< Bytes used by tag 'SystemName' (22 parameter(s)) */
 #define PARAMETER_LIST_TAG_LOGGABLE_SIZE     (29U)  /*!< Bytes used by tag 'Loggable' (15 parameter(s)) */
-#define PARAMETER_LIST_TAG_PARAM_MODE_SIZE   (51U)  /*!< Bytes used by tag 'ParamMode' (23 parameter(s)) */
+#define PARAMETER_LIST_TAG_PARAM_MODE_SIZE   (50U)  /*!< Bytes used by tag 'ParamMode' (22 parameter(s)) */
 
 /* Values of the 'SYSTEM NAMES' drop-down list (kept where already defined) */
 #ifndef SYS_UNKNOWN
@@ -80,8 +79,8 @@ extern "C" {
 #ifndef SYS_GS_MANAGER
 #define SYS_GS_MANAGER       (2U)
 #endif
-#ifndef SYS_GS_PO
-#define SYS_GS_PO            (3U)
+#ifndef SYS_GS_POWER
+#define SYS_GS_POWER         (3U)
 #endif
 #ifndef SYS_ANTENNA_TRACKER
 #define SYS_ANTENNA_TRACKER  (4U)

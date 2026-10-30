@@ -14,10 +14,13 @@ structures in the target application.
 | `paramgen/` | Main application for editing parameter lists and generating the corresponding C/C++ source and header files. |
 | `parameter_descriptor/` | Runtime library used with the generated code to work with parameter descriptors and parameter-list structures. |
 | `smart_data/` | Runtime library used with the generated code to work with parameter values and smart-data structures. |
+| `test_smart_data/` | Sample project in the `smart_data` format: a sublist with arrays, a structure and enumerations, and the code generated from it. |
+| `test_param_table/` | Sample project in the `param_table` format: two sub-system sublists and the `nsrParamTables.h` generated from them. |
 
 The generated code can be integrated with the `smart_data` and
 `parameter_descriptor` libraries to use the parameter-list structure in the
-target application.
+target application. Open a sample project in the editor (`paramgen/run.bat`,
+**Project ▾ ▸ Open project…**) to see a complete one.
 
 ## Documentation
 

@@ -4,10 +4,10 @@
   * @brief   Generated parameter list and its access functions.
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
-  * Generator      : parameter_list_code_generator v01.03.01
-  * Generated at   : 2026-10-30 08:55:22 +0330
+  * Generator      : parameter_list_code_generator v01.04.01
+  * Generated at   : 2026-10-30 18:37:47 +0330
   * Input file(s)  : parameter_lists/flight_parameters.xml
-  * Parameters     : 23 value(s) in 1 structure(s)
+  * Parameters     : 22 value(s) in 1 structure(s)
   ******************************************************************************
   * @attention
   *
@@ -345,12 +345,12 @@ const sParameterDescriptor ParameterList[PARAMETER_LIST_QTY] = {
         .pDescription = "Hours of sleep last night."
     },
 
-    /* [16] NOUROOZ_0 */
+    /* [16] WORK_DAYS_0 */
     {
-        .pName = "nourooz[0]",
-        .pUserName = "hafte",
-        .Type = ePARAMETER_TYPE_MONITORING,
-        .pSmartData = (void *)&Cg_SmartData_nourooz[0],
+        .pName = "WorkDays[0]",
+        .pUserName = "Work days",
+        .Type = ePARAMETER_TYPE_SETTING,
+        .pSmartData = (void *)&Cg_SmartData_WorkDays[0],
         .LogId = 110U,
         .TagSystemName = (uint32_t)SYS_UNKNOWN,
         .TagResetProof = (uint32_t)FALSE,
@@ -361,15 +361,15 @@ const sParameterDescriptor ParameterList[PARAMETER_LIST_QTY] = {
         .Tag2 = 0U,
         .Tag3 = 0U,
         .Tag4 = 0U,
-        .pDescription = ""
+        .pDescription = "The working days of the week, one per element."
     },
 
-    /* [17] NOUROOZ_1 */
+    /* [17] WORK_DAYS_1 */
     {
-        .pName = "nourooz[1]",
-        .pUserName = "hafte",
-        .Type = ePARAMETER_TYPE_MONITORING,
-        .pSmartData = (void *)&Cg_SmartData_nourooz[1],
+        .pName = "WorkDays[1]",
+        .pUserName = "Work days",
+        .Type = ePARAMETER_TYPE_SETTING,
+        .pSmartData = (void *)&Cg_SmartData_WorkDays[1],
         .LogId = 111U,
         .TagSystemName = (uint32_t)SYS_UNKNOWN,
         .TagResetProof = (uint32_t)FALSE,
@@ -380,15 +380,15 @@ const sParameterDescriptor ParameterList[PARAMETER_LIST_QTY] = {
         .Tag2 = 0U,
         .Tag3 = 0U,
         .Tag4 = 0U,
-        .pDescription = ""
+        .pDescription = "The working days of the week, one per element."
     },
 
-    /* [18] NOUROOZ_2 */
+    /* [18] WORK_DAYS_2 */
     {
-        .pName = "nourooz[2]",
-        .pUserName = "hafte",
-        .Type = ePARAMETER_TYPE_MONITORING,
-        .pSmartData = (void *)&Cg_SmartData_nourooz[2],
+        .pName = "WorkDays[2]",
+        .pUserName = "Work days",
+        .Type = ePARAMETER_TYPE_SETTING,
+        .pSmartData = (void *)&Cg_SmartData_WorkDays[2],
         .LogId = 112U,
         .TagSystemName = (uint32_t)SYS_UNKNOWN,
         .TagResetProof = (uint32_t)FALSE,
@@ -399,15 +399,15 @@ const sParameterDescriptor ParameterList[PARAMETER_LIST_QTY] = {
         .Tag2 = 0U,
         .Tag3 = 0U,
         .Tag4 = 0U,
-        .pDescription = ""
+        .pDescription = "The working days of the week, one per element."
     },
 
-    /* [19] NOUROOZ_3 */
+    /* [19] WORK_DAYS_3 */
     {
-        .pName = "nourooz[3]",
-        .pUserName = "hafte",
-        .Type = ePARAMETER_TYPE_MONITORING,
-        .pSmartData = (void *)&Cg_SmartData_nourooz[3],
+        .pName = "WorkDays[3]",
+        .pUserName = "Work days",
+        .Type = ePARAMETER_TYPE_SETTING,
+        .pSmartData = (void *)&Cg_SmartData_WorkDays[3],
         .LogId = 113U,
         .TagSystemName = (uint32_t)SYS_UNKNOWN,
         .TagResetProof = (uint32_t)FALSE,
@@ -418,15 +418,15 @@ const sParameterDescriptor ParameterList[PARAMETER_LIST_QTY] = {
         .Tag2 = 0U,
         .Tag3 = 0U,
         .Tag4 = 0U,
-        .pDescription = ""
+        .pDescription = "The working days of the week, one per element."
     },
 
-    /* [20] NOUROOZ_4 */
+    /* [20] WORK_DAYS_4 */
     {
-        .pName = "nourooz[4]",
-        .pUserName = "hafte",
-        .Type = ePARAMETER_TYPE_MONITORING,
-        .pSmartData = (void *)&Cg_SmartData_nourooz[4],
+        .pName = "WorkDays[4]",
+        .pUserName = "Work days",
+        .Type = ePARAMETER_TYPE_SETTING,
+        .pSmartData = (void *)&Cg_SmartData_WorkDays[4],
         .LogId = 114U,
         .TagSystemName = (uint32_t)SYS_UNKNOWN,
         .TagResetProof = (uint32_t)FALSE,
@@ -437,15 +437,15 @@ const sParameterDescriptor ParameterList[PARAMETER_LIST_QTY] = {
         .Tag2 = 0U,
         .Tag3 = 0U,
         .Tag4 = 0U,
-        .pDescription = ""
+        .pDescription = "The working days of the week, one per element."
     },
 
-    /* [21] NOUROZ2222 */
+    /* [21] DAY_OFF */
     {
-        .pName = "nouroz2222",
-        .pUserName = "",
-        .Type = ePARAMETER_TYPE_MONITORING,
-        .pSmartData = (void *)&Cg_SmartData_nouroz2222,
+        .pName = "DayOff",
+        .pUserName = "Day off",
+        .Type = ePARAMETER_TYPE_SETTING,
+        .pSmartData = (void *)&Cg_SmartData_DayOff,
         .LogId = 0U,
         .TagSystemName = (uint32_t)SYS_UNKNOWN,
         .TagResetProof = (uint32_t)FALSE,
@@ -456,26 +456,7 @@ const sParameterDescriptor ParameterList[PARAMETER_LIST_QTY] = {
         .Tag2 = 0U,
         .Tag3 = 0U,
         .Tag4 = 0U,
-        .pDescription = ""
-    },
-
-    /* [22] SALAM */
-    {
-        .pName = "salam",
-        .pUserName = "",
-        .Type = ePARAMETER_TYPE_MONITORING,
-        .pSmartData = (void *)&Cg_SmartData_salam,
-        .LogId = 0U,
-        .TagSystemName = (uint32_t)SYS_UNKNOWN,
-        .TagResetProof = (uint32_t)FALSE,
-        .TagLoggable = (uint32_t)FALSE,
-        .TagLogEncryption = (uint32_t)FALSE,
-        .TagParamMode = (uint32_t)PARAM_MODE_NONE,
-        .Tag1 = 0U,
-        .Tag2 = 0U,
-        .Tag3 = 0U,
-        .Tag4 = 0U,
-        .pDescription = ""
+        .pDescription = "The day of the week the crew rests."
     }
 };
 

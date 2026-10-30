@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<ParameterListModel schemaVersion="1.0" generator="parameter_list_code_generator" generatorVersion="01.03.01" generatedAt="2026-10-29T16:47:37+03:30">
+<ParameterListModel schemaVersion="1.0" generator="parameter_list_code_generator" generatorVersion="01.04.01" generatedAt="2026-10-29T16:47:37+03:30">
   <SourceFiles>
     <SourceFile path="parameter_lists/flight_parameters.xml" />
   </SourceFiles>
@@ -150,7 +150,7 @@
         </Parameter>
       </Fields>
     </Parameter>
-    <Parameter name="nourooz" kind="primitive" enable="true" userName="hafte" type="MONITORING" valueType="uint8_t" enumType="eWeek" size="5" logId="110" address="0">
+    <Parameter name="WorkDays" kind="primitive" enable="true" userName="Work days" type="SETTING" valueType="uint8_t" enumType="eWeek" size="5" logId="110" address="0">
       <Source file="parameter_lists/flight_parameters.xml" />
       <Limits default="1" minimum="1" maximum="7" resolution="1" />
       <Tags>
@@ -160,10 +160,11 @@
         <Tag id="LogEncryption" kind="boolean" value="false" />
         <Tag id="ParamMode" kind="enum" value="PARAM_MODE_NONE" />
       </Tags>
+      <Description>The working days of the week, one per element.</Description>
     </Parameter>
-    <Parameter name="nouroz2222" kind="primitive" enable="true" type="MONITORING" valueType="uint8_t" enumType="eWeek" size="1" address="0">
+    <Parameter name="DayOff" kind="primitive" enable="true" userName="Day off" type="SETTING" valueType="uint8_t" enumType="eWeek" size="1" address="0">
       <Source file="parameter_lists/flight_parameters.xml" />
-      <Limits default="1" minimum="1" maximum="7" resolution="1" />
+      <Limits default="7" minimum="1" maximum="7" resolution="1" />
       <Tags>
         <Tag id="SystemName" kind="enum" value="SYS_UNKNOWN" />
         <Tag id="ResetProof" kind="boolean" value="false" />
@@ -171,17 +172,7 @@
         <Tag id="LogEncryption" kind="boolean" value="false" />
         <Tag id="ParamMode" kind="enum" value="PARAM_MODE_NONE" />
       </Tags>
-    </Parameter>
-    <Parameter name="salam" kind="primitive" enable="true" type="MONITORING" valueType="uint8_t" enumType="esalam" size="1" address="0">
-      <Source file="parameter_lists/flight_parameters.xml" />
-      <Limits default="1" minimum="1" maximum="1" resolution="1" />
-      <Tags>
-        <Tag id="SystemName" kind="enum" value="SYS_UNKNOWN" />
-        <Tag id="ResetProof" kind="boolean" value="false" />
-        <Tag id="Loggable" kind="boolean" value="false" />
-        <Tag id="LogEncryption" kind="boolean" value="false" />
-        <Tag id="ParamMode" kind="enum" value="PARAM_MODE_NONE" />
-      </Tags>
+      <Description>The day of the week the crew rests.</Description>
     </Parameter>
   </Parameters>
 </ParameterListModel>

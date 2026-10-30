@@ -7,7 +7,7 @@ that is already on the machine renders it.
     server.py     the HTTP server and the routing
     api.py        one method per action the front end can call
     document.py   the parameter list being edited, plus undo/redo
-    web/          index.html + style.css + api.js / tree.js / editor.js / app.js
+    web/          index.html + style.css + api.js / grid.js / editor.js / app.js
 """
 
 __all__ = ["server", "api", "document"]

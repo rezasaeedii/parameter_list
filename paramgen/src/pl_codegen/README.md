@@ -12,8 +12,8 @@ every path in a project file is resolved from the project file itself.
 
 | folder | what is in it |
 |---|---|
-| `model/` | the parameter, the list, value types, tags, and the structure types |
-| `xml_model/` | model ⟷ XML: schema, reader, writer, and the structures file |
+| `model/` | the parameter, the list, value types, tags, the structure types and the enumerations |
+| `xml_model/` | model ⟷ XML: schema, reader, writer, and the types file (structures and enumerations) |
 | `validation/` | one class per rule, and the collector that runs them |
 | `layout/` | tag offsets, and the memory-layout drift check |
 | `codegen/` | one builder per generated file |
@@ -22,7 +22,9 @@ A **structure type** is a `struct` declaration, in `model/struct_type.py`. A
 structure parameter *names* one, so changing the type changes every parameter
 that names it (`model/struct_sync.py`). The types of a parameter sublist live
 next to it in `foo_types.xml`, which is what lets a sublist be handed to another
-project with its structures intact.
+project with its structures intact. An **enumeration** (`model/enum_type.py`) lives
+in the same file: a parameter of one is a value of its integer base type that may
+hold only the enumeration's values.
 
 `choices.py` holds the four drop-down lists. They belong to the machine, not to
 a project, so they live in `paramgen/var/choices.json`.

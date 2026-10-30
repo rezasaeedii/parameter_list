@@ -4,8 +4,8 @@
   * @brief   The sub-systems of the Drop-down lists, as #defines.
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
-  * Generator      : parameter_list_code_generator v01.03.01
-  * Generated at   : 2026-10-29 19:44:45 +0330
+  * Generator      : parameter_list_code_generator v01.04.01
+  * Generated at   : 2026-10-30 18:37:47 +0330
   * Input file(s)  : parameter_lists/sys_nav_paramTable.xml
   *                   parameter_lists/sys_ac_power_paramTable.xml
   * Parameters     : 10 value(s)
@@ -36,8 +36,8 @@
 #ifndef SYS_GS_MANAGER
 #define SYS_GS_MANAGER       (2)
 #endif
-#ifndef SYS_GS_PO
-#define SYS_GS_PO            (3)
+#ifndef SYS_GS_POWER
+#define SYS_GS_POWER         (3)
 #endif
 #ifndef SYS_ANTENNA_TRACKER
 #define SYS_ANTENNA_TRACKER  (4)

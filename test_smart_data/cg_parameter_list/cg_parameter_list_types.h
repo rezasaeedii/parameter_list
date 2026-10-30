@@ -4,10 +4,10 @@
   * @brief   Structure types generated from the structure types of the parameter list.
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
-  * Generator      : parameter_list_code_generator v01.03.01
-  * Generated at   : 2026-10-30 08:55:22 +0330
+  * Generator      : parameter_list_code_generator v01.04.01
+  * Generated at   : 2026-10-30 18:37:47 +0330
   * Input file(s)  : parameter_lists/flight_parameters.xml
-  * Parameters     : 23 value(s) in 1 structure(s)
+  * Parameters     : 22 value(s) in 1 structure(s)
   ******************************************************************************
   * @attention
   *
@@ -63,22 +63,6 @@ typedef uint8_t eWeek;
     ((value_) == charshanbe) || \
     ((value_) == panjshanbe) || \
     ((value_) == jome) )
-
-/**
- * @brief Enumeration 'esalam': a uint8_t that holds only the values below.
- *
- */
-typedef uint8_t esalam;
-
-#define w  ((esalam)1U)
-
-/**
- * @brief TRUE when *value_* is one of the values of 'esalam'.
- *
- * @note  It reads value_ once for every value: give it a plain variable, never x++ or a call.
- */
-#define IS_VALID_esalam(value_)  ( \
-    ((value_) == w) )
 
 /**
  * @brief Structure type 'sRezaSaeedi'.

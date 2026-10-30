@@ -36,7 +36,7 @@ run.bat generate -c ..\projects\demo --check
 Anything after the action is passed on to it; each one also has its own
 `--help`. A relative path is taken from this folder, on both systems.
 
-**On Linux**, `run.sh` finds `python3` (3.8 or newer) itself. A folder copied
+**On Linux**, `run.sh` finds `python3` (3.11 or newer) itself. A folder copied
 over from Windows — a zip, a USB stick — loses the mark that lets a file be
 started, so run it as `sh run.sh`, or mark it once with `chmod +x run.sh`. It
 must keep its Unix line endings: saved with Windows ones it does not start at
@@ -44,7 +44,9 @@ all, and `tests/run_docs_test.py` says so.
 
 In the editor: `Ctrl+S` saves, `Ctrl+G` generates. **Project ▾** in the top bar
 opens, creates and closes projects; **Structure types…** declares the `struct`
-types the parameters are built from.
+types the parameters are built from, and **Enum types…** the enumerations - a
+value that may hold only its named values; **⚙ ▸ Project settings…** edits
+`pl_project.json` itself.
 
 A **project** is a folder with a `pl_project.json` in it — the **parameter
 sublists** it is built from (the XML files that together make its parameter list), in
@@ -57,11 +59,11 @@ what order, **what kind of code it generates** and where that goes.
 | `param_table` | one `nsrParamTables.h` of `ADD_PARAM()` lines, for the older firmware |
 
 The parameter sublists are the same XML either way, so a sublist can be used by
-both — but `param_table` has no structures and no arrays, so a sublist using them is an
-error there and fine in the other. Every path in
+both — but `param_table` has no structures, arrays or enumerations, so a sublist using
+them is an error there and fine in the other. Every path in
 it is relative to the file itself, so the folder can be moved or handed on. Each
-parameter sublist `foo.xml` carries its structure types beside it in
-`foo_types.xml`, so a sublist can be taken into another project intact.
+parameter sublist `foo.xml` carries its structure types and enumerations beside it
+in `foo_types.xml`, so a sublist can be taken into another project intact.
 
 | folder | what is in it |
 |---|---|
@@ -69,7 +71,7 @@ parameter sublist `foo.xml` carries its structure types beside it in
 | `src/` | the code: `pl_codegen/` (the generator) and `pl_gui/` (the editor) |
 | `tests/` | the tool's own tests |
 | `templates/` | what a new project is made of: `pl_project.json`, `c.json`, and the company `choices.json` |
-| `docs/` | the Persian user manual (Word + PDF) and the C usage example |
+| `docs/` | the Persian user and developer manuals (Word + PDF) and the C usage example |
 | `var/` | what the app writes: recent projects, and this machine's drop-down lists |
 
 The C library the generated code plugs into — smart data and the parameter

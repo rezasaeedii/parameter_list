@@ -4,10 +4,10 @@
   * @brief   Generated parameter list and its access functions.
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
-  * Generator      : parameter_list_code_generator v01.03.01
-  * Generated at   : 2026-10-30 08:55:22 +0330
+  * Generator      : parameter_list_code_generator v01.04.01
+  * Generated at   : 2026-10-30 18:37:47 +0330
   * Input file(s)  : parameter_lists/flight_parameters.xml
-  * Parameters     : 23 value(s) in 1 structure(s)
+  * Parameters     : 22 value(s) in 1 structure(s)
   ******************************************************************************
   * @attention
   *

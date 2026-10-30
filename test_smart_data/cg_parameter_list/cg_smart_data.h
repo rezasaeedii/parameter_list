@@ -4,10 +4,10 @@
   * @brief   Smart-data objects that hold the value of every parameter.
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
-  * Generator      : parameter_list_code_generator v01.03.01
-  * Generated at   : 2026-10-30 08:55:22 +0330
+  * Generator      : parameter_list_code_generator v01.04.01
+  * Generated at   : 2026-10-30 18:37:47 +0330
   * Input file(s)  : parameter_lists/flight_parameters.xml
-  * Parameters     : 23 value(s) in 1 structure(s)
+  * Parameters     : 22 value(s) in 1 structure(s)
   ******************************************************************************
   * @attention
   *
@@ -51,9 +51,8 @@ extern sSmartDataI32 Cg_SmartData_AltitudeCm;  /*!< [cm] Altitude above sea leve
 extern sSmartDataF32 Cg_SmartData_Airspeed;  /*!< [m/s] Indicated airspeed. */
 extern sSmartDataF64 Cg_SmartData_HomeLatitude;  /*!< [deg] Latitude of the home point. */
 extern sCgStruct_sRezaSaeedi Cg_SmartData_RezaSaeedi;  /*!< The one behind the tool, as a structure. */
-extern sSmartDataU8 Cg_SmartData_nourooz[NOUROOZ_ARRAY_SIZE];
-extern sSmartDataU8 Cg_SmartData_nouroz2222;
-extern sSmartDataU8 Cg_SmartData_salam;
+extern sSmartDataU8 Cg_SmartData_WorkDays[WORK_DAYS_ARRAY_SIZE];  /*!< The working days of the week, one per element. */
+extern sSmartDataU8 Cg_SmartData_DayOff;  /*!< The day of the week the crew rests. */
 
 #ifdef __cplusplus
 }

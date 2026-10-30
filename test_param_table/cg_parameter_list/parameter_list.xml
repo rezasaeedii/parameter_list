@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<ParameterListModel schemaVersion="1.0" generator="parameter_list_code_generator" generatorVersion="01.03.01" generatedAt="2026-10-29T16:47:02+03:30">
+<ParameterListModel schemaVersion="1.0" generator="parameter_list_code_generator" generatorVersion="01.04.01" generatedAt="2026-10-29T16:47:02+03:30">
   <SourceFiles>
     <SourceFile path="parameter_lists/sys_nav_paramTable.xml" />
     <SourceFile path="parameter_lists/sys_ac_power_paramTable.xml" />

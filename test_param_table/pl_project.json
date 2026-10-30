@@ -37,8 +37,5 @@
   "validation": {
     "treat_warnings_as_errors": false,
     "require_unit": false
-  },
-  "tag_descriptions": {
-    "Tag1": "argvxz"
   }
 }
