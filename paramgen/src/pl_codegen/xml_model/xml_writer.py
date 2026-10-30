@@ -94,6 +94,7 @@ def _parameter_to_element(parameter: Parameter,
     _set(element, sch.ATTR_USER_NAME, parameter.user_name)
     _set(element, sch.ATTR_TYPE, parameter.param_type)
     _set(element, sch.ATTR_DATA_TYPE, parameter.value_type_name)
+    _set(element, sch.ATTR_ENUM_TYPE, parameter.enum_type_name or None)
     _set(element, sch.ATTR_ARRAY_SIZE, parameter.array_size)
     _set(element, sch.ATTR_UNIT, parameter.unit)
     # Not inside <Tags>: the log id is not a tag.

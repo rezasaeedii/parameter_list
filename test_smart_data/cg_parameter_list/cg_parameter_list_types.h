@@ -5,9 +5,9 @@
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
   * Generator      : parameter_list_code_generator v01.03.01
-  * Generated at   : 2026-10-29 19:44:49 +0330
+  * Generated at   : 2026-10-30 08:55:22 +0330
   * Input file(s)  : parameter_lists/flight_parameters.xml
-  * Parameters     : 16 value(s) in 1 structure(s)
+  * Parameters     : 23 value(s) in 1 structure(s)
   ******************************************************************************
   * @attention
   *
@@ -36,6 +36,50 @@ extern "C" {
 /* Exported defines --------------------------------------------------------- */
 /* Exported macros ---------------------------------------------------------- */
 /* Exported types ----------------------------------------------------------- */
+/**
+ * @brief Enumeration 'eWeek': a uint8_t that holds only the values below.
+ *
+ */
+typedef uint8_t eWeek;
+
+#define shanbe      ((eWeek)1U)
+#define yeshanbe    ((eWeek)2U)
+#define doshanbe    ((eWeek)3U)
+#define seshanbe    ((eWeek)4U)
+#define charshanbe  ((eWeek)5U)
+#define panjshanbe  ((eWeek)6U)
+#define jome        ((eWeek)7U)
+
+/**
+ * @brief TRUE when *value_* is one of the values of 'eWeek'.
+ *
+ * @note  It reads value_ once for every value: give it a plain variable, never x++ or a call.
+ */
+#define IS_VALID_eWeek(value_)  ( \
+    ((value_) == shanbe) || \
+    ((value_) == yeshanbe) || \
+    ((value_) == doshanbe) || \
+    ((value_) == seshanbe) || \
+    ((value_) == charshanbe) || \
+    ((value_) == panjshanbe) || \
+    ((value_) == jome) )
+
+/**
+ * @brief Enumeration 'esalam': a uint8_t that holds only the values below.
+ *
+ */
+typedef uint8_t esalam;
+
+#define w  ((esalam)1U)
+
+/**
+ * @brief TRUE when *value_* is one of the values of 'esalam'.
+ *
+ * @note  It reads value_ once for every value: give it a plain variable, never x++ or a call.
+ */
+#define IS_VALID_esalam(value_)  ( \
+    ((value_) == w) )
+
 /**
  * @brief Structure type 'sRezaSaeedi'.
  *

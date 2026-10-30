@@ -75,6 +75,9 @@
         if((*(pVal_) > (pSd_)->_max) || (*(pVal_) < (pSd_)->_min)) {                                    \
             return eSMART_DATA_ERROR_VALUE_OUT_OF_RANGE;                                                \
         }                                                                                               \
+        if(((pSd_)->_core.pIsValid != NULL) && ((pSd_)->_core.pIsValid(pVal_) == FALSE)) {              \
+            return eSMART_DATA_ERROR_VALUE_OUT_OF_RANGE;                                                \
+        }                                                                                               \
     } while(0)
 
 /**
@@ -532,6 +535,7 @@ eSmartDataStatus fSmartData_B8_Ctor(sSmartDataB8 * const me, bool_t defaultVal) 
 
     me->_core.TimestampUs = 0x0ULL;
     me->_core.LastReadTimestampUs = 0x0ULL;
+    me->_core.pIsValid = NULL;
 
     me->_core.ReadWriteStatus.UserFlags = UINT32_MAX;
     me->_core.ReadWriteStatus.HasBeenWrittenOnce = FALSE;
@@ -878,6 +882,7 @@ eSmartDataStatus fSmartData_U8_Ctor(sSmartDataU8 * const me, uint8_t minVal, uin
 
     me->_core.TimestampUs = 0x0ULL;
     me->_core.LastReadTimestampUs = 0x0ULL;
+    me->_core.pIsValid = NULL;
 
     me->_core.ReadWriteStatus.UserFlags = UINT32_MAX;
     me->_core.ReadWriteStatus.HasBeenWrittenOnce = FALSE;
@@ -1333,6 +1338,7 @@ eSmartDataStatus fSmartData_I8_Ctor(sSmartDataI8 * const me, int8_t minVal, int8
 
     me->_core.TimestampUs = 0x0ULL;
     me->_core.LastReadTimestampUs = 0x0ULL;
+    me->_core.pIsValid = NULL;
 
     me->_core.ReadWriteStatus.UserFlags = UINT32_MAX;
     me->_core.ReadWriteStatus.HasBeenWrittenOnce = FALSE;
@@ -1787,6 +1793,7 @@ eSmartDataStatus fSmartData_U16_Ctor(sSmartDataU16 * const me, uint16_t minVal, 
 
     me->_core.TimestampUs = 0x0ULL;
     me->_core.LastReadTimestampUs = 0x0ULL;
+    me->_core.pIsValid = NULL;
 
     me->_core.ReadWriteStatus.UserFlags = UINT32_MAX;
     me->_core.ReadWriteStatus.HasBeenWrittenOnce = FALSE;
@@ -2241,6 +2248,7 @@ eSmartDataStatus fSmartData_I16_Ctor(sSmartDataI16 * const me, int16_t minVal, i
 
     me->_core.TimestampUs = 0x0ULL;
     me->_core.LastReadTimestampUs = 0x0ULL;
+    me->_core.pIsValid = NULL;
 
     me->_core.ReadWriteStatus.UserFlags = UINT32_MAX;
     me->_core.ReadWriteStatus.HasBeenWrittenOnce = FALSE;
@@ -2695,6 +2703,7 @@ eSmartDataStatus fSmartData_U32_Ctor(sSmartDataU32 * const me, uint32_t minVal, 
 
     me->_core.TimestampUs = 0x0ULL;
     me->_core.LastReadTimestampUs = 0x0ULL;
+    me->_core.pIsValid = NULL;
 
     me->_core.ReadWriteStatus.UserFlags = UINT32_MAX;
     me->_core.ReadWriteStatus.HasBeenWrittenOnce = FALSE;
@@ -3149,6 +3158,7 @@ eSmartDataStatus fSmartData_I32_Ctor(sSmartDataI32 * const me, int32_t minVal, i
 
     me->_core.TimestampUs = 0x0ULL;
     me->_core.LastReadTimestampUs = 0x0ULL;
+    me->_core.pIsValid = NULL;
 
     me->_core.ReadWriteStatus.UserFlags = UINT32_MAX;
     me->_core.ReadWriteStatus.HasBeenWrittenOnce = FALSE;
@@ -3603,6 +3613,7 @@ eSmartDataStatus fSmartData_U64_Ctor(sSmartDataU64 * const me, uint64_t minVal, 
 
     me->_core.TimestampUs = 0x0ULL;
     me->_core.LastReadTimestampUs = 0x0ULL;
+    me->_core.pIsValid = NULL;
 
     me->_core.ReadWriteStatus.UserFlags = UINT32_MAX;
     me->_core.ReadWriteStatus.HasBeenWrittenOnce = FALSE;
@@ -4057,6 +4068,7 @@ eSmartDataStatus fSmartData_I64_Ctor(sSmartDataI64* const me, int64_t minVal, in
 
     me->_core.TimestampUs = 0x0ULL;
     me->_core.LastReadTimestampUs = 0x0ULL;
+    me->_core.pIsValid = NULL;
 
     me->_core.ReadWriteStatus.UserFlags = UINT32_MAX;
     me->_core.ReadWriteStatus.HasBeenWrittenOnce = FALSE;
@@ -4512,6 +4524,7 @@ eSmartDataStatus fSmartData_F32_Ctor(sSmartDataF32* const me, float32_t minVal, 
 
     me->_core.TimestampUs = 0x0ULL;
     me->_core.LastReadTimestampUs = 0x0ULL;
+    me->_core.pIsValid = NULL;
 
     me->_core.ReadWriteStatus.UserFlags = UINT32_MAX;
     me->_core.ReadWriteStatus.HasBeenWrittenOnce = FALSE;
@@ -4966,6 +4979,7 @@ eSmartDataStatus fSmartData_F64_Ctor(sSmartDataF64 * const me, float64_t minVal,
 
     me->_core.TimestampUs = 0x0ULL;
     me->_core.LastReadTimestampUs = 0x0ULL;
+    me->_core.pIsValid = NULL;
 
     me->_core.ReadWriteStatus.UserFlags = UINT32_MAX;
     me->_core.ReadWriteStatus.HasBeenWrittenOnce = FALSE;
@@ -5401,3 +5415,31 @@ eSmartDataStatus fSmartData_F64_GetValueSize(sSmartDataF64 * const me, size_t * 
 */
 
 /* === Copyright (c) 2026 FAS === EOF === */
+
+/*
+ * ┌──────────────────────────────────────────────────────────────────────────┐
+ * │                              ENUMERATIONS                                │
+ * └──────────────────────────────────────────────────────────────────────────┘
+ */
+
+/**
+ * @brief Makes a smart data object hold only the values *pIsValid* allows.
+ *
+ * For the object of an enumeration: its range is the smallest to the largest
+ * of its values, and this refuses the numbers in between that are none of
+ * them.  Every write - Write, WriteWithTimestampUs, SetDefaultValue, and the
+ * ...ByIndex functions through them - asks it after the range.  Call it after
+ * the constructor, which sets it back to NULL.
+ *
+ * @param me Pointer to the smart data object, of any type.
+ * @param pIsValid The check, or NULL for none.
+ * @return eSmartDataStatus eSMART_DATA_OK, or eSMART_DATA_ERROR_NULL_POINTER.
+ */
+eSmartDataStatus fSmartData_SetIsValid(void * const me, fSmartDataIsValid pIsValid) {
+
+    ASSERT_NOT_NULL_(me);
+
+    ((sSmartDataCore *)me)->pIsValid = pIsValid;
+
+    return eSMART_DATA_OK;
+}

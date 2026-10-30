@@ -5,9 +5,9 @@
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
   * Generator      : parameter_list_code_generator v01.03.01
-  * Generated at   : 2026-10-29 19:44:49 +0330
+  * Generated at   : 2026-10-30 08:55:22 +0330
   * Input file(s)  : parameter_lists/flight_parameters.xml
-  * Parameters     : 16 value(s) in 1 structure(s)
+  * Parameters     : 23 value(s) in 1 structure(s)
   ******************************************************************************
   * @attention
   *
@@ -51,6 +51,9 @@ extern sSmartDataI32 Cg_SmartData_AltitudeCm;  /*!< [cm] Altitude above sea leve
 extern sSmartDataF32 Cg_SmartData_Airspeed;  /*!< [m/s] Indicated airspeed. */
 extern sSmartDataF64 Cg_SmartData_HomeLatitude;  /*!< [deg] Latitude of the home point. */
 extern sCgStruct_sRezaSaeedi Cg_SmartData_RezaSaeedi;  /*!< The one behind the tool, as a structure. */
+extern sSmartDataU8 Cg_SmartData_nourooz[NOUROOZ_ARRAY_SIZE];
+extern sSmartDataU8 Cg_SmartData_nouroz2222;
+extern sSmartDataU8 Cg_SmartData_salam;
 
 #ifdef __cplusplus
 }

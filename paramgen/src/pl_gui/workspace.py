@@ -174,6 +174,16 @@ class Workspace:
         data = load_jsonc(PROJECT_TEMPLATE)
         data.setdefault("project", {})["name"] = name
         data.setdefault("output", {})["format"] = output_format
+        # The template holds a place for every tag's description; a new project
+        # gets only the ones written there - an empty one means nothing, and a
+        # file keeps no key that means nothing.  (Asked for.)
+        described = data.get("tag_descriptions")
+        if isinstance(described, dict):
+            described = {tag: text for tag, text in described.items() if str(text).strip()}
+            if described:
+                data["tag_descriptions"] = described
+            else:
+                del data["tag_descriptions"]
         target.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8", newline="\n")
 
         # The folder a project keeps its lists in, so the editor has somewhere

@@ -28,6 +28,9 @@ STRUCT_TEMPLATES = "StructTemplates"
 TYPES_ROOT = "ParameterListTypes"
 STRUCT_TYPE = "StructType"
 STRUCT_FIELD = "Field"
+#: <EnumType name="eFlightMode" baseType="uint8_t"><Value name="..." value="0"/></EnumType>
+ENUM_TYPE = "EnumType"
+ENUM_VALUE = "Value"
 SOURCE = "Source"
 LIMITS = "Limits"
 TAGS = "Tags"
@@ -55,6 +58,10 @@ ATTR_USER_NAME = "userName"
 ATTR_OLD_USER_NAME = "gsName"
 ATTR_TYPE = "type"
 ATTR_DATA_TYPE = "valueType"
+#: The enumeration a parameter or a field is; valueType is then its base type.
+ATTR_ENUM_TYPE = "enumType"
+#: The integer an enumeration is.
+ATTR_BASE_TYPE = "baseType"
 ATTR_ARRAY_SIZE = "size"
 #: What the size was called before - still read, never written.
 ATTR_OLD_ARRAY_SIZE = "arraySize"

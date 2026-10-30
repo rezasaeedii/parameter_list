@@ -108,6 +108,8 @@
 
     <button id="btn-types" class="btn" title="Declare, edit and delete structure types">
       Structure types…</button>
+    <button id="btn-enums" class="btn" title="Declare, edit and delete this sublist's enumerations">
+      Enum types…</button>
 
     <span class="bar-sep"></span>
     <button id="btn-duplicate" class="btn icon" title="Duplicate (Ctrl+D)">⧉</button>
@@ -238,6 +240,32 @@
       <span id="settings-count" class="settings-count"></span>
       <button id="settings-cancel" class="btn">Cancel</button>
       <button id="settings-apply" class="btn primary">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- Enum types: the open sublist's enumerations, one page each (app.js,
+     enumDialog).  Built like Project settings. -->
+<div id="enum-modal" class="modal hidden">
+  <div class="modal-card settings-card enum-card" role="dialog" aria-modal="true"
+       aria-labelledby="enum-title">
+    <div class="settings-head">
+      <div class="settings-heading">
+        <h3 id="enum-title">Enum types</h3>
+        <div id="enum-file" class="settings-file mono"></div>
+      </div>
+      <button id="enum-close" class="btn icon" title="Close">✕</button>
+    </div>
+    <div id="enum-alert" class="settings-alert" hidden></div>
+    <div class="settings-main">
+      <nav id="enum-nav" class="settings-nav" aria-label="Enumerations"></nav>
+      <section id="enum-page" class="settings-page"></section>
+    </div>
+    <div class="settings-foot">
+      <button id="enum-delete" class="btn danger">Delete</button>
+      <span id="enum-count" class="settings-count"></span>
+      <button id="enum-cancel" class="btn">Close</button>
+      <button id="enum-save" class="btn primary">Save</button>
     </div>
   </div>
 </div>

@@ -30,10 +30,12 @@ from __future__ import annotations
 
 from typing import List, Tuple
 
+from ...model.enum_type import EnumType
 from ...model.parameter import Parameter
 from ...model.parameter_list import PATH_SEPARATOR
 from ...model.struct_type import StructType
 from ...model.types import resolve_value_type
+from ..literals import integer_literal
 from .file_builder import FileBuilder
 
 BRIEF = "Structure types generated from the structure types of the parameter list."
@@ -68,6 +70,12 @@ class ParameterTypesHeader(FileBuilder):
 
         # ---- one typedef per structure type, inner types first -----------
         text += self.marker.generate("Exported types")
+
+        # ---- every enumeration first: a field or a value may be of one -----
+        for enum_type in self.model.struct_types.enums():
+            text += self._generate_enum(enum_type)
+            text += "\n"
+
         types = self.model.struct_types_in_use()
         if not types:
             text += self.comment.generate_line(
@@ -90,6 +98,45 @@ class ParameterTypesHeader(FileBuilder):
         text += self.guard.generate_close(self.guard_name)
         text += "\n"
         text += self.footer.generate()
+        return text
+
+    # -- one enumeration ------------------------------------------------------
+    def _generate_enum(self, enum_type: EnumType) -> str:
+        """``typedef``, one ``#define`` per value, and ``IS_VALID_<name>()``.  (Asked for.)
+
+        A typedef of the base type, not a C ``enum``: an ``enum``'s size is the
+        compiler's to choose, and this one has to be exactly the integer its
+        smart data object holds - so ``fSmartData_U8_Read(&obj, &mode)`` takes
+        a ``eFlightMode *`` as it is.  The check compares the value with every
+        value by name, never with a range: the values may have gaps, and
+        ``value >= 0`` on an unsigned type is a warning that -Werror turns into
+        an error.
+        """
+        base = resolve_value_type(enum_type.base_type_name)
+        name = enum_type.name
+        text = self.comment.generate_doc(
+            f"Enumeration '{name}': a {enum_type.base_type_name} that holds only the "
+            f"values below.")
+        text += f"typedef {enum_type.base_type_name} {name};\n\n"
+
+        width = max((len(item.name) for item in enum_type.values), default=0) + 2
+        for item in enum_type.values:
+            literal = integer_literal(item.value, base) if base else str(item.value)
+            text += f"#define {item.name:<{width}}(({name}){literal})\n"
+        text += "\n"
+
+        text += self.comment.generate_doc(
+            f"TRUE when *value_* is one of the values of '{name}'.",
+            notes=["It reads value_ once for every value: give it a plain variable, "
+                   "never x++ or a call."])
+        macro = f"#define IS_VALID_{name}(value_)"
+        if not enum_type.values:
+            return text + f"{macro}  (0)\n"
+        tests = [f"((value_) == {item.name})" for item in enum_type.values]
+        text += f"{macro}  ( \\\n"
+        for index, test in enumerate(tests):
+            joint = " || \\" if index < len(tests) - 1 else " )"
+            text += f"{self.tab}{test}{joint}\n"
         return text
 
     # -- one structure type ---------------------------------------------------

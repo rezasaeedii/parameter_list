@@ -46,6 +46,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field, replace
 from typing import Dict, List, Optional
 
+from .enum_type import EnumType
+
 
 @dataclass
 class StructField:
@@ -59,6 +61,9 @@ class StructField:
     name: str
     value_type_name: str = ""
     array_size: int = 1
+    #: The enumeration the field is, when it is one; ``value_type_name`` is
+    #: then its base type.  (Asked for.)
+    enum_type_name: str = ""
     #: Whether the field is generated at all.  The type's to say, not a
     #: parameter's: every parameter of a type has the same fields, which is
     #: what lets them share one C typedef.
@@ -108,14 +113,21 @@ class StructTypeLibrary:
     has to be told about.
     """
 
-    def __init__(self, types: Optional[List[StructType]] = None) -> None:
+    def __init__(self, types: Optional[List[StructType]] = None,
+                 enums: Optional[List[EnumType]] = None) -> None:
         self._types: Dict[str, StructType] = {}
         for struct_type in types or []:
             self._types[struct_type.name] = struct_type
+        #: The enumerations of the same list - kept here, beside the structure
+        #: types, because they live in the same file and travel the same way.
+        self._enums: Dict[str, EnumType] = {}
+        for enum_type in enums or []:
+            self._enums[enum_type.name] = enum_type
 
     # -- reading -----------------------------------------------------------
     def __len__(self) -> int:
-        return len(self._types)
+        """Structure types and enumerations: whether the types file has anything in it."""
+        return len(self._types) + len(self._enums)
 
     def __iter__(self):
         return iter(self.all())
@@ -151,7 +163,34 @@ class StructTypeLibrary:
         return True
 
     def copy(self) -> "StructTypeLibrary":
-        return StructTypeLibrary([item.copy() for item in self.all()])
+        return StructTypeLibrary([item.copy() for item in self.all()],
+                                 [item.copy() for item in self.enums()])
+
+    # -- enumerations ------------------------------------------------------
+    def enums(self) -> List[EnumType]:
+        """Every enumeration, by name."""
+        return [self._enums[name] for name in sorted(self._enums)]
+
+    def enum_names(self) -> List[str]:
+        return sorted(self._enums)
+
+    def get_enum(self, name: Optional[str]) -> Optional[EnumType]:
+        return self._enums.get(str(name)) if name else None
+
+    def put_enum(self, enum_type: EnumType) -> None:
+        """Add or replace one enumeration."""
+        self._enums[enum_type.name] = enum_type
+
+    def remove_enum(self, name: str) -> bool:
+        return self._enums.pop(name, None) is not None
+
+    def rename_enum(self, old: str, new: str) -> bool:
+        enum_type = self._enums.pop(old, None)
+        if enum_type is None:
+            return False
+        enum_type.name = new
+        self._enums[new] = enum_type
+        return True
 
     # -- merging -----------------------------------------------------------
     def merge(self, other: "StructTypeLibrary") -> List[str]:
@@ -170,6 +209,12 @@ class StructTypeLibrary:
                 clashes.append(struct_type.name)
             else:
                 self._types[struct_type.name] = struct_type.copy()
+        # an enumeration belongs to one list just the same
+        for enum_type in other.enums():
+            if enum_type.name in self._enums:
+                clashes.append(enum_type.name)
+            else:
+                self._enums[enum_type.name] = enum_type.copy()
         return clashes
 
     def uses_of(self, name: str) -> List[str]:

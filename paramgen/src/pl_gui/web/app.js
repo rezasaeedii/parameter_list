@@ -123,6 +123,9 @@ const app = {
     /* ...and the Address column only in a parameter table, which has one. */
     const address = gridView.columns.find((column) => column.key === "address");
     address.width = this.isParamTable() ? "84px" : "0px";
+    /* The values of this sublist's enumerations, for the rows that hold one. */
+    gridView.enums = Object.fromEntries(
+      (state.enumTypes || []).map((item) => [item.name, item.values]));
     /* What each free tag means in this project, for its column's heading. */
     for (const column of gridView.columns.filter((item) => item.tag)) {
       const spec = (state.tagSpecs || []).find((item) => item.id === column.tag);
@@ -214,6 +217,11 @@ ${this.formatName()}`
     button.disabled = table;
     button.title = table ? noStructures
                          : "Declare, edit and delete structure types";
+    const enumButton = document.getElementById("btn-enums");
+    enumButton.disabled = table;
+    enumButton.title = table
+      ? "Enumerations are a smart data feature - a parameter table has none."
+      : "Declare, edit and delete this sublist's enumerations";
 
     /* The menu item is dimmed rather than disabled: a disabled item swallows
        the click and says nothing, and "nothing happened" is the one answer a
@@ -556,6 +564,10 @@ ${question}`);
       types.disabled = true;
       types.title = "Structure types are kept beside a parameter sublist, and this "
                   + "project has none yet.";
+      const enums = document.getElementById("btn-enums");
+      enums.disabled = true;
+      enums.title = "Enumerations are kept beside a parameter sublist, and this "
+                  + "project has none yet.";
     }
     document.getElementById("btn-undo").disabled = frozen || !this.state.canUndo;
     document.getElementById("btn-redo").disabled = frozen || !this.state.canRedo;
@@ -861,14 +873,19 @@ ${item.file}
   renderDraftFields() {
     const valueTypes = this.state.defines.valueTypes || [];
     const structs = (this.state.structTypes || []).map((type) => type.name);
+    const enums = this.state.enumTypes || [];
     const body = document.getElementById("type-fields");
     if (!body) return;
     body.innerHTML = this.draftFields.map((field, index) => {
       const option = (value, group) =>
         `<option value="${escapeHtml(value)}"` +
-        `${value === field.valueType ? " selected" : ""}>${escapeHtml(value)}</option>`;
-      const nested = structs.length
-        ? `<optgroup label="Structure types">${structs.map(option).join("")}</optgroup>` : "";
+        `${value === field.valueType && !field.enumType ? " selected" : ""}>${escapeHtml(value)}</option>`;
+      const nested = (structs.length
+        ? `<optgroup label="Structure types">${structs.map(option).join("")}</optgroup>` : "") +
+        (enums.length ? `<optgroup label="Enumerations">${enums.map((item) =>
+          `<option value="enum:${escapeHtml(item.name)}"` +
+          `${item.name === field.enumType ? " selected" : ""}>${escapeHtml(item.name)}</option>`
+        ).join("")}</optgroup>` : "");
       return `<tr data-field-row="${index}">
         <td><input type="text" class="mono" data-f="name" value="${escapeHtml(field.name || "")}"></td>
         <td><select data-f="valueType">${valueTypes.map(option).join("")}${nested}</select></td>
@@ -914,6 +931,15 @@ ${item.file}
         this.draftFields[index][input.dataset.f] =
           input.type === "checkbox" ? input.checked
           : input.dataset.f === "arraySize" ? Number(input.value) || 1 : input.value;
+      }
+      /* an enumeration is chosen in the Data type list as "enum:<name>" */
+      const field = this.draftFields[index];
+      if (String(field.valueType || "").startsWith("enum:")) {
+        field.enumType = field.valueType.slice(5);
+        const found = (this.state.enumTypes || []).find((item) => item.name === field.enumType);
+        field.valueType = found ? found.baseType : "uint8_t";
+      } else {
+        field.enumType = "";
       }
     }
   },
@@ -1561,7 +1587,7 @@ ${item.file}
     const rows = types.map((type) => {
       const shape = type.fields.map((f) =>
         `${escapeHtml(f.name)}${f.arraySize > 1 ? `[${f.arraySize}]` : ""} : ` +
-        `${escapeHtml(f.valueType || "?")}${f.enable === false ? " (off)" : ""}`
+        `${escapeHtml(f.enumType || f.valueType || "?")}${f.enable === false ? " (off)" : ""}`
       ).join("<br>");
       const used = (type.usedHere || []).length;
       return `
@@ -1606,6 +1632,25 @@ ${item.file}
       });
     }
     if (openOn) this.editOneType(openOn);
+  },
+
+  /* Enum types: the open sublist's enumerations (enumDialog, below).  Saving
+     one changes every parameter of it, so the editor and the grid are read
+     again behind the dialog. */
+  editEnums(openOn) {
+    if (!this.state || !this.state.file) {
+      toast("Enumerations are kept beside a parameter sublist - open one first.", "bad");
+      return;
+    }
+    if (this.isParamTable()) {
+      toast("Enumerations are a smart data feature - a parameter table has none.", "bad");
+      return;
+    }
+    enumDialog.open(this.state, openOn, async (message) => {
+      await this.refresh();
+      toast(message, "good");
+      return this.state;
+    });
   },
 
   newType() {
@@ -1815,6 +1860,7 @@ ${item.file}
     });
 
     on("btn-types", () => this.editTypes());
+    on("btn-enums", () => this.editEnums());
     on("btn-clear-filters", () => {
       gridView.filters = {};
       document.getElementById("filter").value = "";
@@ -2906,6 +2952,347 @@ const settingsDialog = {
     }
     this.close();
     await this.onApplied(Object.keys(changes).length);
+  },
+};
+
+/* ------------------------------------------------------------ enumerations */
+/* The Enum types dialog: the open sublist's enumerations on the left, one
+   page each on the right - its name, its base type, its values in order,
+   and where it is used.  A page keeps what was
+   typed while another is looked at; Save writes the page shown.  (Asked for:
+   a window in the editor to declare an enumeration.) */
+const NEW_ENUM = "*new*";
+
+const enumDialog = {
+  enums: [],      // state.enumTypes as last read
+  bases: [],      // state.enumBaseTypes: [{name, min, max}]
+  drafts: {},     // page -> {name, baseType, values: [{name, value}]}
+  page: "",       // an enumeration's name, or NEW_ENUM
+  closing: false, // Close pressed once while a page had unsaved changes
+  onSaved: null,
+
+  open(state, openOn, onSaved) {
+    this.onSaved = onSaved;
+    this.drafts = {};
+    this.load(state);
+    this.page = openOn && this.find(openOn) ? openOn
+              : this.enums.length ? this.enums[0].name : NEW_ENUM;
+    this.alert("");
+    const modal = document.getElementById("enum-modal");
+    document.getElementById("enum-close").onclick = () => this.close();
+    document.getElementById("enum-cancel").onclick = () => this.close();
+    document.getElementById("enum-save").onclick = () => this.save();
+    document.getElementById("enum-delete").onclick = () => this.remove();
+    modal.onkeydown = (event) => { if (event.key === "Escape") this.close(); };
+    modal.classList.remove("hidden");
+    this.render();
+  },
+
+  load(state) {
+    this.enums = state.enumTypes || [];
+    this.bases = state.enumBaseTypes || [];
+    document.getElementById("enum-file").textContent = state.fileShown || state.file || "";
+  },
+
+  find(name) { return this.enums.find((item) => item.name === name); },
+
+  /* What a page holds before anything is typed into it. */
+  original(page) {
+    const found = this.find(page);
+    if (!found) return { name: "", baseType: "uint8_t", values: [{ name: "", value: "" }] };
+    return {
+      name: found.name, baseType: found.baseType,
+      values: found.values.map(([name, value]) => ({ name, value: String(value) })),
+    };
+  },
+
+  draft(page) {
+    if (!this.drafts[page]) this.drafts[page] = this.original(page);
+    return this.drafts[page];
+  },
+
+  changed(page) {
+    return Boolean(this.drafts[page]) &&
+      JSON.stringify(this.drafts[page]) !== JSON.stringify(this.original(page));
+  },
+
+  unsaved() {
+    return Object.keys(this.drafts).filter((page) => this.changed(page));
+  },
+
+  close() {
+    const unsaved = this.unsaved();
+    if (unsaved.length && !this.closing) {
+      this.closing = true;
+      this.alert(`${unsaved.map((page) => page === NEW_ENUM ? "The new enumeration"
+        : `'${page}'`).join(", ")} ${unsaved.length === 1 ? "has" : "have"} unsaved changes. ` +
+        "Save them, or press Close again to drop them.", "warn");
+      return;
+    }
+    this.closing = false;
+    document.getElementById("enum-modal").classList.add("hidden");
+  },
+
+  alert(message, kind) {
+    const box = document.getElementById("enum-alert");
+    box.hidden = !message;
+    box.className = `settings-alert ${kind || "bad"}`;
+    box.textContent = message || "";
+  },
+
+  render() {
+    const nav = document.getElementById("enum-nav");
+    const tab = (page, title, hint) => `<button type="button"
+        class="settings-tab${page === this.page ? " active" : ""}" data-page="${escapeHtml(page)}">
+        <span class="settings-tab-title mono">${escapeHtml(title)}${this.changed(page)
+          ? ` <span class="settings-dot" title="Not saved yet"></span>` : ""}</span>
+        <span class="settings-tab-hint">${escapeHtml(hint)}</span></button>`;
+    nav.innerHTML = this.enums.map((item) => {
+      const used = (item.usedHere || []).length;
+      return tab(item.name, item.name, `${item.baseType} · ${item.values.length} value${
+        item.values.length === 1 ? "" : "s"}${used ? ` · used ${used}×` : ""}`);
+    }).join("") + (this.enums.length ? `<div class="enum-nav-sep"></div>` : "") +
+      (this.page === NEW_ENUM || this.drafts[NEW_ENUM]
+        ? tab(NEW_ENUM, this.draft(NEW_ENUM).name || "New enumeration", "not saved yet")
+        : `<button type="button" class="btn settings-add enum-new" data-page="${NEW_ENUM}">
+             + New enumeration</button>`);
+    for (const item of nav.querySelectorAll("[data-page]")) {
+      item.onclick = () => {
+        this.page = item.dataset.page;
+        this.closing = false;
+        this.alert("");
+        this.render();
+      };
+    }
+    this.renderPage();
+    this.foot();
+  },
+
+  foot() {
+    const isNew = this.page === NEW_ENUM;
+    const deleteButton = document.getElementById("enum-delete");
+    deleteButton.hidden = isNew;
+    deleteButton.title = isNew ? "" : `Delete '${this.page}' - refused while anything uses it`;
+    const save = document.getElementById("enum-save");
+    save.textContent = isNew ? "Declare" : "Save";
+    save.disabled = !this.changed(this.page);
+    const unsaved = this.unsaved().length;
+    document.getElementById("enum-count").textContent = this.changed(this.page)
+      ? (isNew ? "Declare adds it to this sublist's types file."
+               : "Save changes it, and every parameter of it with it.")
+      : unsaved ? `${unsaved} other page${unsaved === 1 ? " has" : "s have"} unsaved changes.`
+      : "Nothing changed.";
+  },
+
+  renderPage() {
+    const page = this.page;
+    const draft = this.draft(page);
+    const found = this.find(page);
+    const base = this.bases.find((item) => item.name === draft.baseType) || this.bases[0] || {};
+    let html = `<h4 class="settings-page-title mono">${escapeHtml(found ? found.name
+        : (draft.name || "New enumeration"))}</h4>
+      <p class="settings-intro">A data type of this sublist that holds only the values
+        below. A parameter or a field of it is a <b>${escapeHtml(draft.baseType)}</b> to
+        the smart data functions, and every write of it refuses any other number.</p>`;
+
+    html += `<div class="settings-row"><div class="settings-label">
+        <label for="enum-name">Name</label>
+        <div class="settings-help">Becomes the <code>typedef</code> - a C name, free in the
+          whole project.</div></div>
+      <div class="settings-control"><input type="text" id="enum-name" class="mono"
+        data-enum="name" value="${escapeHtml(draft.name)}" placeholder="eFlightMode"
+        spellcheck="false" autocomplete="off"></div></div>`;
+
+    html += `<div class="settings-row"><div class="settings-label">
+        <label for="enum-base">Base type</label>
+        <div class="settings-help">The integer it is stored as.</div></div>
+      <div class="settings-control"><select id="enum-base" data-enum="baseType" class="mono">${
+        this.bases.map((item) => `<option value="${escapeHtml(item.name)}"${
+          item.name === draft.baseType ? " selected" : ""}>${escapeHtml(item.name)}</option>`).join("")
+      }</select><div class="settings-help" id="enum-range">${escapeHtml(base.min ?? "")} to ${
+        escapeHtml(base.max ?? "")}</div></div></div>`;
+
+    html += `<div class="settings-row wide"><div class="settings-label">
+        <label>Values</label>
+        <div class="settings-help">In order. A value without a number is the one after the
+          value above it; the first is 0. Every name becomes a <code>#define</code>.</div></div>
+      <div class="settings-control">${this.valueTable(draft)}</div></div>`;
+
+    if (found) {
+      const used = found.usedHere || [];
+      html += `<div class="settings-row"><div class="settings-label"><label>Used by</label>
+          <div class="settings-help">Delete is refused while anything uses it.</div></div>
+        <div class="settings-control">${used.length
+          ? `<div class="settings-files">${used.map((path) =>
+              `<span class="mono">${escapeHtml(path)}</span>`).join("")}</div>`
+          : `<div class="settings-empty">Nothing yet - choose it as a parameter's
+              <b>Data type</b>.</div>`}</div></div>`;
+    }
+
+    const host = document.getElementById("enum-page");
+    host.innerHTML = html;
+    this.wire(host);
+  },
+
+  /* name | number | moves, one row per value */
+  valueTable(draft) {
+    const numbers = this.numbers(draft);
+    const rows = draft.values.map((item, index) => `<div class="enum-value-row">
+        <span class="settings-list-index">${index + 1}</span>
+        <input type="text" class="mono enum-value-name" data-value-name="${index}"
+          value="${escapeHtml(item.name)}" placeholder="FLIGHT_MODE_MANUAL"
+          spellcheck="false" autocomplete="off">
+        <input type="text" class="mono enum-value-number" data-value-number="${index}"
+          value="${escapeHtml(item.value)}" placeholder="${escapeHtml(numbers[index] ?? "")}"
+          title="Empty: ${escapeHtml(numbers[index] ?? "the one after the value above")}"
+          spellcheck="false" autocomplete="off">
+        <button type="button" class="btn icon" data-move="-1" data-index="${index}"
+          title="Earlier"${index === 0 ? " disabled" : ""}>↑</button>
+        <button type="button" class="btn icon" data-move="1" data-index="${index}"
+          title="Later"${index === draft.values.length - 1 ? " disabled" : ""}>↓</button>
+        <button type="button" class="btn icon danger" data-drop="${index}"
+          title="Take this value away">✕</button></div>`).join("");
+    return `<div class="settings-list enum-values">
+      <div class="enum-value-head"><span></span><span>Name</span><span>Number</span></div>
+      ${rows || `<div class="settings-empty">No values - an enumeration needs one.</div>`}
+      <button type="button" class="btn settings-add" data-add-value="1">+ Add value</button></div>`;
+  },
+
+  /* The number of every row as the backend will count it: as typed, or the
+     one after the row above.  BigInt, since a uint64_t does not fit a Number;
+     null where the text is no number at all. */
+  numbers(draft) {
+    let following = 0n;
+    return draft.values.map((item) => {
+      const text = String(item.value || "").trim();
+      let number = following;
+      if (text) {
+        try { number = BigInt(text); } catch (error) { following = null; return null; }
+      } else if (following === null) {
+        return null;
+      }
+      following = number + 1n;
+      return number.toString();
+    });
+  },
+
+  /* Typing goes into the draft as it happens; the page is redrawn only when
+     its shape changes, so the caret stays where it is. */
+  wire(host) {
+    const draft = this.draft(this.page);
+    const typed = () => {
+      const numbers = this.numbers(draft);
+      for (const box of host.querySelectorAll("[data-value-number]")) {
+        const shown = numbers[Number(box.dataset.valueNumber)];
+        box.placeholder = shown ?? "";
+      }
+      const title = host.querySelector(".settings-page-title");
+      if (this.page === NEW_ENUM) title.textContent = draft.name || "New enumeration";
+      this.closing = false;
+      this.refreshNav();
+      this.foot();
+    };
+    host.querySelector("#enum-name").oninput = (event) => {
+      draft.name = event.target.value; typed();
+    };
+    host.querySelector("#enum-base").onchange = (event) => {
+      draft.baseType = event.target.value;
+      const base = this.bases.find((item) => item.name === draft.baseType) || {};
+      host.querySelector("#enum-range").textContent = `${base.min} to ${base.max}`;
+      typed();
+    };
+    for (const box of host.querySelectorAll("[data-value-name]")) {
+      box.oninput = () => { draft.values[Number(box.dataset.valueName)].name = box.value; typed(); };
+      box.onkeydown = (event) => {
+        if (event.key === "Enter") { event.preventDefault(); this.addValue(Number(box.dataset.valueName)); }
+      };
+    }
+    for (const box of host.querySelectorAll("[data-value-number]")) {
+      box.oninput = () => { draft.values[Number(box.dataset.valueNumber)].value = box.value; typed(); };
+      box.onkeydown = (event) => {
+        if (event.key === "Enter") { event.preventDefault(); this.addValue(Number(box.dataset.valueNumber)); }
+      };
+    }
+    for (const button of host.querySelectorAll("[data-move]")) {
+      button.onclick = () => {
+        const from = Number(button.dataset.index);
+        const to = from + Number(button.dataset.move);
+        draft.values.splice(to, 0, draft.values.splice(from, 1)[0]);
+        this.render();
+      };
+    }
+    for (const button of host.querySelectorAll("[data-drop]")) {
+      button.onclick = () => { draft.values.splice(Number(button.dataset.drop), 1); this.render(); };
+    }
+    host.querySelector("[data-add-value]").onclick = () => this.addValue(draft.values.length - 1);
+  },
+
+  /* a new empty row after *index*, with the caret in it */
+  addValue(index) {
+    const draft = this.draft(this.page);
+    draft.values.splice(index + 1, 0, { name: "", value: "" });
+    this.render();
+    const box = document.querySelector(`[data-value-name="${index + 1}"]`);
+    if (box) box.focus();
+  },
+
+  /* the dots on the left, without redrawing the page */
+  refreshNav() {
+    for (const tab of document.querySelectorAll("#enum-nav .settings-tab")) {
+      const title = tab.querySelector(".settings-tab-title");
+      const dot = title.querySelector(".settings-dot");
+      const changed = this.changed(tab.dataset.page);
+      if (tab.dataset.page === NEW_ENUM) {
+        title.firstChild.textContent = this.draft(NEW_ENUM).name || "New enumeration";
+      }
+      if (changed && !dot) title.insertAdjacentHTML("beforeend", ` <span class="settings-dot" title="Not saved yet"></span>`);
+      if (!changed && dot) dot.remove();
+    }
+  },
+
+  async save() {
+    const page = this.page;
+    const draft = this.draft(page);
+    let answer;
+    try {
+      answer = page === NEW_ENUM
+        ? await api.newEnum(draft.name.trim(), draft.baseType, draft.values)
+        : await api.updateEnum(page, { name: draft.name.trim(), baseType: draft.baseType,
+                                       values: draft.values });
+    } catch (error) {
+      this.alert(`Saving failed: ${error.message}`);
+      return;
+    }
+    if (!answer.ok) { this.alert(answer.message || "Not saved."); return; }
+    delete this.drafts[page];
+    const state = await this.onSaved(page === NEW_ENUM
+      ? `Enumeration '${answer.name}' declared.` : `Enumeration '${answer.name}' saved.`);
+    if (page !== answer.name && this.drafts[page]) delete this.drafts[page];
+    this.load(state);
+    this.page = answer.name;
+    this.closing = false;
+    this.alert("");
+    this.render();
+  },
+
+  async remove() {
+    const name = this.page;
+    if (name === NEW_ENUM) return;
+    let answer;
+    try {
+      answer = await api.deleteEnum(name);
+    } catch (error) {
+      this.alert(`Deleting failed: ${error.message}`);
+      return;
+    }
+    if (!answer.ok) { this.alert(answer.message || "Not deleted."); return; }
+    delete this.drafts[name];
+    const state = await this.onSaved(`Enumeration '${name}' deleted.`);
+    this.load(state);
+    this.page = this.enums.length ? this.enums[0].name : NEW_ENUM;
+    this.closing = false;
+    this.alert("");
+    this.render();
   },
 };
 

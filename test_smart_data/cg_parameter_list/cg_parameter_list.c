@@ -5,9 +5,9 @@
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
   * Generator      : parameter_list_code_generator v01.03.01
-  * Generated at   : 2026-10-29 19:44:49 +0330
+  * Generated at   : 2026-10-30 08:55:22 +0330
   * Input file(s)  : parameter_lists/flight_parameters.xml
-  * Parameters     : 16 value(s) in 1 structure(s)
+  * Parameters     : 23 value(s) in 1 structure(s)
   ******************************************************************************
   * @attention
   *
@@ -343,6 +343,139 @@ const sParameterDescriptor ParameterList[PARAMETER_LIST_QTY] = {
         .Tag3 = 0U,
         .Tag4 = 0U,
         .pDescription = "Hours of sleep last night."
+    },
+
+    /* [16] NOUROOZ_0 */
+    {
+        .pName = "nourooz[0]",
+        .pUserName = "hafte",
+        .Type = ePARAMETER_TYPE_MONITORING,
+        .pSmartData = (void *)&Cg_SmartData_nourooz[0],
+        .LogId = 110U,
+        .TagSystemName = (uint32_t)SYS_UNKNOWN,
+        .TagResetProof = (uint32_t)FALSE,
+        .TagLoggable = (uint32_t)TRUE,
+        .TagLogEncryption = (uint32_t)FALSE,
+        .TagParamMode = (uint32_t)PARAM_MODE_NONE,
+        .Tag1 = 0U,
+        .Tag2 = 0U,
+        .Tag3 = 0U,
+        .Tag4 = 0U,
+        .pDescription = ""
+    },
+
+    /* [17] NOUROOZ_1 */
+    {
+        .pName = "nourooz[1]",
+        .pUserName = "hafte",
+        .Type = ePARAMETER_TYPE_MONITORING,
+        .pSmartData = (void *)&Cg_SmartData_nourooz[1],
+        .LogId = 111U,
+        .TagSystemName = (uint32_t)SYS_UNKNOWN,
+        .TagResetProof = (uint32_t)FALSE,
+        .TagLoggable = (uint32_t)TRUE,
+        .TagLogEncryption = (uint32_t)FALSE,
+        .TagParamMode = (uint32_t)PARAM_MODE_NONE,
+        .Tag1 = 0U,
+        .Tag2 = 0U,
+        .Tag3 = 0U,
+        .Tag4 = 0U,
+        .pDescription = ""
+    },
+
+    /* [18] NOUROOZ_2 */
+    {
+        .pName = "nourooz[2]",
+        .pUserName = "hafte",
+        .Type = ePARAMETER_TYPE_MONITORING,
+        .pSmartData = (void *)&Cg_SmartData_nourooz[2],
+        .LogId = 112U,
+        .TagSystemName = (uint32_t)SYS_UNKNOWN,
+        .TagResetProof = (uint32_t)FALSE,
+        .TagLoggable = (uint32_t)TRUE,
+        .TagLogEncryption = (uint32_t)FALSE,
+        .TagParamMode = (uint32_t)PARAM_MODE_NONE,
+        .Tag1 = 0U,
+        .Tag2 = 0U,
+        .Tag3 = 0U,
+        .Tag4 = 0U,
+        .pDescription = ""
+    },
+
+    /* [19] NOUROOZ_3 */
+    {
+        .pName = "nourooz[3]",
+        .pUserName = "hafte",
+        .Type = ePARAMETER_TYPE_MONITORING,
+        .pSmartData = (void *)&Cg_SmartData_nourooz[3],
+        .LogId = 113U,
+        .TagSystemName = (uint32_t)SYS_UNKNOWN,
+        .TagResetProof = (uint32_t)FALSE,
+        .TagLoggable = (uint32_t)TRUE,
+        .TagLogEncryption = (uint32_t)FALSE,
+        .TagParamMode = (uint32_t)PARAM_MODE_NONE,
+        .Tag1 = 0U,
+        .Tag2 = 0U,
+        .Tag3 = 0U,
+        .Tag4 = 0U,
+        .pDescription = ""
+    },
+
+    /* [20] NOUROOZ_4 */
+    {
+        .pName = "nourooz[4]",
+        .pUserName = "hafte",
+        .Type = ePARAMETER_TYPE_MONITORING,
+        .pSmartData = (void *)&Cg_SmartData_nourooz[4],
+        .LogId = 114U,
+        .TagSystemName = (uint32_t)SYS_UNKNOWN,
+        .TagResetProof = (uint32_t)FALSE,
+        .TagLoggable = (uint32_t)TRUE,
+        .TagLogEncryption = (uint32_t)FALSE,
+        .TagParamMode = (uint32_t)PARAM_MODE_NONE,
+        .Tag1 = 0U,
+        .Tag2 = 0U,
+        .Tag3 = 0U,
+        .Tag4 = 0U,
+        .pDescription = ""
+    },
+
+    /* [21] NOUROZ2222 */
+    {
+        .pName = "nouroz2222",
+        .pUserName = "",
+        .Type = ePARAMETER_TYPE_MONITORING,
+        .pSmartData = (void *)&Cg_SmartData_nouroz2222,
+        .LogId = 0U,
+        .TagSystemName = (uint32_t)SYS_UNKNOWN,
+        .TagResetProof = (uint32_t)FALSE,
+        .TagLoggable = (uint32_t)FALSE,
+        .TagLogEncryption = (uint32_t)FALSE,
+        .TagParamMode = (uint32_t)PARAM_MODE_NONE,
+        .Tag1 = 0U,
+        .Tag2 = 0U,
+        .Tag3 = 0U,
+        .Tag4 = 0U,
+        .pDescription = ""
+    },
+
+    /* [22] SALAM */
+    {
+        .pName = "salam",
+        .pUserName = "",
+        .Type = ePARAMETER_TYPE_MONITORING,
+        .pSmartData = (void *)&Cg_SmartData_salam,
+        .LogId = 0U,
+        .TagSystemName = (uint32_t)SYS_UNKNOWN,
+        .TagResetProof = (uint32_t)FALSE,
+        .TagLoggable = (uint32_t)FALSE,
+        .TagLogEncryption = (uint32_t)FALSE,
+        .TagParamMode = (uint32_t)PARAM_MODE_NONE,
+        .Tag1 = 0U,
+        .Tag2 = 0U,
+        .Tag3 = 0U,
+        .Tag4 = 0U,
+        .pDescription = ""
     }
 };
 

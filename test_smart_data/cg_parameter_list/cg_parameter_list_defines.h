@@ -5,9 +5,9 @@
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
   * Generator      : parameter_list_code_generator v01.03.01
-  * Generated at   : 2026-10-29 19:44:49 +0330
+  * Generated at   : 2026-10-30 08:55:22 +0330
   * Input file(s)  : parameter_lists/flight_parameters.xml
-  * Parameters     : 16 value(s) in 1 structure(s)
+  * Parameters     : 23 value(s) in 1 structure(s)
   ******************************************************************************
   * @attention
   *
@@ -34,7 +34,7 @@ extern "C" {
 
 /* Exported defines --------------------------------------------------------- */
 /* Number of parameters in the parameter list */
-#define PARAMETER_LIST_QTY  (16U)  /*!< Number of enabled parameters */
+#define PARAMETER_LIST_QTY  (23U)  /*!< Number of enabled parameters */
 
 /* Index of every parameter inside the parameter list */
 #define ENGINE_ON                        (0U)   /*!< bool_t */
@@ -53,14 +53,22 @@ extern "C" {
 #define REZA_SAEEDI_COFFEE_CUPS_PER_DAY  (13U)  /*!< uint8_t [cup] */
 #define REZA_SAEEDI_BUGS_FIXED_TODAY     (14U)  /*!< uint32_t */
 #define REZA_SAEEDI_SLEEP_HOURS          (15U)  /*!< float32_t [h] */
+#define NOUROOZ_0                        (16U)  /*!< uint8_t (element 0 of 5) */
+#define NOUROOZ_1                        (17U)  /*!< uint8_t (element 1 of 5) */
+#define NOUROOZ_2                        (18U)  /*!< uint8_t (element 2 of 5) */
+#define NOUROOZ_3                        (19U)  /*!< uint8_t (element 3 of 5) */
+#define NOUROOZ_4                        (20U)  /*!< uint8_t (element 4 of 5) */
+#define NOUROZ2222                       (21U)  /*!< uint8_t */
+#define SALAM                            (22U)  /*!< uint8_t */
 
 /* Array size of every array parameter */
 #define CELL_TEMPERATURE_ARRAY_SIZE  (4U)  /*!< Number of elements of 'CellTemperature' */
+#define NOUROOZ_ARRAY_SIZE           (5U)  /*!< Number of elements of 'nourooz' */
 
 /* Total size used by every tag */
-#define PARAMETER_LIST_TAG_SYSTEM_NAME_SIZE  (44U)  /*!< Bytes used by tag 'SystemName' (16 parameter(s)) */
-#define PARAMETER_LIST_TAG_LOGGABLE_SIZE     (24U)  /*!< Bytes used by tag 'Loggable' (10 parameter(s)) */
-#define PARAMETER_LIST_TAG_PARAM_MODE_SIZE   (44U)  /*!< Bytes used by tag 'ParamMode' (16 parameter(s)) */
+#define PARAMETER_LIST_TAG_SYSTEM_NAME_SIZE  (51U)  /*!< Bytes used by tag 'SystemName' (23 parameter(s)) */
+#define PARAMETER_LIST_TAG_LOGGABLE_SIZE     (29U)  /*!< Bytes used by tag 'Loggable' (15 parameter(s)) */
+#define PARAMETER_LIST_TAG_PARAM_MODE_SIZE   (51U)  /*!< Bytes used by tag 'ParamMode' (23 parameter(s)) */
 
 /* Values of the 'SYSTEM NAMES' drop-down list (kept where already defined) */
 #ifndef SYS_UNKNOWN

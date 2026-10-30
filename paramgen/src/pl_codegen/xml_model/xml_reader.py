@@ -161,6 +161,7 @@ def _read_parameter(element: ET.Element, path: Path,
                            else element.get(sch.ATTR_OLD_USER_NAME))
     parameter.param_type = element.get(sch.ATTR_TYPE)
     parameter.value_type_name = element.get(sch.ATTR_DATA_TYPE)
+    parameter.enum_type_name = (element.get(sch.ATTR_ENUM_TYPE) or "").strip() or None
     parameter.unit = element.get(sch.ATTR_UNIT)
     # 'size'; a list written before the rename says 'arraySize' and reads
     # the same - the next save writes 'size'.

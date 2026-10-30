@@ -326,7 +326,8 @@ const editorView = {
     if (node.isField) {
       html += this.readOnly("Name", node.name);
       html += this.userNameField(node);
-      html += this.readOnly("Data type", node.valueType);
+      html += this.readOnly("Data type", node.enumType
+        ? `${node.enumType} (${node.valueType})` : node.valueType);
       html += this.readOnly("Size", node.arraySize);
       html += this.text("unit", "Unit", node.unit);
       html += this.readOnly("Enabled", node.enable ? "yes" : "no");
@@ -363,11 +364,22 @@ const editorView = {
     }
 
     html += `<div class="field-group"><h3>Value</h3><div class="grid">`;
+    const enumType = node.enumType
+      ? (state.enumTypes || []).find((item) => item.name === node.enumType) : null;
     if (isBool) {
       html += this.select("default_value", "Default value",
         node.defaultValue ? "true" : "false", ["false", "true"]);
       html += `<div class="field"><label>Range</label>
         <span class="hint">bool_t has no minimum, maximum or resolution.</span></div>`;
+    } else if (enumType) {
+      html += this.enumDefault(node, enumType);
+      html += this.readOnly("Minimum", this.enumValueText(enumType, node.minimum));
+      html += this.readOnly("Maximum", this.enumValueText(enumType, node.maximum));
+      html += this.readOnly("Resolution", node.resolution ?? 1);
+      html += `<div class="field"><label>&nbsp;</label>
+        <span class="hint">An enumeration holds only its values: the range is its
+        smallest to its largest, and every write refuses the numbers between them
+        that are none of them.</span></div>`;
     } else {
       html += this.number("default_value", "Default value", node.defaultValue);
       html += this.number("minimum", "Minimum", node.minimum);
@@ -438,11 +450,42 @@ const editorView = {
         ${hint}</div>`;
     }
 
-    const options = optionList(state.defines.valueTypes || [], node.valueType, true);
+    /* the sublist's own enumerations after the data types, each as
+       "enum:<name>" - choosing one sends the enumeration and its base type */
+    const enums = state.enumTypes || [];
+    const options = node.enumType
+      ? optionList(state.defines.valueTypes || [], null, true)
+      : optionList(state.defines.valueTypes || [], node.valueType, true);
+    const enumOptions = enums.length
+      ? `<optgroup label="Enumerations">${enums.map((item) =>
+          `<option value="enum:${escapeHtml(item.name)}"` +
+          `${item.name === node.enumType ? " selected" : ""}>` +
+          `${escapeHtml(item.name)} (${escapeHtml(item.baseType)})</option>`).join("")}</optgroup>`
+      : "";
     return `<div class="field"><label>Data type <span class="req">*</span></label>
-      <select data-field="value_type_name" data-type-select="1">${options}</select>
-      <span class="hint">What this one value holds. To hold fields instead, add a
+      <select data-field="value_type_name" data-type-select="1">${options}${enumOptions}</select>
+      <span class="hint">What this one value holds - a data type, or one of this
+      sublist's enumerations (Enum types…). To hold fields instead, add a
       structure.</span></div>`;
+  },
+
+  /* The default of an enumeration: one of its values, by name. */
+  enumDefault(node, enumType) {
+    const options = enumType.values.map(([name, number]) =>
+      `<option value="${number}"${Number(node.defaultValue) === number ? " selected" : ""}>` +
+      `${escapeHtml(name)} (${number})</option>`).join("");
+    const known = enumType.values.some(([, number]) => Number(node.defaultValue) === number);
+    const stray = known || node.defaultValue == null ? ""
+      : `<option value="${escapeHtml(node.defaultValue)}" selected>${escapeHtml(node.defaultValue)}
+         - none of its values</option>`;
+    return `<div class="field"><label>Default value</label>
+      <select data-field="default_value">${stray}${options}</select></div>`;
+  },
+
+  /* "FLIGHT_MODE_LAND (6)" for a number that is a value of *enumType* */
+  enumValueText(enumType, number) {
+    const found = enumType.values.find(([, value]) => value === Number(number));
+    return found ? `${found[0]} (${found[1]})` : (number ?? "");
   },
 
   /* ------------------------------------------- what a field inherits */
@@ -743,6 +786,19 @@ const editorView = {
       // A structure's type is an action - it reshapes the parameter - and is
       // handled in wire(); it must never ride along in an ordinary edit.
       if (name === "value_type_name" && this.node.isStruct) continue;
+      // The data type list holds the enumerations too, as "enum:<name>".
+      if (name === "value_type_name") {
+        if (raw.startsWith("enum:")) {
+          const enumName = raw.slice(5);
+          const found = (this.state.enumTypes || []).find((item) => item.name === enumName);
+          changes.enum_type_name = enumName;
+          changes.value_type_name = found ? found.baseType : this.node.valueType;
+        } else {
+          changes.enum_type_name = null;
+          changes.value_type_name = raw === "" ? null : raw;
+        }
+        continue;
+      }
 
       if (name === "default_value" && isBool) { changes[name] = raw === "true"; continue; }
       if (name === "array_size") { changes[name] = raw === "" ? 1 : parseInt(raw, 10); continue; }

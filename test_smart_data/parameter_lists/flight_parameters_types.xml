@@ -6,4 +6,16 @@
     <Field name="BugsFixedToday" valueType="uint32_t" />
     <Field name="SleepHours" valueType="float32_t" />
   </StructType>
+  <EnumType name="eWeek" baseType="uint8_t">
+    <Value name="shanbe" value="1" />
+    <Value name="yeshanbe" value="2" />
+    <Value name="doshanbe" value="3" />
+    <Value name="seshanbe" value="4" />
+    <Value name="charshanbe" value="5" />
+    <Value name="panjshanbe" value="6" />
+    <Value name="jome" value="7" />
+  </EnumType>
+  <EnumType name="esalam" baseType="uint8_t">
+    <Value name="w" value="1" />
+  </EnumType>
 </ParameterListTypes>

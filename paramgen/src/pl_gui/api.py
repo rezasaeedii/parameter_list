@@ -18,6 +18,7 @@ from pl_codegen.config import FORMAT_PARAM_TABLE, FORMAT_SMART_DATA, relative_to
 from pl_codegen.errors import CodeGeneratorError, DiagnosticCollector
 from pl_codegen.model.defines import (COLUMN_TYPES, COLUMN_PARAM_MODES, COLUMN_SYSTEM_NAMES,
                                       COLUMN_VALUE_TYPES)
+from pl_codegen.model.enum_type import ENUM_BASE_TYPES
 from pl_codegen.model.parameter import Parameter, element_key
 from pl_codegen.model.parameter_list import PATH_SEPARATOR, ParameterList
 from pl_codegen.naming import strip_array_indices
@@ -101,6 +102,9 @@ class Api:
             "update_type": self.update_type,
             "delete_type": self.delete_type,
             "use_type": self.use_type,
+            "new_enum": self.new_enum,
+            "update_enum": self.update_enum,
+            "delete_enum": self.delete_enum,
         }
 
     # -- reading -------------------------------------------------------------
@@ -178,6 +182,10 @@ class Api:
             # the open list's own structure types, for the Structure types panel
             # and for the "Data type" list of a structure parameter
             "structTypes": document.struct_types(),
+            # the open list's own enumerations, for the Enum types dialog and
+            # the data type list - and the integers one may be  (Asked for.)
+            "enumTypes": document.enum_types(),
+            "enumBaseTypes": _enum_bases(),
             # A free tag the project describes reads "Tag1 : Saveable" wherever
             # the editor names it, and its tooltip is that meaning.  (Asked for.)
             "tagSpecs": [
@@ -531,9 +539,12 @@ class Api:
                                "it to drop them - applying re-reads the whole project, "
                                "and that would lose them."}
         try:
-            if changes:
+            if changes or project_settings.holds_empty_values(path):
+                # with nothing changed, only what means nothing is taken out -
+                # of the file as it is now
                 text, _old = project_settings.new_text(
-                    path, str(request.get("fingerprint") or ""), changes)
+                    path, str(request.get("fingerprint") or "") if changes else None,
+                    changes)
                 config = project_settings.load_candidate(path, text)
                 try:
                     document.check_new_build(config.inputs.model_files)
@@ -628,6 +639,27 @@ class Api:
         except (ValueError, OSError, CodeGeneratorError) as error:
             return {"ok": False, "message": str(error)}
         return {"ok": True, "paths": [str(path) for path in chosen]}
+
+    # -- enumerations ---------------------------------------------------------
+    def new_enum(self, request: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            name = self.document.create_enum_type(request.get("name"), request.get("baseType"),
+                                                  request.get("values"))
+        except (ValueError, CodeGeneratorError) as error:
+            return {"ok": False, "message": str(error)}
+        return {"ok": True, "name": name}
+
+    def update_enum(self, request: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            name = self.document.update_enum_type(str(request.get("name") or ""),
+                                                  request.get("changes") or {})
+        except (ValueError, CodeGeneratorError) as error:
+            return {"ok": False, "message": str(error)}
+        return {"ok": True, "name": name}
+
+    def delete_enum(self, request: Dict[str, Any]) -> Dict[str, Any]:
+        removed, why = self.document.delete_enum_type(str(request.get("name") or ""))
+        return {"ok": removed, "message": why}
 
     # -- structure types ------------------------------------------------------
     def new_type(self, request: Dict[str, Any]) -> Dict[str, Any]:
@@ -773,6 +805,16 @@ def _row(rows: List[RowValues], position: int) -> RowValues:
     return rows[position] if position < len(rows) else {}
 
 
+def _enum_bases() -> List[Dict[str, str]]:
+    """The integers an enumeration may be, with the range the Enum types
+    dialog shows under each.  As text - a uint64_t's maximum is more than a
+    JavaScript number holds."""
+    return [{"name": name,
+             "min": str(int(VALUE_TYPES[name].native_min)),
+             "max": str(int(VALUE_TYPES[name].native_max))}
+            for name in ENUM_BASE_TYPES]
+
+
 def _numbers_of(defines: Any) -> Dict[str, List[List[Any]]]:
     """``{"systemNames": [["SYS_UNKNOWN", 0], ...], "paramModes": [...]}``.
 
@@ -842,6 +884,7 @@ def _node(parameter: Parameter, path: str,
         "address": parameter.address,
         "paramType": parameter.param_type,
         "valueType": parameter.value_type_name,
+        "enumType": parameter.enum_type_name,
         "arraySize": parameter.array_size,
         "defaultValue": parameter.default_value,
         "minimum": parameter.minimum,

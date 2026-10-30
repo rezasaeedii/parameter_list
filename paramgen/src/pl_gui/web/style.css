@@ -527,6 +527,30 @@ html, body {
 .settings-foot { display: flex; align-items: center; gap: 8px; padding: 12px 18px;
   border-top: 1px solid var(--line-soft); background: var(--surface-2); }
 .settings-count { flex: 1; font-size: 11.5px; color: var(--ink-soft); }
+/* ------------------------------------------------------------- enum types */
+/* Built on the Project settings dialog; only the values table is its own.
+   (app.js, enumDialog) */
+.enum-nav-sep { height: 1px; background: var(--line-soft); margin: 8px 4px; }
+.settings-nav .enum-new { align-self: stretch; text-align: left; margin: 0; }
+.enum-values { max-width: 620px; }
+.enum-value-head, .enum-value-row {
+  display: grid; grid-template-columns: 18px minmax(0, 1fr) 132px repeat(3, 30px);
+  gap: 6px; align-items: center;
+}
+.enum-value-head { font-size: 11px; color: var(--ink-faint); font-weight: 600; }
+.enum-value-head span:nth-child(2) { grid-column: 2; }
+.enum-value-head span:nth-child(3) { grid-column: 3; }
+.enum-value-row .settings-list-index { padding-top: 0; }
+.settings-card .enum-value-row input[type=text] {
+  font-family: var(--mono); font-size: 12.5px; width: 100%; min-width: 0; padding: 6px 9px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--ink);
+}
+.settings-card .enum-value-row input[type=text]:focus { outline: none;
+  border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.settings-card .enum-value-row input::placeholder { color: var(--ink-faint); }
+.enum-card .settings-foot #enum-delete[hidden] { display: none; }
+
 /* the "(21)" next to a list label, so a truncated list is obvious */
 .count { font-family: var(--mono); color: var(--accent); }
 .file-list { font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft);

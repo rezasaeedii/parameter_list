@@ -42,7 +42,10 @@ const gridView = {
     { key: "valueType", label: "Value type", width: "134px", mono: true },
     { key: "array",    label: "Size",      width: "54px" },
     { key: "unit",     label: "Unit",      width: "68px" },
-    { key: "def",      label: "Default",   width: "82px", mono: true },
+    /* wide enough for an enumeration value's name - FLIGHT_MODE_MANUAL - which
+       82px cut to FLIGHT_MO...  A fixed width: every row is a grid of its own,
+       so a width that follows the text would put each row's columns elsewhere. */
+    { key: "def",      label: "Default",   width: "150px", mono: true },
     { key: "min",      label: "Min",       width: "82px", mono: true },
     { key: "max",      label: "Max",       width: "82px", mono: true },
     { key: "res",      label: "Res",       width: "88px", mono: true },
@@ -89,6 +92,10 @@ const gridView = {
 
   //: the header and filter row as last drawn - kept while they stay the same
   drawnTop: "",
+
+  //: enumeration name -> its values as [name, number], set by app.paint():
+  //: a value of one shows its enumeration and its value's NAME, not a number
+  enums: {},
 
   init(element, onSelect, onToggleEnable) {
     this.element = element;
@@ -196,6 +203,14 @@ const gridView = {
   /* Structures open by default - the shape is the thing you came to see.
      Arrays start closed, because sixteen elements would bury everything else.
      `toggled` holds only the ones the reader flipped away from that default. */
+  /* The name of *value* in the enumeration *enumType* - or the number as
+     every other row shows it, when there is none to name. */
+  enumName(enumType, value) {
+    const found = enumType && (this.enums[enumType] || [])
+      .find(([, number]) => number === Number(value));
+    return found ? found[0] : fmtNumber(value);
+  },
+
   isOpen(path, isArray) {
     if (this.forceOpen.has(path)) return true;
     const byDefault = !isArray;
@@ -249,10 +264,11 @@ const gridView = {
         address: node.isField ? "" : String(node.address ?? 0),
         paramType: (node.isField ? node.effectiveType : node.paramType) || "",
         kind: isStruct ? "struct" : "value",   // not a column; the row's look
-        valueType: node.valueType || "",
+        valueType: node.enumType || node.valueType || "",
         array: shape.isArray ? String(node.arraySize) : "",
         unit: node.unit || "",
-        def: shape.leaf || !isStruct ? fmtNumber(node.defaultValue) : "",
+        def: shape.leaf || !isStruct
+          ? this.enumName(node.enumType, node.defaultValue) : "",
         min: shape.leaf || !isStruct ? fmtNumber(node.minimum) : "",
         max: shape.leaf || !isStruct ? fmtNumber(node.maximum) : "",
         res: shape.leaf || !isStruct ? fmtNumber(node.resolution) : "",

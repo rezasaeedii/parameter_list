@@ -241,6 +241,67 @@ def set_json_value(text: str, path: Tuple[str, ...], value: object,
     return text
 
 
+def remove_json_value(text: str, path: Tuple[str, ...]) -> str:
+    """*text* without the member at *path*; unchanged when the file has none.
+
+    The member's own line goes with it, and the comma that kept it apart from
+    its neighbour - the one after it, or the one before when it was the last.
+    A section the removal leaves with nothing in it, not even a comment, goes
+    too: a key that means nothing has no place in the file.  (Asked for: an
+    emptied tag description stayed in the file as "".)  *text* has ``\\n``
+    line endings, as for :func:`set_json_value`.
+    """
+    start = _space(text, 0)
+    if start >= len(text) or text[start] != "{":
+        raise CodeGeneratorError("The project file does not hold a JSON object.")
+    obj = start
+    for depth, key in enumerate(path):
+        members, close = _members(text, obj)
+        index = next((number for number, item in enumerate(members) if item[0] == key), None)
+        if index is None:
+            return text
+        if depth < len(path) - 1:
+            value_start = members[index][2]
+            if text[value_start] != "{":
+                return text
+            obj = value_start
+            continue
+        text = _cut_member(text, members, index)
+        if depth > 0:
+            members, close = _members(text, obj)
+            if not members and not text[obj + 1:close].strip():
+                return remove_json_value(text, path[:-1])
+    return text
+
+
+def _cut_member(text: str, members: list, index: int) -> str:
+    """*text* without ``members[index]``, its line and its comma."""
+    _, key_start, _, value_end = members[index]
+    line_start = text.rfind("\n", 0, key_start) + 1
+    own_line = not text[line_start:key_start].strip()
+    end = value_end
+    while end < len(text) and text[end] in " \t":
+        end += 1
+    has_comma = end < len(text) and text[end] == ","
+    if has_comma:
+        end += 1
+        while end < len(text) and text[end] in " \t":
+            end += 1
+    if text.startswith("//", end):
+        end = _skip_line_comment(text, end)        # a note on its line is its own
+    if own_line and (end >= len(text) or text[end] == "\n"):
+        start, end = line_start, min(end + 1, len(text))
+    else:
+        start = key_start
+    cut = text[:start] + text[end:]
+    if not has_comma and index > 0:
+        # it was the last: the comma after the one before it goes instead
+        comma = _space(text, members[index - 1][3])
+        if comma < start and text[comma] == ",":
+            cut = cut[:comma] + cut[comma + 1:]
+    return cut
+
+
 def _insert_member(text: str, obj: int, members: list, close: int,
                    key: str, value: object) -> str:
     """*text* with ``"key": value`` added as the last member of the object at *obj*."""

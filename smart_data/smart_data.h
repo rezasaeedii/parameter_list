@@ -162,9 +162,26 @@ typedef struct {
  * @brief
  *
  */
+/**
+ * @brief Decides whether a value is one a smart data object may hold.
+ *
+ * Set on the object of an enumeration (see fSmartData_SetIsValid): every write
+ * then refuses a value this answers FALSE for, even one inside the range.
+ *
+ * @param pValue The value, of the object's own type.
+ * @return bool_t TRUE when the value is allowed.
+ */
+typedef bool_t (*fSmartDataIsValid)(const void *pValue);
+
+/**
+ * @brief
+ *
+ */
 typedef struct {
 
     sSmartDataTypeInfo TypeInfo;
+
+    fSmartDataIsValid pIsValid;     /*!< NULL, or which values the object may hold (an enumeration). In the 32-bit padding gap: no extra RAM. */
 
     uint64_t TimestampUs;
 
@@ -785,6 +802,13 @@ eSmartDataStatus fSmartData_F64_GetSmartDataSize(sSmartDataF64 * const me, size_
 eSmartDataStatus fSmartData_F64_GetValueSize(sSmartDataF64 * const me, size_t *pOutSize);
 
 /* Exported variables ------------------------------------------------------- */
+
+/*
+ * ┌──────────────────────────────────────────────────────────────────────────┐
+ * │                              ENUMERATIONS                                │
+ * └──────────────────────────────────────────────────────────────────────────┘
+ */
+eSmartDataStatus fSmartData_SetIsValid(void * const me, fSmartDataIsValid pIsValid);
 
 #ifdef __cplusplus
 }

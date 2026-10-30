@@ -74,4 +74,9 @@ const api = {
   updateType(name, changes)  { return this.call("update_type", { name, changes }); },
   deleteType(name)           { return this.call("delete_type", { name }); },
   useType(path, name)        { return this.call("use_type", { path, name }); },
+  newEnum(name, baseType, values) {
+    return this.call("new_enum", { name, baseType, values });
+  },
+  updateEnum(name, changes)  { return this.call("update_enum", { name, changes }); },
+  deleteEnum(name)           { return this.call("delete_enum", { name }); },
 };

@@ -27,6 +27,7 @@ from __future__ import annotations
 
 from typing import List, Optional, Set
 
+from .enum_type import fit_limits
 from .parameter import Parameter, ParameterKind
 from .types import resolve_value_type
 from .struct_type import StructField, StructType, StructTypeLibrary
@@ -44,6 +45,9 @@ def _reshape(node: Parameter, library: StructTypeLibrary, busy: Set[str]) -> Non
         # parameter somebody turned back into a value, and keeping them would
         # leave invisible rows in the generated table.
         node.children = []
+        # A value of an enumeration takes its base type and its range from it.
+        if node.enum_type_name:
+            fit_limits(node, library.get_enum(node.enum_type_name))
         return
 
     struct_type = library.get(node.value_type_name)
@@ -82,6 +86,7 @@ def _apply_field(child: Parameter, member: StructField) -> None:
     """Put the type's half onto *child*, leaving the parameter's half alone."""
     child.name = member.name
     child.value_type_name = member.value_type_name or None
+    child.enum_type_name = member.enum_type_name or None
     child.array_size = max(1, int(member.array_size or 1))
     child.enable = bool(member.enable)
     # The unit and the description are left exactly as they are: they say what

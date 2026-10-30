@@ -34,6 +34,7 @@ from typing import Optional
 
 from .. import __tool_name__, __version__
 from ..errors import CodeGeneratorError, DiagnosticCollector, SourceLocation
+from ..model.enum_type import EnumType, EnumValue
 from ..model.struct_type import StructField, StructType, StructTypeLibrary
 from . import schema as sch
 
@@ -142,6 +143,7 @@ def read_types(path: Path, diagnostics: Optional[DiagnosticCollector] = None
             struct_type.fields.append(StructField(
                 name=member_name,
                 value_type_name=(member_element.get(sch.ATTR_DATA_TYPE) or "").strip(),
+                enum_type_name=(member_element.get(sch.ATTR_ENUM_TYPE) or "").strip(),
                 array_size=_to_int(_size_of(member_element), 1),
                 enable=_to_bool(member_element.get(sch.ATTR_ENABLE), True)))
 
@@ -155,7 +157,54 @@ def read_types(path: Path, diagnostics: Optional[DiagnosticCollector] = None
                          "or delete the copy.")
             continue
         library.put(struct_type)
+
+    for element in root.findall(sch.ENUM_TYPE):
+        enum_type = _read_enum(element, path, diagnostics)
+        if enum_type is None:
+            continue
+        if library.get_enum(enum_type.name) is not None:
+            if diagnostics is not None:
+                diagnostics.error(
+                    "ENUM012", f"Enumeration '{enum_type.name}' is declared twice in this file.",
+                    SourceLocation(file=str(path), parameter=enum_type.name),
+                    hint="A name identifies one enumeration. Rename one of them, or "
+                         "delete the copy.")
+            continue
+        library.put_enum(enum_type)
     return library
+
+
+def _read_enum(element: ET.Element, path: Path,
+               diagnostics: Optional[DiagnosticCollector]) -> Optional[EnumType]:
+    """One <EnumType>; a value whose number cannot be read is reported and left out."""
+    name = (element.get(sch.ATTR_NAME) or "").strip()
+    if not name:
+        if diagnostics is not None:
+            diagnostics.error(
+                "ENUM012", "An <EnumType> element has no 'name' attribute.",
+                SourceLocation(file=str(path)),
+                hint="An enumeration is identified by its name; it becomes the C typedef.")
+        return None
+    enum_type = EnumType(name=name,
+                         base_type_name=(element.get(sch.ATTR_BASE_TYPE) or "").strip())
+    for value_element in element.findall(sch.ENUM_VALUE):
+        value_name = (value_element.get(sch.ATTR_NAME) or "").strip()
+        raw = (value_element.get(sch.ATTR_VALUE) or "").strip()
+        try:
+            number = int(raw, 0)
+        except ValueError:
+            number = None
+        if not value_name or number is None:
+            if diagnostics is not None:
+                diagnostics.error(
+                    "ENUM012",
+                    f"A value of enumeration '{name}' has no name or no whole number "
+                    f"(name '{value_name}', value '{raw}').",
+                    SourceLocation(file=str(path), parameter=name),
+                    hint="Every value needs a name and a whole number.")
+            continue
+        enum_type.values.append(EnumValue(name=value_name, value=number))
+    return enum_type
 
 
 def types_to_element(library: StructTypeLibrary) -> ET.Element:
@@ -175,11 +224,19 @@ def types_to_element(library: StructTypeLibrary) -> ET.Element:
         for member in struct_type.fields:
             attributes = {sch.ATTR_NAME: member.name,
                           sch.ATTR_DATA_TYPE: member.value_type_name or ""}
+            if member.enum_type_name:
+                attributes[sch.ATTR_ENUM_TYPE] = member.enum_type_name
             if member.array_size and member.array_size != 1:
                 attributes[sch.ATTR_ARRAY_SIZE] = str(member.array_size)
             if not member.enable:
                 attributes[sch.ATTR_ENABLE] = "false"
             ET.SubElement(element, sch.STRUCT_FIELD, attributes)
+    for enum_type in library.enums():
+        element = ET.SubElement(root, sch.ENUM_TYPE, {
+            sch.ATTR_NAME: enum_type.name, sch.ATTR_BASE_TYPE: enum_type.base_type_name})
+        for item in enum_type.values:
+            ET.SubElement(element, sch.ENUM_VALUE,
+                          {sch.ATTR_NAME: item.name, sch.ATTR_VALUE: str(item.value)})
     return root
 
 

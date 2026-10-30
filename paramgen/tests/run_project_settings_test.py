@@ -38,6 +38,7 @@ import pl_codegen.logging_utils as _logging_utils                    # noqa: E40
 from pl_gui.api import Api                                           # noqa: E402
 from pl_gui.project_settings import SETTINGS                         # noqa: E402
 from pl_gui.workspace import Workspace                               # noqa: E402
+import pl_gui.workspace as workspace_module                          # noqa: E402
 
 _logging_utils._colour_enabled = colour_supported()
 
@@ -128,6 +129,8 @@ def without(data, dotted):
     copy = json.loads(json.dumps(data))
     section, _, key = dotted.partition(".")
     copy.get(section, {}).pop(key, None)
+    if copy.get(section) == {}:
+        del copy[section]       # a section that held only that key: as if never there
     return copy
 
 
@@ -420,14 +423,80 @@ def test_a_table_takes_only_lists_it_can_build(work):
 
 # -- the templates ----------------------------------------------------------------
 def test_a_new_project_starts_from_the_template(work):
+    """The template has a place for every tag's description; a new project gets
+    only the ones written there.  (Asked for.)"""
     template = load_jsonc(PROJECT_TEMPLATE)
     equal(template.get("tag_descriptions"), {"Tag1": "", "Tag2": "", "Tag3": "", "Tag4": ""},
-          "the template has the four tags")
+          "the template has the four tags, to be written in")
+    (work / "empty").mkdir()
+    (work / "described").mkdir()
+    api, path = project(work / "empty")
+    true("tag_descriptions" not in load_jsonc(path),
+         "a new project gets none of the empty ones")
+    equal(api.project_settings({})["present"]["tag_descriptions.Tag1"], False,
+          "and the dialog says Tag1 is not in the file")
+
+    written = work / "template.json"
+    written.write_text(PROJECT_TEMPLATE.read_text(encoding="utf-8").replace(
+        '"Tag1": ""', '"Tag1": "Saveable"'), encoding="utf-8")
+    real = workspace_module.PROJECT_TEMPLATE
+    workspace_module.PROJECT_TEMPLATE = written
+    try:
+        _api, path = project(work / "described")
+    finally:
+        workspace_module.PROJECT_TEMPLATE = real
+    equal(load_jsonc(path)["tag_descriptions"], {"Tag1": "Saveable"},
+          "one written in the template: every new project has it, and only it")
+
+
+def test_an_emptied_tag_description_leaves_the_file(work):
+    """An emptied description is taken out, not kept as "".  (Asked for.)"""
     api, path = project(work)
-    equal(load_jsonc(path)["tag_descriptions"], template["tag_descriptions"],
-          "a new project gets them from it")
-    equal(Config.load(path).tag_descriptions, {"Tag1": "", "Tag2": "", "Tag3": "", "Tag4": ""},
-          "and loads them")
+    true(apply(api, {"tag_descriptions.Tag1": "Saveable",
+                     "tag_descriptions.Tag2": "Ground station"})["ok"], "two described")
+    equal(load_jsonc(path)["tag_descriptions"],
+          {"Tag1": "Saveable", "Tag2": "Ground station"}, "both in the file")
+
+    true(apply(api, {"tag_descriptions.Tag1": ""})["ok"], "Tag1 emptied")
+    equal(load_jsonc(path)["tag_descriptions"], {"Tag2": "Ground station"},
+          "Tag1 is gone from the file, Tag2 stays")
+    shown = api.project_settings({})
+    equal((shown["values"]["tag_descriptions.Tag1"], shown["present"]["tag_descriptions.Tag1"]),
+          ("", False), "and the dialog says it is not in the file")
+
+    before = load_jsonc(path)
+    true(apply(api, {"tag_descriptions.Tag2": ""})["ok"], "the last one emptied")
+    after = load_jsonc(path)
+    true("tag_descriptions" not in after, "the section goes with the last of them")
+    before.pop("tag_descriptions")
+    equal(after, before, "and nothing else changed")
+    labels = {spec["id"]: spec["label"] for spec in api.state({})["tagSpecs"]}
+    equal(labels["Tag2"], "Tag2", "the form names the tag plainly again")
+
+
+def test_an_empty_one_from_before_is_taken_out(work):
+    """A file that already has "Tag1": "" - as Apply wrote it before.  (Reported.)"""
+    text = HAND_WRITTEN.replace('''  "validation": {
+    "treat_warnings_as_errors": false,
+  },''', '''  "validation": {
+    "treat_warnings_as_errors": false,
+  },
+  "tag_descriptions": {
+    "Tag1": "",
+    "Tag3": "Saveable"
+  },''')
+    api, path = project(work, text)
+    shown = api.project_settings({})
+    equal(shown["present"]["tag_descriptions.Tag1"], False, "shown as not in the file")
+    true(shown["present"]["tag_descriptions.Tag3"], "a written one is in the file")
+    true(apply(api, {})["ok"], "Apply with nothing changed")
+    data = load_jsonc(path)
+    equal(data["tag_descriptions"], {"Tag3": "Saveable"}, "the empty one is taken out")
+    true("// the navigation unit first" in path.read_text(encoding="utf-8"),
+         "and the comments stay")
+    before = path.read_bytes()
+    true(apply(api, {})["ok"], "Apply again")
+    equal(path.read_bytes(), before, "then there is nothing left to take out")
 
 
 CASES = [
@@ -446,6 +515,9 @@ CASES = [
     ("it agrees with the sublists dialog", test_it_agrees_with_the_sublists_dialog),
     ("a table takes only lists it can build", test_a_table_takes_only_lists_it_can_build),
     ("a new project starts from the template", test_a_new_project_starts_from_the_template),
+    ("an emptied tag description leaves the file",
+     test_an_emptied_tag_description_leaves_the_file),
+    ("an empty one from before is taken out", test_an_empty_one_from_before_is_taken_out),
 ]
 
 

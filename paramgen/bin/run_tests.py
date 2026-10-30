@@ -46,6 +46,7 @@ SUITES = [
     ("the documentation", "tests/run_docs_test.py"),
     ("setting the version", "tests/run_version_test.py"),
     ("structure types", "tests/run_struct_test.py"),
+    ("enumerations", "tests/run_enum_test.py"),
     ("the parameter-table format", "tests/run_paramtable_test.py"),
     ("generated code compiles and runs", "tests/run_compile_test.py"),
 ]

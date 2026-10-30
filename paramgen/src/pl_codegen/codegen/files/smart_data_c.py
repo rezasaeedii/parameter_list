@@ -16,6 +16,9 @@ BRIEF = "Definition and construction of the generated smart-data objects."
 LOOP_INDEX = "index"
 STATUS = "status"
 
+#: The check an enumeration's objects are given: ``fIsValid_eFlightMode``.
+IS_VALID_FUNCTION = "fIsValid_{name}"
+
 #: the trailing "[0]" of the first element of an array declaration
 _TRAILING_ELEMENT = re.compile(r"\[\d+\]$")
 
@@ -59,6 +62,7 @@ class SmartDataSource(FileBuilder):
         text += self.marker.generate("Private types")
         text += self.marker.generate("Private variables")
         text += self.marker.generate("Private functions")
+        text += self._generate_checks()
 
         # ---- one object per top level parameter ---------------------------
         text += self.marker.generate("Exported variables")
@@ -122,6 +126,7 @@ class SmartDataSource(FileBuilder):
                 body += f"{tab}if ({STATUS} != eSMART_DATA_OK) {{\n"
                 body += f"{tab}{tab}return ({INIT_RETURN}){STATUS};\n"
                 body += f"{tab}}}\n"
+                body += self._set_check(parameter, element, tab)
                 body += "}\n"
                 index += count
             else:
@@ -129,6 +134,7 @@ class SmartDataSource(FileBuilder):
                 body += f"if ({STATUS} != eSMART_DATA_OK) {{\n"
                 body += f"{tab}return ({INIT_RETURN}){STATUS};\n"
                 body += "}\n"
+                body += self._set_check(parameter, symbol, "")
                 index += 1
             body += "\n"
 
@@ -137,3 +143,46 @@ class SmartDataSource(FileBuilder):
             head += f"uint16_t {LOOP_INDEX} = 0U;\n"
         return head + "\n" + body + f"return ({INIT_RETURN}){STATUS};"
 
+    # -- enumerations -----------------------------------------------------
+    def _enums_in_use(self):
+        """The enumerations some value of the build is - the ones that need a check."""
+        names = []
+        for parameter in self.parameters:
+            if parameter.enum_type_name and parameter.enum_type_name not in names:
+                names.append(parameter.enum_type_name)
+        library = self.model.struct_types
+        return [library.get_enum(name) for name in names if library.get_enum(name)]
+
+    def _generate_checks(self) -> str:
+        """One ``static`` check per enumeration in use.  (Asked for.)
+
+        A function, because the smart data object keeps a pointer to it; it
+        only asks ``IS_VALID_<name>()``.  Only for the enumerations some value
+        is of: an unused static function is a warning, and -Werror an error.
+        """
+        text = ""
+        for enum_type in self._enums_in_use():
+            name = IS_VALID_FUNCTION.format(name=enum_type.name)
+            text += self.comment.generate_doc(
+                f"Whether *pValue* is one of the values of '{enum_type.name}' - every "
+                f"write of its smart data objects asks.",
+                params=["pValue The value, a " + enum_type.name + "."],
+                returns="bool_t TRUE when it is one of them.")
+            text += f"static bool_t {name}(const void *pValue) {{\n\n"
+            text += (f"{self.tab}return IS_VALID_{enum_type.name}"
+                     f"(*(const {enum_type.name} *)pValue) ? TRUE : FALSE;\n\n")
+            text += "}\n\n"
+        return text
+
+    def _set_check(self, parameter, target: str, indent: str) -> str:
+        """``fSmartData_SetIsValid(&obj, fIsValid_eX);`` for a value of an enumeration."""
+        enum_type = self.model.struct_types.get_enum(parameter.enum_type_name)
+        if enum_type is None:
+            return ""
+        tab = self.tab
+        check = IS_VALID_FUNCTION.format(name=enum_type.name)
+        text = f"{indent}{STATUS} = fSmartData_SetIsValid(&{target}, {check});\n"
+        text += f"{indent}if ({STATUS} != eSMART_DATA_OK) {{\n"
+        text += f"{indent}{tab}return ({INIT_RETURN}){STATUS};\n"
+        text += f"{indent}}}\n"
+        return text

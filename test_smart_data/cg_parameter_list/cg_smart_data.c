@@ -5,9 +5,9 @@
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
   * Generator      : parameter_list_code_generator v01.03.01
-  * Generated at   : 2026-10-29 19:44:49 +0330
+  * Generated at   : 2026-10-30 08:55:22 +0330
   * Input file(s)  : parameter_lists/flight_parameters.xml
-  * Parameters     : 16 value(s) in 1 structure(s)
+  * Parameters     : 23 value(s) in 1 structure(s)
   ******************************************************************************
   * @attention
   *
@@ -30,6 +30,30 @@
 /* Private types ------------------------------------------------------------ */
 /* Private variables -------------------------------------------------------- */
 /* Private functions -------------------------------------------------------- */
+/**
+ * @brief Whether *pValue* is one of the values of 'eWeek' - every write of its smart data objects asks.
+ *
+ * @param pValue The value, a eWeek.
+ * @return bool_t TRUE when it is one of them.
+ */
+static bool_t fIsValid_eWeek(const void *pValue) {
+
+    return IS_VALID_eWeek(*(const eWeek *)pValue) ? TRUE : FALSE;
+
+}
+
+/**
+ * @brief Whether *pValue* is one of the values of 'esalam' - every write of its smart data objects asks.
+ *
+ * @param pValue The value, a esalam.
+ * @return bool_t TRUE when it is one of them.
+ */
+static bool_t fIsValid_esalam(const void *pValue) {
+
+    return IS_VALID_esalam(*(const esalam *)pValue) ? TRUE : FALSE;
+
+}
+
 /* Exported variables ------------------------------------------------------- */
 sSmartDataB8 Cg_SmartData_EngineOn;
 sSmartDataU8 Cg_SmartData_FlightMode;
@@ -41,6 +65,9 @@ sSmartDataI32 Cg_SmartData_AltitudeCm;
 sSmartDataF32 Cg_SmartData_Airspeed;
 sSmartDataF64 Cg_SmartData_HomeLatitude;
 sCgStruct_sRezaSaeedi Cg_SmartData_RezaSaeedi;
+sSmartDataU8 Cg_SmartData_nourooz[NOUROOZ_ARRAY_SIZE];
+sSmartDataU8 Cg_SmartData_nouroz2222;
+sSmartDataU8 Cg_SmartData_salam;
 
 /*
   ==============================================================================
@@ -121,6 +148,35 @@ uint8_t fCgSmartData_Init(void) {
     }
 
     status = fSmartData_F32_Ctor(&Cg_SmartData_RezaSaeedi.SleepHours, 0.0f, 24.0f, 4.5f, 0.5f, "h");
+    if (status != eSMART_DATA_OK) {
+        return (uint8_t)status;
+    }
+
+    for (index = 0U; index < NOUROOZ_ARRAY_SIZE; index++) {
+        status = fSmartData_U8_Ctor(&Cg_SmartData_nourooz[index], 1U, 7U, 1U, 1U, "");
+        if (status != eSMART_DATA_OK) {
+            return (uint8_t)status;
+        }
+        status = fSmartData_SetIsValid(&Cg_SmartData_nourooz[index], fIsValid_eWeek);
+        if (status != eSMART_DATA_OK) {
+            return (uint8_t)status;
+        }
+    }
+
+    status = fSmartData_U8_Ctor(&Cg_SmartData_nouroz2222, 1U, 7U, 1U, 1U, "");
+    if (status != eSMART_DATA_OK) {
+        return (uint8_t)status;
+    }
+    status = fSmartData_SetIsValid(&Cg_SmartData_nouroz2222, fIsValid_eWeek);
+    if (status != eSMART_DATA_OK) {
+        return (uint8_t)status;
+    }
+
+    status = fSmartData_U8_Ctor(&Cg_SmartData_salam, 1U, 1U, 1U, 1U, "");
+    if (status != eSMART_DATA_OK) {
+        return (uint8_t)status;
+    }
+    status = fSmartData_SetIsValid(&Cg_SmartData_salam, fIsValid_esalam);
     if (status != eSMART_DATA_OK) {
         return (uint8_t)status;
     }

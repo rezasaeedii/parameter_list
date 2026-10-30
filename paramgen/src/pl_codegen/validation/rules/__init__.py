@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import List, Type
 
 from .defines_rules import DefinesSheetRule
+from .enum_rules import EnumTypeRule, EnumUseRule
 from .name_rules import (GeneratedIdentifierRule, IndexMacroCollisionRule, NameSyntaxRule,
                          NameUniquenessRule, StructRule)
 from .range_rules import (DefaultInRangeRule, IntegralValueRule, MetadataRule,
@@ -38,6 +39,8 @@ ALL_RULES: List[Type[ValidationRule]] = [
     StructTypeCycleRule,
     StructTypeClashRule,
     StructTypeOwnerRule,
+    EnumTypeRule,
+    EnumUseRule,
     ValueTypeRule,
     DeclaredTypeRule,
     ParameterTypeRule,

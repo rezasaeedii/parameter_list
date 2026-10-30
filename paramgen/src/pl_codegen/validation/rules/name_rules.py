@@ -152,6 +152,20 @@ class IndexMacroCollisionRule(ValidationRule):
                                    self.config.codegen.struct_type_prefix),
                   "a structure type", node, struct_type.name)
 
+        # ---- one typedef, one #define per value and one IS_VALID_ macro per
+        # enumeration - reported on the first value that is of it, if any
+        users = {}
+        for node in model.flatten():
+            if node.enum_type_name:
+                users.setdefault(node.enum_type_name, node)
+        for enum_type in model.struct_types.enums():
+            node = users.get(enum_type.name)
+            claim(enum_type.name, "an enumeration", node, enum_type.name)
+            claim(f"IS_VALID_{enum_type.name}", f"the check of '{enum_type.name}'", node,
+                  enum_type.name)
+            for item in enum_type.values:
+                claim(item.name, f"a value of '{enum_type.name}'", node, enum_type.name)
+
         # ---- and what it makes for each parameter --------------------------
         for parameter in model.flatten():
             claim(index_macro(parameter.name, index_prefix), "an index macro", parameter)

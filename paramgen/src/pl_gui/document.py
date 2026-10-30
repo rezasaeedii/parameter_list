@@ -24,12 +24,14 @@ from pl_codegen.errors import CodeGeneratorError, DiagnosticCollector, Severity
 from pl_codegen.layout.tag_offset import reserved_log_ids
 from pl_codegen.model.defines import (COLUMN_SYSTEM_NAMES, COLUMN_TYPES, GENERATED_DEFINES,
                                       Defines)
+from pl_codegen.model.enum_type import (DEFAULT_BASE_TYPE, ENUM_BASE_TYPES, EnumType,
+                                       EnumValue, fit_limits)
 from pl_codegen.model.parameter import Parameter, ParameterKind, element_key
 from pl_codegen.model.parameter_list import PATH_SEPARATOR, ParameterList, merge_lists
 from pl_codegen.model.struct_sync import apply_types
 from pl_codegen.model.struct_type import StructField, StructType
 from pl_codegen.model.types import resolve_value_type
-from pl_codegen.naming import is_valid_c_identifier, strip_array_indices
+from pl_codegen.naming import is_reserved_keyword, is_valid_c_identifier, strip_array_indices
 from pl_codegen.xml_model.types_xml import (LEGACY_TYPES_SUFFIX, TYPES_SUFFIX,
                                             existing_types_file_for, is_types_file,
                                             legacy_types_file_for, read_types,
@@ -881,6 +883,15 @@ class Document:
         # update that was already in flight when the type became bool_t - could
         # never be seen or corrected.  Every other type shows its fields, so a
         # wrong value there is visible and gets a diagnostic instead.
+        # An enumeration, chosen in the data type list, brings its base type,
+        # its range and resolution; a plain data type takes it away.  (Asked for.)
+        if "enum_type_name" in changes:
+            self._set_enum(node, changes.get("enum_type_name"))
+        elif "value_type_name" in changes and node.enum_type_name:
+            node.enum_type_name = None
+        if node.enum_type_name:
+            fit_limits(node, self.find_enum_type(node.enum_type_name))
+
         self._hold_boolean_shape(node)
         self._hold_number_shape(node)
 
@@ -1544,6 +1555,7 @@ class Document:
                 "name": struct_type.name,
                 "fields": [{"name": member.name,
                             "valueType": member.value_type_name,
+                            "enumType": member.enum_type_name or "",
                             "arraySize": member.array_size,
                             "enable": member.enable}
                            for member in struct_type.fields],
@@ -1671,8 +1683,18 @@ class Document:
         enable = raw.get("enable", True)
         if not isinstance(enable, bool):
             enable = str(enable).strip().lower() not in ("false", "0", "no", "")
+        # A field of an enumeration is of its base type, with the enumeration
+        # beside it - the list's own enumeration only.  (Asked for.)
+        enum_name = str(raw.get("enumType") or "").strip()
+        if enum_name:
+            enum_type = self.find_enum_type(enum_name)
+            if enum_type is None:
+                raise ValueError(f"Field '{field_name}' is of enumeration '{enum_name}', "
+                                 f"which this sublist does not declare.")
+            value_type = enum_type.base_type_name
         return StructField(name=field_name, value_type_name=value_type,
-                           array_size=array_size, enable=enable)
+                           array_size=array_size, enable=enable,
+                           enum_type_name=enum_name)
 
     def _fields_from(self, raw: object) -> List[StructField]:
         """A type's fields as a dialog sends them, checked as a whole.
@@ -1761,6 +1783,232 @@ class Document:
             except CodeGeneratorError:
                 continue
         return ""
+
+    # -- enumerations ------------------------------------------------------
+    #
+    # An enumeration is declared in the list's types file, beside its
+    # structure types, and belongs to the list the same way: only the open
+    # list's own are offered, edited or used here.  A value of one is a value
+    # of its base type with enum_type_name beside it - see
+    # pl_codegen.model.enum_type.  (Asked for.)
+
+    def enum_types(self) -> List[Dict[str, object]]:
+        """The open list's own enumerations, as the Enum types dialog shows them."""
+        return [{
+            "name": enum_type.name,
+            "baseType": enum_type.base_type_name,
+            "values": [[item.name, item.value] for item in enum_type.values],
+            "usedHere": self._uses_of_enum(enum_type.name),
+        } for enum_type in self.model.struct_types.enums()]
+
+    def find_enum_type(self, name: Optional[str]) -> Optional[EnumType]:
+        """One of the open list's own enumerations - the only ones it may use."""
+        return self.model.struct_types.get_enum(name)
+
+    def _enum_users(self, name: str) -> List[Tuple[str, Parameter]]:
+        """``(path, node)`` of every value of the open list that is of *name*."""
+        found: List[Tuple[str, Parameter]] = []
+
+        def walk(node: Parameter, prefix: str) -> None:
+            dotted = f"{prefix}{PATH_SEPARATOR}{node.name}" if prefix else node.name
+            if node.enum_type_name == name:
+                found.append((dotted, node))
+            for child in node.children:
+                walk(child, dotted)
+
+        for parameter in self.model.parameters:
+            walk(parameter, "")
+        return found
+
+    def _uses_of_enum(self, name: str) -> List[str]:
+        """Where *name* is used: values of the list, and fields of its structure types."""
+        uses = [path for path, _node in self._enum_users(name)]
+        for struct_type in self.model.struct_types.all():
+            for member in struct_type.fields:
+                if member.enum_type_name == name:
+                    uses.append(f"{struct_type.name}{PATH_SEPARATOR}{member.name} (field)")
+        return uses
+
+    def create_enum_type(self, name: object, base_type: object,
+                         values: object) -> str:
+        """Declare a new enumeration with its values.  Returns its name."""
+        self._require_a_list()
+        name = self._new_enum_name(name)
+        base = self._enum_base(base_type)
+        items = self._enum_values_from(values, base)
+        with self._change("new enumeration"):
+            self.model.struct_types.put_enum(EnumType(name, base, items))
+        return name
+
+    def update_enum_type(self, name: str, changes: Dict[str, object]) -> str:
+        """Change an enumeration, and bring every value of it along.
+
+        ``changes`` may hold ``name``, ``baseType`` and ``values`` - the values
+        as the whole truth, in order.  A value that keeps its name keeps its
+        meaning: a default that was it follows it to its new number.  A value
+        some default still is cannot be taken away, and a base type every value
+        no longer fits cannot be given - both are refused, saying where.
+        """
+        enum_type = self.find_enum_type(name)
+        if enum_type is None:
+            raise ValueError(f"This sublist has no enumeration called '{name}'.")
+        new_name = str(changes.get("name") or name).strip()
+        if new_name != name:
+            new_name = self._new_enum_name(new_name)
+        base = (self._enum_base(changes["baseType"]) if "baseType" in changes
+                else enum_type.base_type_name)
+        items = (self._enum_values_from(changes["values"], base) if "values" in changes
+                 else self._enum_values_from(
+                     [{"name": item.name, "value": item.value} for item in enum_type.values],
+                     base))
+
+        # what every default becomes: the same NAME, at its new number
+        renumbered = {}
+        kept = {item.name: item.value for item in items}
+        lost: List[str] = []
+        for path, node in self._enum_users(name):
+            old_name = enum_type.name_of(node.default_value)
+            if old_name is None:
+                continue
+            if old_name not in kept:
+                lost.append(f"'{path}' ({old_name})")
+            else:
+                renumbered[id(node)] = kept[old_name]
+        if lost:
+            raise ValueError(
+                f"A value of '{name}' that is taken away is still a default: "
+                f"{', '.join(lost)}. Give those another default first.")
+
+        with self._change("edit enumeration"):
+            for path, node in self._enum_users(name):
+                if id(node) in renumbered:
+                    node.default_value = renumbered[id(node)]
+                node.value_type_name = base
+            for struct_type in self.model.struct_types.all():
+                for member in struct_type.fields:
+                    if member.enum_type_name == name:
+                        member.value_type_name = base
+                        member.enum_type_name = new_name
+            enum_type.base_type_name = base
+            enum_type.values = items
+            if new_name != name:
+                self.model.struct_types.rename_enum(name, new_name)
+                for _path, node in self._enum_users(name):
+                    node.enum_type_name = new_name
+            self._resync()
+        return new_name
+
+    def delete_enum_type(self, name: str) -> Tuple[bool, str]:
+        """Remove an enumeration nothing uses.  ``(removed, why not)``."""
+        if self.find_enum_type(name) is None:
+            return False, f"This sublist has no enumeration called '{name}'."
+        used = self._uses_of_enum(name)
+        if used:
+            shown = ", ".join(used[:4]) + (" …" if len(used) > 4 else "")
+            return False, (f"'{name}' is still used by {shown}. Give those another "
+                           f"data type first.")
+        with self._change("delete enumeration"):
+            self.model.struct_types.remove_enum(name)
+        return True, ""
+
+    def _new_enum_name(self, name: object) -> str:
+        """*name* as a new enumeration may have it - or a refusal saying why."""
+        name = str(name or "").strip()
+        if not name:
+            raise ValueError("An enumeration needs a name.")
+        if not is_valid_c_identifier(name) or is_reserved_keyword(name):
+            raise ValueError(f"'{name}' is not a C name. It becomes a typedef, so use "
+                             f"letters, digits and '_', and do not start with a digit.")
+        if resolve_value_type(name) is not None:
+            raise ValueError(f"'{name}' is a data type already. Choose another name.")
+        if self.find_struct_type(name) is not None:
+            raise ValueError(f"'{name}' is a structure type of this sublist already.")
+        if self.find_enum_type(name) is not None:
+            raise ValueError(f"An enumeration called '{name}' already exists.")
+        for path in self.config.inputs.model_files:
+            if self.path is not None and _same_file(path, self.path):
+                continue
+            try:
+                if read_types(existing_types_file_for(path)).get_enum(name) is not None:
+                    raise ValueError(
+                        f"The parameter sublist '{path.stem}' already has an enumeration "
+                        f"called '{name}'. An enumeration belongs to one sublist, so its "
+                        f"name has to be free in the whole project.")
+            except CodeGeneratorError:
+                continue
+        return name
+
+    @staticmethod
+    def _enum_base(raw: object) -> str:
+        base = str(raw or DEFAULT_BASE_TYPE).strip()
+        if base not in ENUM_BASE_TYPES:
+            raise ValueError(f"An enumeration is an integer: '{base}' is not one of "
+                             f"{', '.join(ENUM_BASE_TYPES)}.")
+        return base
+
+    @staticmethod
+    def _enum_values_from(raw: object, base: str) -> List[EnumValue]:
+        """The values as the dialog sends them: ``[{name, value}]``, in order.
+
+        A value left empty is the one after the value above it, the first 0 -
+        the way the Drop-down lists count.  Every one checked: a C name, no name
+        or number twice, and a number the base type holds.
+        """
+        rows = raw if isinstance(raw, list) else []
+        value_type = resolve_value_type(base)
+        items: List[EnumValue] = []
+        following = 0
+        for row in rows:
+            row = row if isinstance(row, dict) else {}
+            value_name = str(row.get("name") or "").strip()
+            text = str(row.get("value") if row.get("value") is not None else "").strip()
+            if not value_name and not text:
+                continue
+            if not value_name:
+                raise ValueError(f"The value {text} has no name.")
+            if not is_valid_c_identifier(value_name) or is_reserved_keyword(value_name):
+                raise ValueError(f"'{value_name}' is not a C name; every value becomes "
+                                 f"a #define.")
+            if text:
+                try:
+                    number = int(text, 0)
+                except ValueError:
+                    raise ValueError(f"'{text}' after {value_name} is not a whole "
+                                     f"number.") from None
+            else:
+                number = following
+            if value_type is not None and value_type.native_min is not None and not (
+                    value_type.native_min <= number <= value_type.native_max):
+                raise ValueError(f"{value_name} = {number} does not fit a {base} "
+                                 f"({int(value_type.native_min)} to "
+                                 f"{int(value_type.native_max)}).")
+            if any(item.name == value_name for item in items):
+                raise ValueError(f"'{value_name}' is there twice.")
+            twin = next((item.name for item in items if item.value == number), None)
+            if twin:
+                raise ValueError(f"{twin} and {value_name} are both {number}.")
+            items.append(EnumValue(value_name, number))
+            following = number + 1
+        if not items:
+            raise ValueError("An enumeration needs at least one value.")
+        return items
+
+    def _set_enum(self, node: Parameter, name: object) -> None:
+        """Make *node* a value of the enumeration *name*, or of none."""
+        name = str(name or "").strip()
+        if not name:
+            node.enum_type_name = None
+            return
+        enum_type = self.find_enum_type(name)
+        if enum_type is None:
+            raise ValueError(f"This sublist has no enumeration called '{name}'.")
+        if node.is_struct:
+            raise ValueError(f"'{node.name}' is a structure; an enumeration is a data "
+                             f"type for one value.")
+        node.enum_type_name = name
+        fit_limits(node, enum_type)
+        if not enum_type.contains(node.default_value):
+            node.default_value = enum_type.values[0].value
 
     def use_struct_type(self, path: str, name: str) -> Optional[str]:
         """Make the parameter at *path* a structure of type *name*."""
@@ -1866,6 +2114,16 @@ class Document:
             elif node.is_primitive and node.value_type_name != before[id(node)][1]:
                 self._retune_for_type(node, before[id(node)][1])
                 self._hold_number_shape(node)
+        # A field of an enumeration has its range from it, whatever a new field
+        # starts with, and starts at one of its values.  (Found testing: a new
+        # field of one opened with the range 0 to 0.)
+        for node in self._fields():
+            enum_type = self.find_enum_type(node.enum_type_name)
+            if enum_type is None or not enum_type.values:
+                continue
+            fit_limits(node, enum_type)
+            if not enum_type.contains(node.default_value):
+                node.default_value = enum_type.values[0].value
 
     def _fields(self) -> Iterator[Parameter]:
         """Every field of every structure of the open list, at any depth."""

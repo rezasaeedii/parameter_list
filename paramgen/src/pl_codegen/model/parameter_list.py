@@ -62,6 +62,13 @@ class ParameterList:
     #: :func:`merge_lists`, while each list can still be told apart.
     foreign_types: List[ForeignType] = field(default_factory=list)
 
+    #: The same two for enumerations: which list files declare each one, and
+    #: parameters and fields naming one their own list does not declare.
+    #: Kept apart from the structure types so that each is reported as what it
+    #: is.  (Asked for.)
+    enum_owners: Dict[str, List[str]] = field(default_factory=dict)
+    foreign_enums: List[ForeignType] = field(default_factory=list)
+
     # -- collection behaviour -------------------------------------------
     def __iter__(self) -> Iterator[Parameter]:
         return iter(self.parameters)
@@ -89,8 +96,9 @@ class ParameterList:
         # A type belongs to the list that declares it, so a name both lists
         # declare is a clash whatever the two say - kept to be reported, not
         # resolved here.  The first declaration is the one the merge keeps.
+        enums = set(other.struct_types.enum_names())
         for name in self.struct_types.merge(other.struct_types):
-            if name not in self.type_clashes:
+            if name not in self.type_clashes and name not in enums:
                 self.type_clashes.append(name)
 
     # -- the tree ---------------------------------------------------------
@@ -269,12 +277,17 @@ def merge_lists(parts: Sequence[Tuple[object, ParameterList]]) -> ParameterList:
     """
     merged = ParameterList()
     owners: Dict[str, List[str]] = {}
+    enum_owners: Dict[str, List[str]] = {}
     foreign: List[ForeignType] = []
+    foreign_enums: List[ForeignType] = []
     for index, (source, part) in enumerate(parts):
         list_file = str(source)
         for name in part.struct_types.names():
             owners.setdefault(name, []).append(list_file)
+        for name in part.struct_types.enum_names():
+            enum_owners.setdefault(name, []).append(list_file)
         foreign.extend(_undeclared_types(part, list_file))
+        foreign_enums.extend(_undeclared_enums(part, list_file))
         if index == 0:
             merged = part
         else:
@@ -282,7 +295,36 @@ def merge_lists(parts: Sequence[Tuple[object, ParameterList]]) -> ParameterList:
     merged.type_owners = owners
     merged.type_clashes = [name for name, files in owners.items() if len(files) > 1]
     merged.foreign_types = foreign
+    merged.enum_owners = enum_owners
+    merged.foreign_enums = foreign_enums
     return merged
+
+
+def _undeclared_enums(part: ParameterList, list_file: str) -> List[ForeignType]:
+    """The enumerations *part* uses without declaring them itself - by a value
+    of its own, or by a field of one of its own structure types."""
+    own = part.struct_types
+    found: List[ForeignType] = []
+
+    def walk(node: Parameter, prefix: str, in_type: bool) -> None:
+        if not node.enable:
+            return
+        path = f"{prefix}{PATH_SEPARATOR}{node.name}" if prefix else node.name
+        # a field's enumeration is its type's to name: reported once, on the type
+        if node.enum_type_name and not in_type and own.get_enum(node.enum_type_name) is None:
+            found.append(ForeignType(list_file, path, node.enum_type_name))
+        for child in node.children:
+            walk(child, path, in_type or node.is_struct)
+
+    for parameter in part.parameters:
+        walk(parameter, "", False)
+    for struct_type in own.all():
+        for member in struct_type.fields:
+            if member.enum_type_name and own.get_enum(member.enum_type_name) is None:
+                found.append(ForeignType(list_file,
+                                         f"{struct_type.name}{PATH_SEPARATOR}{member.name}",
+                                         member.enum_type_name, struct_type.name))
+    return found
 
 
 def _undeclared_types(part: ParameterList, list_file: str) -> List[ForeignType]:

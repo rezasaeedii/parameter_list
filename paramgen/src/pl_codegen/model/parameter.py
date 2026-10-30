@@ -79,6 +79,10 @@ class Parameter:
     user_name: Optional[str] = None
     param_type: Optional[str] = None
     value_type_name: Optional[str] = None
+    #: The enumeration this value is, when it is one - ``value_type_name`` is
+    #: then its base type, so the value is a plain integer to everything else.
+    #: See :mod:`pl_codegen.model.enum_type`.  (Asked for.)
+    enum_type_name: Optional[str] = None
     array_size: int = 1
     default_value: NumericValue = None
     minimum: NumericValue = None

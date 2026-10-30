@@ -34,7 +34,7 @@ from pl_codegen.config import (DESCRIBED_TAGS, CodegenConfig, Config, Validation
 from pl_codegen.errors import CodeGeneratorError
 from pl_codegen.naming import is_reserved_keyword, is_valid_c_identifier
 
-from .config_file import set_json_value
+from .config_file import remove_json_value, set_json_value
 
 
 class SettingsError(ValueError):
@@ -58,6 +58,9 @@ class Setting:
     aliases: Tuple[str, ...] = ()
     #: whether an empty value is refused
     required: bool = False
+    #: whether an empty value means "none": it is taken out of the file rather
+    #: than written as "" - a tag description nobody wrote  (Asked for.)
+    empty_is_absent: bool = False
 
     @property
     def path(self) -> Tuple[str, ...]:
@@ -98,7 +101,8 @@ SETTINGS: Tuple[Setting, ...] = (
     Setting("validation.treat_warnings_as_errors", "bool",
             _VALIDATION.treat_warnings_as_errors),
     Setting("validation.require_unit", "bool", _VALIDATION.require_unit),
-    *(Setting(f"tag_descriptions.{tag}", "text") for tag in DESCRIBED_TAGS),
+    *(Setting(f"tag_descriptions.{tag}", "text", empty_is_absent=True)
+      for tag in DESCRIBED_TAGS),
 )
 
 SETTINGS_BY_KEY: Dict[str, Setting] = {setting.key: setting for setting in SETTINGS}
@@ -129,7 +133,8 @@ def read_settings(config_path: Path) -> Dict[str, Any]:
                 # Config.load falls back to the folder for a project with no name
                 value = config_path.parent.name
         values[setting.key] = value
-        present[setting.key] = found
+        # an empty one is as good as missing - and Apply takes it out
+        present[setting.key] = found and not (setting.empty_is_absent and value == "")
     return {
         "file": str(config_path),
         "fingerprint": fingerprint(raw),
@@ -255,16 +260,18 @@ def _plain_name(text: str) -> bool:
 
 
 # -- writing -------------------------------------------------------------------
-def new_text(config_path: Path, seen_fingerprint: str,
+def new_text(config_path: Path, seen_fingerprint: Optional[str],
              changes: Dict[str, Any]) -> Tuple[str, bytes]:
     """The project file's new text with *changes* in it, and its old bytes.
 
     Nothing is written here.  Refused with :class:`SettingsError` when the file
-    is not the one the dialog showed, or a change cannot be made.
+    is not the one the dialog showed, or a change cannot be made.  With no
+    *seen_fingerprint* the file is taken as it is now - for taking out what
+    means nothing, when nothing was changed.
     """
     config_path = Path(config_path)
     raw = config_path.read_bytes()
-    if fingerprint(raw) != seen_fingerprint:
+    if seen_fingerprint is not None and fingerprint(raw) != seen_fingerprint:
         raise SettingsError(
             f"{config_path.name} was changed outside this dialog after it opened. "
             f"It is shown as it is now - make your change again.", "")
@@ -282,10 +289,29 @@ def new_text(config_path: Path, seen_fingerprint: str,
     text = text.replace("\r\n", "\n")
     data = load_jsonc(config_path)
     for key, value in checked.items():
-        text = _set(text, data, SETTINGS_BY_KEY[key], value)
+        setting = SETTINGS_BY_KEY[key]
+        if setting.empty_is_absent and value == "":
+            continue                    # taken out below, never written as ""
+        text = _set(text, data, setting, value)
+    # A value that means nothing when empty is not kept in the file - whether it
+    # was emptied now or left empty before, and its section goes with the last
+    # of them.  (Asked for: an emptied tag description stayed as "".)
+    for setting in SETTINGS:
+        if setting.empty_is_absent:
+            found, value = _lookup(data, setting)
+            if found and checked.get(setting.key, value) == "":
+                text = remove_json_value(text, setting.path)
     if crlf:
         text = text.replace("\n", "\r\n")
     return ("﻿" if bom else "") + text, raw
+
+
+def holds_empty_values(config_path: Path) -> bool:
+    """Whether the project file keeps a value that means nothing when empty -
+    one Apply takes out even when nothing else was changed."""
+    data = load_jsonc(Path(config_path))
+    return any(setting.empty_is_absent and _lookup(data, setting) == (True, "")
+               for setting in SETTINGS)
 
 
 def _set(text: str, data: Dict[str, Any], setting: Setting, value: Any) -> str:

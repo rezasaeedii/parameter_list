@@ -5,9 +5,9 @@
   *
   * This file is generated automatically - DO NOT EDIT IT BY HAND.
   * Generator      : parameter_list_code_generator v01.03.01
-  * Generated at   : 2026-10-29 19:44:49 +0330
+  * Generated at   : 2026-10-30 08:55:22 +0330
   * Input file(s)  : parameter_lists/flight_parameters.xml
-  * Parameters     : 16 value(s) in 1 structure(s)
+  * Parameters     : 23 value(s) in 1 structure(s)
   ******************************************************************************
   * @attention
   *
@@ -51,6 +51,9 @@ extern "C" {
   | 13    | x  |   CoffeeCupsPerDay | -               | -          | uint8_t   | 1   | 3       | 0      | 20         | 1     | cup  |
   | 14    | x  |   BugsFixedToday   | -               | -          | uint32_t  | 1   | 0       | 0      | 4294967295 | 1     | -    |
   | 15    | x  |   SleepHours       | -               | -          | float32_t | 1   | 4.5     | 0      | 24         | 0.5   | h    |
+  | 16    | x  | nourooz            | hafte           | MONITORING | uint8_t   | 5   | 1       | 1      | 7          | 1     | -    |
+  | 21    | x  | nouroz2222         | -               | MONITORING | uint8_t   | 1   | 1       | 1      | 7          | 1     | -    |
+  | 22    | x  | salam              | -               | MONITORING | uint8_t   | 1   | 1       | 1      | 1          | 1     | -    |
   +-------+----+--------------------+-----------------+------------+-----------+-----+---------+--------+------------+-------+------+
 
   'Index' is the index in the parameter list, the value of the matching
@@ -74,6 +77,9 @@ extern "C" {
   | 10    | Airspeed        | SYS_NAV          |            | x        |               | PARAM_MODE_NONE | -    | -    | -    | -    | 109         |
   | 11    | HomeLatitude    | SYS_NAV          |            |          |               | PARAM_MODE_NONE | -    | -    | -    | -    | -           |
   | -     | RezaSaeedi      | SYS_UNKNOWN      |            |          |               | PARAM_MODE_NONE | -    | -    | -    | -    | -           |
+  | 16    | nourooz         | SYS_UNKNOWN      |            | x        |               | PARAM_MODE_NONE | -    | -    | -    | -    | 110..114    |
+  | 21    | nouroz2222      | SYS_UNKNOWN      |            |          |               | PARAM_MODE_NONE | -    | -    | -    | -    | -           |
+  | 22    | salam           | SYS_UNKNOWN      |            |          |               | PARAM_MODE_NONE | -    | -    | -    | -    | -           |
   +-------+-----------------+------------------+------------+----------+---------------+-----------------+------+------+------+------+-------------+
 */
 
@@ -99,7 +105,14 @@ extern "C" {
   | 13    | RezaSaeedi.CoffeeCupsPerDay | 1     | 35         | -        | 35        |
   | 14    | RezaSaeedi.BugsFixedToday   | 4     | 36         | -        | 36        |
   | 15    | RezaSaeedi.SleepHours       | 4     | 40         | -        | 40        |
-  |       | TOTAL (bytes)               |       | 44         | 24       | 44        |
+  | 16    | nourooz[0]                  | 1     | 44         | 24       | 44        |
+  | 17    | nourooz[1]                  | 1     | 45         | 25       | 45        |
+  | 18    | nourooz[2]                  | 1     | 46         | 26       | 46        |
+  | 19    | nourooz[3]                  | 1     | 47         | 27       | 47        |
+  | 20    | nourooz[4]                  | 1     | 48         | 28       | 48        |
+  | 21    | nouroz2222                  | 1     | 49         | -        | 49        |
+  | 22    | salam                       | 1     | 50         | -        | 50        |
+  |       | TOTAL (bytes)               |       | 51         | 29       | 51        |
   +-------+-----------------------------+-------+------------+----------+-----------+
 
   Every tag owns an independent counter that starts at 0 and advances by
